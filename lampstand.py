@@ -1,24 +1,10 @@
-# Copyright (c) 2001-2004 Twisted Matrix Laboratories.
+#!/usr/bin/python
+
 # See LICENSE for details.
 
 
-"""An example IRC log bot - logs a channel's events to a file.
-
-If someone says the bot's name in the channel followed by a ':',
-e.g.
-
-  <foo> logbot: hello!
-
-the bot will reply:
-
-  <logbot> foo: I am a log bot
-
-Run this script with two arguments, the channel name the bot should
-connect to, and file to log to, e.g.:
-
-  $ python ircLogBot.py test test.log
-
-will log channel #test to the file 'test.log'.
+"""
+I am Lampstand.
 """
 
 def splitAt(string, number):
@@ -606,8 +592,8 @@ class HugReaction:
 			print "I have no replacement for %s" % username;
 			return "gives %s %s " % (username, self.default)
 
-class LogBot(irc.IRCClient):
-	"""A logging IRC bot."""
+class LampstandLoop(irc.IRCClient):
+	"""An IRC Bot for #maelfroth."""
 	
 	nickname = "Lampstand"
 	
@@ -702,14 +688,14 @@ class LogBot(irc.IRCClient):
 		self.logger.log("%s is now known as %s" % (old_nick, new_nick))
 
 
-class LogBotFactory(protocol.ClientFactory):
-	"""A factory for LogBots.
+class LampstandFactory(protocol.ClientFactory):
+	"""We make Lampstands
 
 	A new protocol instance will be created each time we connect to the server.
 	"""
 
 	# the class of the protocol to build when new connection is made
-	protocol = LogBot
+	protocol = LampstandLoop
 
 	def __init__(self, channel, filename):
 		self.channel = channel
@@ -728,12 +714,20 @@ if __name__ == '__main__':
 	# initialize logging
 	log.startLogging(sys.stdout)
 	
+	if len(sys.argv) < 3:
+		print "Not enough arguments. Try %s #channel logfile [server]" % sys.argv[0]
+		sys.exit(1)
+	
+	server = "cosmos.esper.net"
+	
+	if len(sys.argv) < 4:
+		server = sys.argv[3]
+	
 	# create factory protocol and application
-	f = LogBotFactory(sys.argv[1], sys.argv[2])
+	f = LampstandFactory(sys.argv[1], sys.argv[2])
 
 	# connect factory to this host and port
-	reactor.connectTCP("cosmos.esper.net", 6667, f)
-	#reactor.connectTCP("localhost", 6667, f)
+	reactor.connectTCP(server, 6667, f)
 
 	# run bot
 	reactor.run()
