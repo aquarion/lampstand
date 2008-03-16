@@ -181,15 +181,13 @@ class InsultReaction:
 	
 	def channelAction(self, connection, user, channel, message):
 		
-		print "[INSULT] called "
+		print "[INSULT] called"
 		
 		if overUsed(self.uses, self.cooldown_number, self.cooldown_time):
 			connection.msg(channel, "%s: Do it yourself." % user )
 			return
 		
 		item = self.channelMatch.findall(message);
-		
-		print "[INSULT] insulting xx%sxx xx%sxx " % (item[0][0], connection.nickname.lower())
 		
 		if item[0][0].lower() == connection.nickname.lower():
 			connection.msg(channel, "%s: No." % user )
@@ -201,7 +199,7 @@ class InsultReaction:
 		
 		ownerMatch = re.compile('.*aquarion.*', re.IGNORECASE)
 		myNameMatch = re.compile('.*%s.*' % connection.nickname, re.IGNORECASE)
-		if ownerMatch.match(message) or myNameMatch.match(item[0][0]):
+		if ownerMatch.match(item[0][0]) or myNameMatch.match(item[0][0]):
 			connection.msg(channel, "%s: Hah. Very clever. Still no." % user )
 			return
 			
@@ -219,11 +217,20 @@ class InsultReaction:
 		
 class BibleReaction:
 	
+	cooldown_number = 3
+	cooldown_time   = 120
+	uses = []
+	
 	def __init__(self, connection):
 		self.channelMatch = re.compile('%s. (\w*) (\d+\:\S+)' % connection.nickname, re.IGNORECASE)
 	
 	def channelAction(self, connection, user, channel, message):
 		matches = self.channelMatch.findall(message);
+		
+		
+		if overUsed(self.uses, self.cooldown_number, self.cooldown_time):
+			connection.msg(channel, "%s: Enough with the religion for now." % user )
+			return
 					
 		print "[Bible] %s" % matches
 		
@@ -289,6 +296,153 @@ class PokeReaction:
 			return
 		
 		connection.msg(channel, "Do I look like a facebook user? Fuck off." )
+		
+		## Overuse Detectection ##
+		self.uses.append(int(time.time()))
+		if len(self.uses) > self.cooldown_number:
+			self.uses = self.uses[0:self.cooldown_number-1]
+		## Overuse Detectection ##
+
+class CohanReaction:
+	
+	cooldown_number = 2
+	cooldown_time   = 360
+	uses = []
+	
+	def __init__(self, connection):
+		self.channelMatch = re.compile('%s. What is best in life?' % connection.nickname, re.IGNORECASE)
+	
+	
+	def channelAction(self, connection, user, channel, message):
+		print "[Cohan] called"
+		
+		
+		if overUsed(self.uses, self.cooldown_number, self.cooldown_time):
+			connection.msg(channel, "Not Telling" )
+			return
+		
+		connection.msg(channel, "To crush your enemies, see them driven before you, and to hear the lamentations of their women!" )
+		
+		## Overuse Detectection ##
+		self.uses.append(int(time.time()))
+		if len(self.uses) > self.cooldown_number:
+			self.uses = self.uses[0:self.cooldown_number-1]
+		## Overuse Detectection ##
+		
+class FavouriteReaction:
+	
+	cooldown_number = 10
+	cooldown_time   = 360
+	uses = []
+	
+	def __init__(self, connection):
+		self.channelMatch = re.compile('%s. What is your favou?rite (.*)\?' % connection.nickname, re.IGNORECASE)
+	
+	
+	def channelAction(self, connection, user, channel, message):
+		
+		matches = self.channelMatch.findall(message);
+					
+		print "[Favourite] %s" % matches
+		
+		
+		if overUsed(self.uses, self.cooldown_number, self.cooldown_time):
+			connection.msg(channel, "Not Telling" )
+			return
+			
+		favourites = {
+			'movie'         : 'Luxo Jr.',
+			'song'          : 'They Might Be Giants - Birdhouse in Your Soul', #['Barenaked Ladies - Light Up My Room',
+			'book'          : "I don't go for big, complicated books. I prefer light reading",
+			'computer game' : "Portal. GLaDOS is my idol. #This was a triumph. I'm making a note here, huge success#",
+			'color'			: "Straw",
+			'colour'		: "Incandescent",
+			'cake'	    	: "Delicious and moist chocolate cake."
+			}
+			
+		if favourites.has_key(matches[0].lower()):
+			connection.msg(channel, "%s: %s" % (user, favourites[matches[0].lower()]))
+		else:
+			connection.msg(channel, "%s: I'm not sure yet" % user)
+		
+		## Overuse Detectection ##
+		self.uses.append(int(time.time()))
+		if len(self.uses) > self.cooldown_number:
+			self.uses = self.uses[0:self.cooldown_number-1]
+		## Overuse Detectection ##
+		
+class HowLongReaction:
+	
+	#@todo: "How long until $specific event"
+	#@todo: "How long since $specific event"
+	#@todo: "How long since Maelstrom?"
+	#@todo: Custom events, player events, data driven thing (ical export?)
+	
+	cooldown_number = 2
+	cooldown_time   = 360
+	uses = []
+	
+	def __init__(self, connection):
+		self.channelMatch = re.compile('%s. how long until Maelstrom?' % connection.nickname, re.IGNORECASE)
+	
+	
+	def channelAction(self, connection, user, channel, message):
+		print "[How Long] called"
+		
+		
+		if overUsed(self.uses, self.cooldown_number, self.cooldown_time):
+			return
+		
+		events = [
+			'2007-09-05 18:00',
+			'2008-03-21 18:00',
+			'2008-06-06 18:00',
+			'2008-07-18 18:00',
+			'2008-09-05 18:00'
+			]
+			
+		last_event = time.strptime('1981-01-26 18:00', '%Y-%m-%d %H:%M')
+		
+		current_time = time.time()
+		
+		for event in events:
+			print "comparing %s" % event
+			maelstrom = time.mktime(time.strptime(event, '%Y-%m-%d %H:%M'))
+			if maelstrom > current_time:
+				print "Keeping %s" % event
+				break
+		
+		
+		days = int((maelstrom - current_time) / (60*60*24));
+		remainder = (maelstrom - current_time) % (60*60*24);
+		hours = remainder / (60*60)
+		remainder = (maelstrom - current_time) % (60*60);
+		minutes = remainder / 60
+
+		if int(days) == 1:
+			days_message = "1 day, "
+		elif days > 1:
+			days_message = "%d days, " % days
+		else:
+			days_message = ''
+			
+		if int(hours) == 1:
+			hours_message = "1 hour, "
+		elif hours > 1:
+			hours_message = "%d hours, " % hours
+		else:
+			hours_message = ''
+		
+		
+		if int(minutes) == 1:
+			minutes_message = "1 minute" 
+		elif minutes > 1:
+			minutes_message = "%d minutes" % minutes
+		else:
+			minutes_message = ''
+			
+		
+		connection.msg(channel, "Next Event is in %s%s%s" % (days_message, hours_message, minutes_message))
 		
 		## Overuse Detectection ##
 		self.uses.append(int(time.time()))
@@ -379,7 +533,7 @@ class HugReaction:
 		
 		self.default = "chocolate";
 		
-		self.banned = {'entimix': 'rickroller'}
+		self.banned = {}#{'entimix': 'rickroller'}
 		
 		self.channelMatch = re.compile('.*hugs %s' % connection.nickname, re.IGNORECASE)
 		self.privateMatch = re.compile('give me (.*)', re.IGNORECASE)
@@ -478,6 +632,9 @@ class LogBot(irc.IRCClient):
 		self.channelModules.append(WeblinkReaction(self))
 		self.channelModules.append(PokeReaction(self))
 		self.channelModules.append(DictionaryReaction(self))
+		self.channelModules.append(HowLongReaction(self))
+		self.channelModules.append(FavouriteReaction(self))
+		self.channelModules.append(CohanReaction(self))
 		
 		self.privateModules = []
 		self.privateModules.append(WhowasReaction(self))
