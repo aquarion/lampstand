@@ -359,45 +359,89 @@ class FavouriteReaction:
 		
 class HowLongReaction:
 	
-	#@todo: "How long until $specific event"
 	#@todo: "How long since $specific event"
 	#@todo: "How long since Maelstrom?"
 	#@todo: Custom events, player events, data driven thing (ical export?)
 	
-	cooldown_number = 2
+	cooldown_number = 5
 	cooldown_time   = 360
 	uses = []
 	
 	def __init__(self, connection):
-		self.channelMatch = re.compile('%s. how long until Maelstrom?' % connection.nickname, re.IGNORECASE)
+		self.channelMatch = re.compile('%s. how long until (.*?)\?' % connection.nickname, re.IGNORECASE)
+		self.privateMatch = re.compile('how long until (.*?)\?', re.IGNORECASE)
 	
 	
 	def channelAction(self, connection, user, channel, message):
-		print "[How Long] called"
-		
-		
+	
 		if overUsed(self.uses, self.cooldown_number, self.cooldown_time):
+			connection.msg(channel, "Shortly less than when you last asked.")
 			return
+			
+		match = self.channelMatch.findall(message);
+		
+		
+		## Overuse Detectection ##
+		self.uses.append(int(time.time()))
+		if len(self.uses) > self.cooldown_number:
+			self.uses = self.uses[0:self.cooldown_number-1]
+		## Overuse Detectection ##
+		
+		connection.msg(channel, self.howLong(match))
+		
+	def privateAction(self, connection, user, channel, message):
+		match = self.privateMatch.findall(message);
+		connection.msg(user, self.howLong(match))
+		
+	
+	def howLong(self, match):
+		
+		print "[How Long] called with '%s'" % match[0]
+		
 		
 		events = [
-			'2007-09-05 18:00',
-			'2008-03-21 18:00',
-			'2008-06-06 18:00',
-			'2008-07-18 18:00',
-			'2008-09-05 18:00'
+			('2007 IV',  '2007-09-05 18:00'),
+			('Event I', '2008-03-21 18:00'),
+			('Event II', '2008-06-06 18:00'),
+			('Event III', '2008-07-18 18:00'),
+			('Event IV', '2008-09-05 18:00')
 			]
 			
 		last_event = time.strptime('1981-01-26 18:00', '%Y-%m-%d %H:%M')
 		
 		current_time = time.time()
 		
-		for event in events:
-			print "comparing %s" % event
-			maelstrom = time.mktime(time.strptime(event, '%Y-%m-%d %H:%M'))
-			if maelstrom > current_time:
-				print "Keeping %s" % event
-				break
+		eventName = 'Maelstrom'
 		
+		foundEvent = False
+		
+		eventList = []
+		
+		if not foundEvent:
+			for event in events:
+				maelstrom = time.mktime(time.strptime(event[1], '%Y-%m-%d %H:%M'))
+				
+				if maelstrom > current_time:
+					eventList.append(event[0])
+
+				print "comparing %s/%s" % (event[0], event[1])
+				
+				if event[0].lower() == match[0].lower():
+					eventName = event[0]
+					print "Direct Match on %s" % event[0]
+					foundEvent = event
+					break
+				elif maelstrom > current_time and match[0].lower() == 'maelstrom':
+					print "Keeping %s" % event[1]
+					eventName = event[0]
+					foundEvent = event
+					break
+		
+		if not foundEvent:
+			return "I don't know when that is. I know about: '%s' & 'Maelstrom'" % "', '".join(eventList)
+			return
+		
+		event = foundEvent
 		
 		days = int((maelstrom - current_time) / (60*60*24));
 		remainder = (maelstrom - current_time) % (60*60*24);
@@ -428,13 +472,8 @@ class HowLongReaction:
 			minutes_message = ''
 			
 		
-		connection.msg(channel, "Next Event is in %s%s%s" % (days_message, hours_message, minutes_message))
 		
-		## Overuse Detectection ##
-		self.uses.append(int(time.time()))
-		if len(self.uses) > self.cooldown_number:
-			self.uses = self.uses[0:self.cooldown_number-1]
-		## Overuse Detectection ##
+		return "%s is in %s%s%s" % (eventName, days_message, hours_message, minutes_message)
 		
 class SayReaction:
 	
@@ -626,6 +665,7 @@ class LampstandLoop(irc.IRCClient):
 		self.privateModules.append(WhowasReaction(self))
 		self.privateModules.append(HugReaction(self))
 		self.privateModules.append(SayReaction(self))
+		self.privateModules.append(HowLongReaction(self))
 		
 				
 		self.logger.log("[connected at %s]" % 
@@ -715,12 +755,12 @@ if __name__ == '__main__':
 	log.startLogging(sys.stdout)
 	
 	if len(sys.argv) < 3:
-		print "Not enough arguments. Try %s #channel logfile [server]" % sys.argv[0]
+		print "Not enough arguments. Try %s #channel logfile [server]" % sys.argv[0] 
 		sys.exit(1)
 	
 	server = "cosmos.esper.net"
 	
-	if len(sys.argv) < 4:
+	if len(sys.argv) == 4:
 		server = sys.argv[3]
 	
 	# create factory protocol and application
