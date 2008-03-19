@@ -43,7 +43,7 @@ import cPickle
 import sqlite
 import string
 
-from lampstand import shakeinsult, dice, bible
+from lampstand import shakeinsult, dice, bible, eightball
 
 import dictclient
 
@@ -282,6 +282,31 @@ class PokeReaction:
 			return
 		
 		connection.msg(channel, "Do I look like a facebook user? Fuck off." )
+		
+		## Overuse Detectection ##
+		self.uses.append(int(time.time()))
+		if len(self.uses) > self.cooldown_number:
+			self.uses = self.uses[0:self.cooldown_number-1]
+		## Overuse Detectection ##
+	
+class EightballReaction:
+	
+	cooldown_number = 2
+	cooldown_time   = 360
+	uses = []
+	
+	def __init__(self, connection):
+		self.channelMatch = re.compile('^%s. ask the 8.ball' % connection.nickname, re.IGNORECASE)
+	
+	
+	def channelAction(self, connection, user, channel, message):
+		print "[8Ball] called"
+		
+		
+		if overUsed(self.uses, self.cooldown_number, self.cooldown_time):
+			return
+		
+		connection.msg(channel, "%s: %s" % (user, eightball.question()) )
 		
 		## Overuse Detectection ##
 		self.uses.append(int(time.time()))
@@ -660,6 +685,7 @@ class LampstandLoop(irc.IRCClient):
 		self.channelModules.append(HowLongReaction(self))
 		self.channelModules.append(FavouriteReaction(self))
 		self.channelModules.append(CohanReaction(self))
+		self.channelModules.append(EightballReaction(self))
 		
 		self.privateModules = []
 		self.privateModules.append(WhowasReaction(self))
