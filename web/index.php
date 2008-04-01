@@ -10,7 +10,7 @@
 
 $tr = '<tr><td>%s</td><td>%s</td><td>%s</td></tr>';
 
-$db = sqlite_open('../lampstand.db');
+$db = sqlite_open('/home/aquarion/projects/lampstand/lampstand.db');
 
 $query = "select * from urllist order by time desc limit 40";
 

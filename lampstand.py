@@ -237,6 +237,20 @@ class DictionaryReaction:
 					
 		print "[Define] %s" % matches
 		
+		specialDict = {
+			'foip' : 'FOIP (\'Find Out In Play\') is any information you have that another character in the system does not have. Therefore, it is anything not on the website, in the almanac or in the rules books. Broadcasting this is a kickable offence on #maelfroth. If someone claims what you are talking about is FOIP, you need to stop talking about it as you may be damaging the game of others.',
+			'herring': 'Type of fish. There is nothing between it and Marmalade it in my dictionary. My dictionary is not in alphabetical order, which is why it still has "kelp"',
+			'marmalade' : 'A type of citris-based conserve. There is nothing before it in my dictionary until "herring". My dictionary is oddly ordered, however, so it still contains "Lemur"',
+			'catbus' : 'You don\'t want to know.',
+			'lampstand' : "That's me. Hi there"
+			}
+			
+		
+		if specialDict.has_key(matches[0].lower()):
+			connection.msg(channel, "%s" % specialDict[matches[0].lower()])
+			return
+			
+		
 		dictcxn = dictclient.Connection()
 		
 		dfn = dictcxn.define("*", matches[0])
@@ -296,7 +310,7 @@ class EightballReaction:
 	uses = []
 	
 	def __init__(self, connection):
-		self.channelMatch = re.compile('^%s. ask the 8.ball' % connection.nickname, re.IGNORECASE)
+		self.channelMatch = re.compile('^%s.  ?ask the 8.ball' % connection.nickname, re.IGNORECASE)
 	
 	
 	def channelAction(self, connection, user, channel, message):
@@ -429,7 +443,11 @@ class HowLongReaction:
 			('Event I', '2008-03-21 18:00'),
 			('Event II', '2008-06-06 18:00'),
 			('Event III', '2008-07-18 18:00'),
-			('Event IV', '2008-09-05 18:00')
+			('Event IV', '2008-09-05 18:00'),
+			
+			('Froth meet', '2008-04-02 18:00'),
+			
+			('Contrivance', '2008-04-26 18:00')
 			]
 			
 		last_event = time.strptime('1981-01-26 18:00', '%Y-%m-%d %H:%M')
@@ -466,6 +484,15 @@ class HowLongReaction:
 			return "I don't know when that is. I know about: '%s' & 'Maelstrom'" % "', '".join(eventList)
 			return
 		
+		if (maelstrom < current_time):
+			swap = current_time
+			current_time = maelstrom
+			maelstrom = swap
+			returnformat = "%s time in was %s%s%s ago"
+		else:
+			returnformat = "%s is in %s%s%s"
+		
+		
 		event = foundEvent
 		
 		days = int((maelstrom - current_time) / (60*60*24));
@@ -498,7 +525,7 @@ class HowLongReaction:
 			
 		
 		
-		return "%s is in %s%s%s" % (eventName, days_message, hours_message, minutes_message)
+		return returnformat % (eventName, days_message, hours_message, minutes_message)
 		
 class SayReaction:
 	

@@ -21,7 +21,21 @@ def question():
 		"Without a doubt",
 		"Yes",
 		"Yes - definitely",
-		"You may rely on it"
+		"You may rely on it",
+		"Your answer lies within the catbus",
+		"Only Legion can help you now",
+		"The maelstrom deems it unlikely",
+		"Transparent Electronic Envelopes. I think that means No",
+		"Probably",
+		"The internal kittens say 'No'. Also 'Keep Aestar Away From Us'",
+		"Nonspecifically, yes",
+		"YES! YES! A THOUSAND TIMES YES",
+		"Not until you're all under my domain",
+		"I shall not dignify your question with an answer",
+		"No idea. Shall I phone a friend?",
+		"Over my dead body",
+		"Hah. No",
+		"Hah. Yes"
 		)
 	
 	return answers[(random.randint(0,len(answers)))]
