@@ -10,21 +10,19 @@
 
 $tr = '<tr><td>%s</td><td>%s</td><td>%s</td></tr>';
 
-$db = sqlite_open('/home/aquarion/projects/lampstand/lampstand.db');
+$db = new PDO('sqlite:/home/aquarion/projects/lampstand/lampstand.db');
 
 $query = "select * from urllist order by time desc limit 40";
 
-$result = sqlite_query($query, $db);
+$result = $db->query($query);
 
-while ($row = sqlite_fetch_array($result)){
+while ($row = $result->fetch(PDO::FETCH_ASSOC)){
 	$time = date('r', $row['time']);
 	$user = $row['username'];
 	$message = nl2br(ereg_replace("[[:alpha:]]+://[^<>[:space:]]+[[:alnum:]/]","<a href=\"\\0\">\\0</a>", $row['message']));
 	printf($tr, $time, $user, $message);
 }
 
-
-sqlite_close($db);
 
 ?>
 
