@@ -125,7 +125,7 @@ class PrivateActions:
 
 
 class DiceReaction:
-	
+
 	cooldown_number = 5
 	cooldown_time   = 60
 	uses = []
@@ -206,7 +206,7 @@ class InsultReaction:
 		if overUsed(self.uses, self.cooldown_number, self.cooldown_time):
 			connection.msg(user, "I'm bored of this, insult them yourself." )
 			return
-			
+
 		item = self.channelMatch.findall(message);
 
 		if item[0][0].lower() == connection.nickname.lower():
@@ -479,10 +479,12 @@ class HowLongReaction:
 			('Event II', '2008-06-06 18:00'),
 			('Event III', '2008-07-18 18:00'),
 			('Event IV', '2008-09-05 18:00'),
+			
+			('Event 1 2009',  '2009-04-10 18:00'),
 
 			('Froth meet', '2008-04-19 18:00'),
 
-			('Contrivance', '2008-04-26 18:00')
+			('Contrivance', '2008-04-26 11:00')
 			]
 
 		last_event = time.strptime('1981-01-26 18:00', '%Y-%m-%d %H:%M')
@@ -611,6 +613,27 @@ class QuitReaction:
 			print "[Quit] %s %s" % (sys.argv[1], matches[0])
 			connection.quit(matches[0])
 
+class TellAqReaction:
+
+	canSay = ("Aquarion")
+
+	def __init__(self, connection):
+		self.privateMatch = re.compile('Tell Aquarion (.*)', re.IGNORECASE)
+
+
+	def privateAction(self, connection, user, channel, message):
+		matches = self.privateMatch.findall(message)
+		print "[Summon Aq] called"
+
+		sendThis = 'LS: %s: %s ' % (user, matches[0])
+
+		if len(sendThis) > 159:
+			connection.msg(user, "Can't do that Dave. Message too long")
+		else:
+			sms.send(sendThis)
+			connection.msg(user, "Message Sent")
+
+
 class WhowasReaction:
 
 	def __init__(self, connection):
@@ -683,10 +706,10 @@ class OpinionReaction: #Currently borked, fix this regex.
 			connection.msg(channel, self.vote(match, user));
 		else:
 			connection.msg(channel, self.opinion(match[0]));
-		
+
 	def vote(self, match, user):
 		return match;
-	
+
 	def opinion(self, item):
 		return 'No idea, mate';
 
@@ -807,6 +830,7 @@ class LampstandLoop(irc.IRCClient):
 		self.channelModules.append(EightballReaction(self))
 
 		self.privateModules = []
+		self.privateModules.append(TellAqReaction(self))
 		self.privateModules.append(WhowasReaction(self))
 		self.privateModules.append(HugReaction(self))
 		self.privateModules.append(SayReaction(self))
