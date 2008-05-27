@@ -124,6 +124,22 @@ class PrivateActions:
 				self.connection.msg(user, "I didn't understand that, sorry. Hi, I'm Lampstand. I'm a bot built for #maelfroth by Aquarion <nicholas@aquarionics.com>. Please talk to him if you have a problem with me. Some documentation about me is at http://hol.istic.net/lampstand")
 
 
+class NickChangeActions:
+
+	peopleToIgnore = ('ChanServ')
+
+	def __init__(self, connection):
+		self.connection = connection
+
+	def action(self, old_nick, new_nick):
+		if old_nick in self.peopleToIgnore or new_nick in self.peopleToIgnore:
+			print "(Ignoring)"
+		else:
+			matched = 0
+			for nickChangeModule in self.connection.nickChangeModules:
+				nickChangeModule.nickChangeAction(self.connection, old_nick, new_nick)
+
+
 class DiceReaction:
 
 	cooldown_number = 5
@@ -191,7 +207,7 @@ class DiceReaction:
 
 class InsultReaction:
 
-	cooldown_number = 5
+	cooldown_number = 3
 	cooldown_time   = 60
 	uses = []
 
@@ -389,6 +405,32 @@ class CohanReaction:
 			self.uses = self.uses[0:self.cooldown_number-1]
 		## Overuse Detectection ##
 
+class PodBayReaction:
+
+	cooldown_number = 2
+	cooldown_time   = 360
+	uses = []
+
+	def __init__(self, connection):
+		self.channelMatch = re.compile('%s. Open the pod bay doors' % connection.nickname, re.IGNORECASE)
+
+
+	def channelAction(self, connection, user, channel, message):
+		print "[PodBay] called"
+
+
+		if overUsed(self.uses, self.cooldown_number, self.cooldown_time):
+			connection.msg(channel, "I think you have your AIs confused." )
+			return
+
+		connection.msg(channel, "I can't do that, %s" % user )
+
+		## Overuse Detectection ##
+		self.uses.append(int(time.time()))
+		if len(self.uses) > self.cooldown_number:
+			self.uses = self.uses[0:self.cooldown_number-1]
+		## Overuse Detectection ##
+
 class FavouriteReaction:
 
 	cooldown_number = 10
@@ -479,7 +521,7 @@ class HowLongReaction:
 			('Event II', '2008-06-06 18:00'),
 			('Event III', '2008-07-18 18:00'),
 			('Event IV', '2008-09-05 18:00'),
-			
+
 			('Event 1 2009',  '2009-04-10 18:00'),
 
 			('Froth meet', '2008-04-19 18:00'),
@@ -669,6 +711,13 @@ class WhowasReaction:
 			connection.msg(user, self.lastseen(matches[0]))
 
 
+	def nickChangeAction(self, connection, old_nick, new_nick):
+		print "[WHOWAS] saw a nick change"
+		new_nick = ">%s" % new_nick
+		cursor = self.dbconnection.cursor()
+		cursor.execute('replace into lastseen (username, last_seen, last_words) values (?, ?, ?)', (old_nick, time.time(), new_nick) )
+
+
 
 	def lastseen(self, searchingfor):
 
@@ -677,6 +726,8 @@ class WhowasReaction:
 		result = cursor.fetchone()
 		if result == None:
 			return "Which universe is %s in?" % searchingfor
+		elif (result[2][0] == ">"):
+			return "I last saw %s on %s relabeling themselves as \"%s\"" % (result[0].encode('utf8'), time.strftime('%a, %1d %B %y at %H:%M', time.localtime(result[1])), result[2][1:].encode('utf8'))
 		else:
 			return "I last saw %s on %s saying \"%s\"" % (result[0].encode('utf8'), time.strftime('%a, %1d %B %y at %H:%M', time.localtime(result[1])), result[2].encode('utf8'))
 
@@ -694,10 +745,10 @@ class WeblinkReaction:
 		cursor.execute('insert into urllist (time, username, message) values (?, ?, ?)', (time.time(), user, message) )
 		self.dbconnection.commit()
 
-class OpinionReaction: #Currently borked, fix this regex.
+class OpinionReaction:
 
 	def __init__(self, connection):
-		self.channelMatch = (re.compile('(\w*)(\+\+|--)'), re.compile('%s.? what do you think of (.*?)\??' % connection.nickname, re.IGNORECASE))
+		self.channelMatch = (re.compile('(.*?)(\w*)(\+\+|--)'), re.compile('%s.? what do you think of (.*?)\??' % connection.nickname, re.IGNORECASE))
 		self.dbconnection = connection.dbconnection
 
 	def channelAction(self, connection, user, channel, message):
@@ -708,7 +759,18 @@ class OpinionReaction: #Currently borked, fix this regex.
 			connection.msg(channel, self.opinion(match[0]));
 
 	def vote(self, match, user):
-		return match;
+		match=match[0]
+		if match[2] == '--':
+			vote = -1
+		else:
+			vote = +1
+
+		cursor = self.dbconnection.cursor()
+		#CREATE TABLE vote (id INTEGER PRIMARY KEY, username varchar(64), item varchar(64), vote tinyint);
+
+		cursor.execute('insert into vote (time, username, item, vote) values (?, ?, ?, ?)', (time.time(), user, match[1], vote) )
+
+		#return match;
 
 	def opinion(self, item):
 		return 'No idea, mate';
@@ -716,8 +778,8 @@ class OpinionReaction: #Currently borked, fix this regex.
 class HugReaction:
 
 
-	cooldown_number   = 20
-	cooldown_time     = 60*5
+	cooldown_number   = 5
+	cooldown_time     = 120
 	uses              = []
 
 	def __init__(self, connection):
@@ -808,13 +870,16 @@ class LampstandLoop(irc.IRCClient):
 		irc.IRCClient.connectionMade(self)
 		self.logger = MessageLogger(open(self.factory.filename, "a"))
 
-		self.channel = ChannelActions(self)
-		self.private = PrivateActions(self)
+		self.channel    = ChannelActions(self)
+		self.private    = PrivateActions(self)
+		self.nickchange = NickChangeActions(self)
+
 		self.dbconnection = sqlite.connect('lampstand.db')
 
 
 		self.channelModules = []
 		self.channelModules.append(HugReaction(self))
+		self.channelModules.append(PodBayReaction(self))
 		self.channelModules.append(InsultReaction(self))
 		self.channelModules.append(WhowasReaction(self))
 		#self.channelModules.append(RevelationReaction(self))
@@ -823,7 +888,7 @@ class LampstandLoop(irc.IRCClient):
 		self.channelModules.append(WeblinkReaction(self))
 		self.channelModules.append(PokeReaction(self))
 		self.channelModules.append(DictionaryReaction(self))
-		#self.channelModules.append(OpinionReaction(self))
+		self.channelModules.append(OpinionReaction(self))
 		self.channelModules.append(HowLongReaction(self))
 		self.channelModules.append(FavouriteReaction(self))
 		self.channelModules.append(CohanReaction(self))
@@ -838,6 +903,8 @@ class LampstandLoop(irc.IRCClient):
 		self.privateModules.append(QuitReaction(self))
 		self.privateModules.append(HowLongReaction(self))
 
+		self.nickChangeModules = []
+		self.nickChangeModules.append(WhowasReaction(self))
 
 		self.logger.log("[connected at %s]" %
 						time.asctime(time.localtime(time.time())))
@@ -898,6 +965,7 @@ class LampstandLoop(irc.IRCClient):
 		old_nick = prefix.split('!')[0]
 		new_nick = params[0]
 		self.logger.log("%s is now known as %s" % (old_nick, new_nick))
+		self.nickchange.action(old_nick, new_nick)
 
 
 class LampstandFactory(protocol.ClientFactory):
