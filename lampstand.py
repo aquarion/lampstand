@@ -735,7 +735,7 @@ class WhowasReaction:
 class WeblinkReaction:
 
 	def __init__(self, connection):
-		self.channelMatch = re.compile('https?\:\/\/')
+		self.channelMatch = re.compile('.*https?\:\/\/')
 		self.dbconnection = connection.dbconnection
 
 	def channelAction(self, connection, user, channel, message):
