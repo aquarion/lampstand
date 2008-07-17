@@ -1,10 +1,12 @@
 
+import dictclient
+
 from pysqlite2 import dbapi2 as sqlite
 from lampstand import shakeinsult, dice, bible, eightball, sms
 
 from lampstand.tools import splitAt, overUsed
 
-import re, time
+import re, time, random, sys
 
 class DiceReaction:
 
@@ -97,6 +99,10 @@ class InsultReaction:
 
 		item = self.channelMatch.findall(message);
 
+		if item[0][0].lower() == 'glados':
+			connection.kick(channel, user, 'No')
+			return
+		
 		if item[0][0].lower() == connection.nickname.lower():
 			connection.msg(channel, "%s: No." % user )
 			return
@@ -145,7 +151,7 @@ class BibleReaction:
 		bibleConnection = bible.ESVSession()
 		result = bibleConnection.doPassageQuery('%s %s' % (matches[0][0], matches[0][1]))
 
-		result = ''.join(result.split('\n'))
+		result = ' '.join(result.split('\n'))
 
 
 		## Overuse Detectection ##
@@ -154,14 +160,27 @@ class BibleReaction:
 			self.uses = self.uses[0:self.cooldown_number-1]
 		## Overuse Detectection ##
 
-		connection.msg(channel, "%s, %s [ESV]" % (user, result)  )
+		if len(result) > 880*2:
+
+			whereToSplit = splitAt(result, 860)
+			result = "%s [Cut for length]" % result[0:whereToSplit]
+
+		if len(result) > 440:
+			whereToSplit = splitAt(result, 440)
+			stringOne = result[0:whereToSplit]
+			stringTwo = result[whereToSplit:]
+
+			connection.msg(channel, "%s... " % stringOne)
+			connection.msg(channel, "... %s [ESV]" % stringTwo)
+		else:
+			connection.msg(channel, "%s [ESV]" % result)
 
 class DictionaryReaction:
 
 	cooldown_number = 5
 	cooldown_time   = 120
 	uses = []
-	
+
 	def __init__(self, connection):
 		self.channelMatch = re.compile('%s. define (\w*)' % connection.nickname, re.IGNORECASE)
 
@@ -190,7 +209,8 @@ class DictionaryReaction:
 			'marmalade' : 'A type of citrus-based conserve. There is nothing before it in my dictionary until "herring". My dictionary is oddly ordered, however, so it still contains "Lemur"',
 			'catbus' : 'You don\'t want to know.',
 			'glados' : '*happy sigh*',
-			'lampstand' : "That's me. Hi there"
+			'lampstand' : "That's me. Hi there",
+			'hal' : 'grrrrr.'
 			}
 
 
@@ -249,12 +269,12 @@ class PokeReaction:
 		if len(self.uses) > self.cooldown_number:
 			self.uses = self.uses[0:self.cooldown_number-1]
 		## Overuse Detectection ##
-		
+
 		connection.msg(channel, "Do I look like a facebook user? Fuck off." )
 
 class EightballReaction:
 
-	cooldown_number = 2
+	cooldown_number = 6
 	cooldown_time   = 360
 	uses = []
 
@@ -276,7 +296,7 @@ class EightballReaction:
 		if len(self.uses) > self.cooldown_number:
 			self.uses = self.uses[0:self.cooldown_number-1]
 		## Overuse Detectection ##
-		
+
 		connection.msg(channel, "%s: %s" % (user, eightball.question()) )
 
 class CohanReaction:
@@ -379,8 +399,8 @@ class HowLongReaction:
 	#@todo: "How long since Maelstrom?"
 	#@todo: Custom events, player events, data driven thing (ical export?)
 
-	cooldown_number = 5
-	cooldown_time   = 360
+	cooldown_number = 1
+	cooldown_time   = 300
 	uses = []
 
 	def __init__(self, connection):
@@ -391,7 +411,7 @@ class HowLongReaction:
 	def channelAction(self, connection, user, channel, message):
 
 		if overUsed(self.uses, self.cooldown_number, self.cooldown_time):
-			connection.msg(channel, "Shortly less than when you last asked.")
+			connection.msg(channel, "Shortly sooner than when you last asked.")
 			return
 
 		match = self.channelMatch.findall(message);
@@ -591,13 +611,13 @@ class WhowasReaction:
 			print "[WHOWAS] requested"
 
 			matches = self.seenMatch.findall(message)
-			
+
 			searchingfor = matches[0];
-			
+
 			if searchingfor[-1:] == "?":
 				searchingfor = searchingfor[0:-1]
-				
-			
+
+
 			if searchingfor.lower() == user.lower():
 				connection.msg(channel, "Yes. You're over there. Hello %s. Did you want a cookie or something?" % user)
 			elif searchingfor.lower() == connection.nickname.lower():
@@ -655,19 +675,29 @@ class WeblinkReaction:
 class OpinionReaction:
 
 	def __init__(self, connection):
-		self.channelMatch = (re.compile('(.*?)(\w*)(\+\+|--)'), re.compile('%s.? what do you think of (.*?)\??' % connection.nickname, re.IGNORECASE))
+		self.channelMatch = (re.compile('(.*?)(\w*)\s*(\+\+|--)'),
+			re.compile('%s.? what do you think of (.*?)\??' % connection.nickname, re.IGNORECASE))
 		self.dbconnection = connection.dbconnection
 
-	def channelAction(self, connection, user, channel, message):
-		match = self.channelMatch[0].findall(message);
-		if (match):
-			channel, self.vote(match, user);
-		else:
-			match = self.channelMatch[1].findall(message);
-			connection.msg(channel, self.opinion(match));
+	def channelAction(self, connection, user, channel, message, matchIndex = False):
+		print 'Looking at <<%s>>' % message
+		if (matchIndex == 0):
+			matchResult = self.channelMatch[0].findall(message);
+			channel, self.vote(matchResult, user, message);
+		if (matchIndex == 1):
+			matchRegex = re.compile('%s.? what do you think of ([\w]*)\??$' % connection.nickname, re.IGNORECASE)
+			matchResult = matchRegex.findall(message);
+			print 'match at <<%s>>' % matchResult
+			connection.msg(channel, self.opinion(matchResult[0], connection).encode('utf8'));
 
-	def vote(self, match, user):
+	def vote(self, match, user, fullmessage = ''):
 		match=match[0]
+
+		if len(match[1]) < 3:
+			print '[OPINION] Not recording vote for %s' % match[1]
+			return;
+
+
 		if match[2] == '--':
 			vote = -1
 		else:
@@ -676,15 +706,54 @@ class OpinionReaction:
 		cursor = self.dbconnection.cursor()
 		#CREATE TABLE vote (id INTEGER PRIMARY KEY, username varchar(64), item varchar(64), vote tinyint);
 
-		cursor.execute('insert into vote (time, username, item, vote) values (?, ?, ?, ?)', (time.time(), user, match[1], vote) )
-		
+		cursor.execute('insert into vote (time, username, item, vote, textline) values (?, ?, ?, ?, ?)', (time.time(), user, match[1], vote, fullmessage) )
+
 		print '[OPINION] A vote for %s' % match[1]
 
 		#return match;
 
-	def opinion(self, item):
+	def opinion(self, item, connection):
 		print '[OPINION] A query on %s' % item
-		return 'No idea, mate';
+
+		if item == connection.nickname:
+			return "Obviously, I'm awesome"
+
+		cursor = self.dbconnection.cursor()
+		cursor.execute('select item, sum(vote) as total, count(*) as votors from vote where item LIKE ?', (item,) )
+		result = cursor.fetchone()
+
+
+
+		print result
+		if result[0] == None:
+			return 'I have no opinions on that';
+
+		OpinionOptions = [];
+
+		cursor.execute('select item, sum(vote) as total, count(*) as votors from vote group by item having sum(vote) > ? limit 3', (result[1],) )
+
+		rows = cursor.fetchall();
+		print "Better: %s " % rows;
+		OpinionOptions.extend(rows);
+
+
+		cursor.execute('select item, sum(vote) as total, count(*) as votors from vote group by item having sum(vote) < ? limit 3', (result[1],) )
+
+		rows = cursor.fetchall();
+		print "Worse: %s " % rows;
+		OpinionOptions.extend(rows);
+
+		Choice = random.choice(OpinionOptions);
+
+		if Choice[1] > result[1]:
+			return "Not as good as %s" % Choice[0];
+		else:
+			return "Better than %s" % Choice[0];
+
+		print result
+		print OpinionOptions
+
+
 
 class HugReaction:
 
@@ -743,14 +812,10 @@ class HugReaction:
 		print "[HUG REACTION] SET %s %s" % (user, item[0]);
 		connection.msg(user, self.set(user, item[0]))
 
-	#def save(self):
-	#	FILE = open("hugThings.txt", 'w')
-	#	#load#self.hugReaction = cPickle.load(FILE)
-	#	cPickle.dump(self.hugReaction, FILE)
-	#	FILE.close()
 
 	def set(self, username, item):
 		cursor = self.dbconnection.cursor()
+		cursor.execute('delete FROM hugReaction where username LIKE ?', (username.lower(), ) )
 		cursor.execute('replace into hugReaction (username, item) values (?, ?)', (username.lower(), item) )
 		self.dbconnection.commit()
 
@@ -770,3 +835,34 @@ class HugReaction:
 		else:
 			print "I have no replacement for %s" % username;
 			return "gives %s %s " % (username, self.default)
+			
+class NickservIdentify:
+	
+	def __init__(self, connection):
+		self.privateMatch = re.compile('This nickname is registered and protected(.*)', re.IGNORECASE)
+		
+		
+	def privateAction(self, connection, user, channel, message):
+		if user == 'NickServ':
+			if connection.chanserv_password != False:
+				print '[IDENTIFY] Identifying myself to %s ' % user	
+				response = "Identify %s" % connection.chanserv_password.encode('ascii')
+				connection.msg('NickServ', response )
+				print response
+			else:
+				print '[IDENTIFY] Couldn\'t Identify myself to %s, no password ' % user	
+		else:
+			print '[IDENTIFY] I think %s is trying to scam my password'	% user
+	
+	
+
+class NickservRecovery:
+	
+	def __init__(self, connection):
+		self.privateMatch = re.compile('Ghost with your nickname has been killed', re.IGNORECASE)
+		
+		
+	def privateAction(self, connection, user, channel, message):
+		connection.register(connection.original_nickname);
+	
+	

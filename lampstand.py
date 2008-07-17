@@ -37,13 +37,18 @@ from twisted.python import log
 
 # system imports
 import time, sys
-import re
+import re, os
 import string
 
+from pysqlite2 import dbapi2 as sqlite
 
-from lampstand.reactions import *
 
-import dictclient
+#from lampstand.reactions import *
+
+import lampstand.reactions;
+
+from lampstand import sms
+
 
 class MessageLogger:
 	"""
@@ -63,6 +68,7 @@ class MessageLogger:
 		self.file.close()
 
 class ChannelActions:
+	peopleToIgnore = ('ChanServ')
 
 	def __init__(self, connection):
 		self.connection = connection
@@ -71,24 +77,26 @@ class ChannelActions:
 	def action(self, user, channel, message):
 			for channelModule in self.connection.channelModules:
 				if isinstance(channelModule.channelMatch, tuple):
+					indx = 0
 					for channelSubMatch in channelModule.channelMatch:
 						if channelSubMatch.match(message):
-							channelModule.channelAction(self.connection, user, channel, message)
+							channelModule.channelAction(self.connection, user, channel, message, indx)
+						indx = indx+1;
 				elif channelModule.channelMatch.match(message):
 					#print 'Channel Matched on %s' % channelModule
 					channelModule.channelAction(self.connection, user, channel, message)
 
 			#print "< %s/%s: %s" % (user, channel, message)
-	
-	
+
+
 	def leave(self, reason, user, parameters):
-	
+
 			if (user in self.connection.people):
 				self.connection.people.remove(user)
 				print "Removed %s from user list" % user
 			else:
 				print "No %s in %s" % (user, self.connection.people)
-	
+
 			for leaveModule in self.connection.leaveModules:
 				if isinstance(leaveModule.leaveMatch, tuple):
 					for leaveSubMatch in leaveModule.leaveMatch:
@@ -98,16 +106,16 @@ class ChannelActions:
 					#print 'Channel Matched on %s' % channelModule
 					leaveModule.leaveAction(self.connection, user, reason, params)
 
-	
+
 	def join(self, user, parameters):
-	
+
 			if user not in self.connection.people:
 				self.connection.people.append(user)
 				print "Added %s to user list" % user
 			else:
 				print "%s is in %s" % (user, self.connection.people)
-				
-			
+
+
 			for joinModule in self.connection.joinModules:
 				if isinstance(joinModule.joinMatch, tuple):
 					for joinSubMatch in joinModule.joinMatch:
@@ -122,6 +130,16 @@ class ChannelActions:
 
 
 	def nickChange(self, old_nick, new_nick):
+
+		if new_nick not in self.connection.people:
+			self.connection.people.append(new_nick)
+			print "Added %s to user list" % new_nick
+
+		if (old_nick in self.connection.people):
+			self.connection.people.remove(old_nick)
+			print "Removed %s from user list" % old_nick
+
+
 		if old_nick in self.peopleToIgnore or new_nick in self.peopleToIgnore:
 			print "(Ignoring)"
 		else:
@@ -147,7 +165,11 @@ class PrivateActions:
 					print 'Private Matched on %s' % privateModule
 					privateModule.privateAction(self.connection, user, channel, message)
 			if matched == 0:
-				self.connection.msg(user, "I didn't understand that, sorry. Hi, I'm Lampstand. I'm a bot built for #maelfroth by Aquarion <nicholas@aquarionics.com>. Please talk to him if you have a problem with me. Some documentation about me is at http://hol.istic.net/lampstand")
+				peopleToIgnore = ('NickServ', 'MemoServ')
+				if user in peopleToIgnore:
+					print "(Ignoring)"
+				else:
+					self.connection.msg(user, "I didn't understand that, sorry. Docs: http://www.maelfroth.org/lampstand")
 
 
 
@@ -155,53 +177,82 @@ class LampstandLoop(irc.IRCClient):
 	"""An IRC Bot for #maelfroth."""
 
 	nickname = "Lampstand"
+	original_nickname = "Lampstand"
+	alt_nickname = "Catbus"
+	
+	chanserv_password = False
 
 
+	dbconnection = False
 
 	def connectionMade(self):
+		
+		if os.path.exists('%s.db' % self.factory.channel):
+			print "Loading database database %s " % self.factory.channel
+			self.dbconnection = sqlite.connect('%s.db' % self.factory.channel)
+		else:
+			print "Couldn't load database %s " % self.factory.channel
+			reactor.stop()
+		
+		
+		if (self.dbconnection):
+			cursor = self.dbconnection.cursor()
+			cursor.execute('SELECT server, password FROM nickserv where server = ?', (self.factory.server,) )
+			result = cursor.fetchone()
+		
+			if result != None:
+				self.chanserv_password = result[1];
+				print "Chanserv Password is "+result[1];
+			else: 
+				print "Couldn't find a chanserv password for "+self.factory.server
+		else:
+				print "No database, not loading nickserv password"
+				
+		
+		
 		irc.IRCClient.connectionMade(self)
 		self.logger = MessageLogger(open(self.factory.filename, "a"))
 
 		self.channel    = ChannelActions(self)
 		self.private    = PrivateActions(self)
-		
-		self.people = []
-		
 
-		self.dbconnection = sqlite.connect('lampstand.db')
+		self.people = []
 
 
 		self.channelModules = []
-		self.channelModules.append(HugReaction(self))
-		self.channelModules.append(PodBayReaction(self))
-		self.channelModules.append(InsultReaction(self))
-		self.channelModules.append(WhowasReaction(self))
-		#self.channelModules.append(RevelationReaction(self))
-		self.channelModules.append(BibleReaction(self))
-		self.channelModules.append(DiceReaction(self))
-		self.channelModules.append(WeblinkReaction(self))
-		self.channelModules.append(PokeReaction(self))
-		self.channelModules.append(DictionaryReaction(self))
-		self.channelModules.append(OpinionReaction(self))
-		self.channelModules.append(HowLongReaction(self))
-		self.channelModules.append(FavouriteReaction(self))
-		self.channelModules.append(CohanReaction(self))
-		self.channelModules.append(EightballReaction(self))
+		self.channelModules.append(lampstand.reactions.HugReaction(self))
+		self.channelModules.append(lampstand.reactions.PodBayReaction(self))
+		self.channelModules.append(lampstand.reactions.InsultReaction(self))
+		self.channelModules.append(lampstand.reactions.WhowasReaction(self))
+		#self.channelModules.append(lampstand.reactions.RevelationReaction(self))
+		self.channelModules.append(lampstand.reactions.BibleReaction(self))
+		self.channelModules.append(lampstand.reactions.DiceReaction(self))
+		self.channelModules.append(lampstand.reactions.WeblinkReaction(self))
+		self.channelModules.append(lampstand.reactions.PokeReaction(self))
+		self.channelModules.append(lampstand.reactions.DictionaryReaction(self))
+		self.channelModules.append(lampstand.reactions.OpinionReaction(self))
+		self.channelModules.append(lampstand.reactions.HowLongReaction(self))
+		self.channelModules.append(lampstand.reactions.FavouriteReaction(self))
+		self.channelModules.append(lampstand.reactions.CohanReaction(self))
+		self.channelModules.append(lampstand.reactions.EightballReaction(self))
 
 		self.privateModules = []
-		self.privateModules.append(TellAqReaction(self))
-		self.privateModules.append(WhowasReaction(self))
-		self.privateModules.append(HugReaction(self))
-		self.privateModules.append(SayReaction(self))
-		self.privateModules.append(DoReaction(self))
-		self.privateModules.append(QuitReaction(self))
-		self.privateModules.append(HowLongReaction(self))
+		self.privateModules.append(lampstand.reactions.TellAqReaction(self))
+		self.privateModules.append(lampstand.reactions.WhowasReaction(self))
+		self.privateModules.append(lampstand.reactions.HugReaction(self))
+		self.privateModules.append(lampstand.reactions.SayReaction(self))
+		self.privateModules.append(lampstand.reactions.DoReaction(self))
+		self.privateModules.append(lampstand.reactions.QuitReaction(self))
+		self.privateModules.append(lampstand.reactions.HowLongReaction(self))
+		
+		self.privateModules.append(lampstand.reactions.NickservIdentify(self))
+		self.privateModules.append(lampstand.reactions.NickservRecovery(self))
 
 		self.nickChangeModules = []
-		self.nickChangeModules.append(WhowasReaction(self))
+		self.nickChangeModules.append(lampstand.reactions.WhowasReaction(self))
 
 		self.leaveModules = []
-		
+
 		self.joinModules = []
 
 		self.logger.log("[connected at %s]" %
@@ -214,9 +265,21 @@ class LampstandLoop(irc.IRCClient):
 		self.logger.close()
 
 
+	def nicknameRecovery(self):
+		if self.chanserv_password != False:
+			print '[IDENTIFY] Recovering my nickname '	
+			self.msg('nickserv', "Ghost %s %s" % (self.original_nickname, self.chanserv_password.encode('utf8') ) )
+		else:
+			print '[IDENTIFY] Tried to recovering my nickname, but couldn\'t see a password'	
+
+
 	# callbacks for events
 
 	def signedOn(self):
+		
+		if (self.nickname != self.original_nickname):
+			self.nicknameRecovery()
+		
 		"""Called when bot has succesfully signed on to server."""
 		self.join(self.factory.channel)
 
@@ -232,7 +295,7 @@ class LampstandLoop(irc.IRCClient):
 
 
 		print "> %s/%s: %s" % (user, channel, msg)
-		self.logger.log("<%s> %s" % (self.nickname, msg))
+		#self.logger.log("<%s> %s" % (self.nickname, msg))
 
 		if (msg[0:3] == '***'):
 			return
@@ -255,8 +318,8 @@ class LampstandLoop(irc.IRCClient):
 		user = user.split('!', 1)[0]
 		self.channel.action(user, channel, msg)
 		self.logger.log("* %s %s" % (user, msg))
-		
-		
+
+
 	# irc callbacks
 
 	def irc_NICK(self, prefix, params):
@@ -264,7 +327,7 @@ class LampstandLoop(irc.IRCClient):
 		old_nick = prefix.split('!')[0]
 		new_nick = params[0]
 		self.logger.log("%s is now known as %s" % (old_nick, new_nick))
-		self.channel.nickchange(old_nick, new_nick)
+		self.channel.nickChange(old_nick, new_nick)
 
 	def irc_PART(self, prefix, params):
 		"""Saw someone part from the channel"""
@@ -272,43 +335,59 @@ class LampstandLoop(irc.IRCClient):
 		nickname = prefix.split('!')[0]
 		self.channel.leave('part', nickname, params)
 		pass
-	
+
 	def irc_QUIT(self, prefix, params):
 		"""Saw someone Quit from the channel"""
 		print "Saw a quit: %s %s" % (prefix, params)
 		nickname = prefix.split('!')[0]
 		self.channel.leave('quit', nickname, params)
 		pass
-		
+
 	def irc_TOPIC(self, prefix, params):
 		"""Saw someone change the topic"""
 		print "Saw a topic change: %s %s" % (prefix, params)
 		pass
-		
+
 	def irc_JOIN(self, prefix, params):
 		"""Saw someone Join the channel"""
 		print "Saw a join: %s %s" % (prefix, params)
 		nickname = prefix.split('!')[0]
 		self.channel.join(nickname, params)
 		pass
-		
+
 	def irc_RPL_TOPIC(self, prefix, params):
 		"""??????????"""
 		print "Saw a RPL_TOPIC (!!): %s %s" % (prefix, params)
 		pass
+
+	def irc_ERR_NICKNAMEINUSE(self, prefix, params):
+		"""??????????"""
+		print "Saw a irc_ERR_NICKNAMEINUSE (!!): %s %s" % (prefix, params)
+		if (self.nickname == self.original_nickname):
+			print '[IDENTIFY] Downgrading to  '	+self.alt_nickname
+			self.register(self.alt_nickname)
+			self.nickname = self.alt_nickname
+		elif (self.nickname == self.alt_nickname):
+			print '[IDENTIFY] Downgrading to  '	+self.original_nickname+'_'
+			self.register(self.original_nickname+'_')
+			self.nickname = self.original_nickname+'_'
+			
+		self.nicknameRecovery()
+		pass
+		
 		
 	def irc_RPL_NAMREPLY(self, prefix, params):
 		"""??????????"""
 		print "Saw a irc_RPL_NAMREPLY (!!): %s %s" % (prefix, params)
-		
+
 		server = prefix
 		myname = params[0]
 		atsign = params[1]
 		channel = params[2]
 		names = params[3].split(' ');
-		
+
 		people = []
-		
+
 		for nickname in names:
 			print "saw %s" % nickname
 			if len(nickname) == 0:
@@ -317,26 +396,25 @@ class LampstandLoop(irc.IRCClient):
 				people.append(nickname[1:])
 			else:
 				people.append(nickname)
-				
+
 		print 'People: %s' % people
-		
+
 		self.people = people
-		
-		
+
+
 		pass
-			
+
 	def irc_333(self, prefix, params):
 		"""??????????"""
 		print "Saw a 333 (!!): %s %s" % (prefix, params)
 		pass
-		
-	def userKicked(self, prefix, params):
+
+	def userKicked(self, kickee, channel, kicker, message):
 		"""Saw someone kicked from the channel"""
-		print "Saw a kick: %s %s" % (prefix, params)
-		nickname = prefix.split('!')[0]
-		self.channel.leave('kick', nickname, params)
+		print "Saw a kick: %s kicked %s saying %s" % (kickee, kicker, message)
+		self.channel.leave('kick', kickee, message)
 		pass
-		
+
 
 
 class LampstandFactory(protocol.ClientFactory):
@@ -348,14 +426,15 @@ class LampstandFactory(protocol.ClientFactory):
 	# the class of the protocol to build when new connection is made
 	protocol = LampstandLoop
 
-	def __init__(self, channel, filename):
+	def __init__(self, channel, filename, server):
 		self.channel = channel
 		self.filename = filename
+		self.server = server
 
 	def clientConnectionLost(self, connector, reason):
 		"""If we get disconnected, reconnect to server."""
 		#connector.connect()
-		sms.send('Lampstand: HAZ NO CONEXON')
+		#sms.send('Lampstand: HAZ NO CONEXON')
 
 	def clientConnectionFailed(self, connector, reason):
 		print "connection failed:", reason
@@ -371,12 +450,12 @@ if __name__ == '__main__':
 		sys.exit(1)
 
 	server = "cosmos.esper.net"
-
+		
 	if len(sys.argv) == 4:
 		server = sys.argv[3]
 
 	# create factory protocol and application
-	f = LampstandFactory(sys.argv[1], sys.argv[2])
+	f = LampstandFactory(sys.argv[1], sys.argv[2], server)
 
 	# connect factory to this host and port
 	reactor.connectTCP(server, 6667, f)

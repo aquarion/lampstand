@@ -1,5 +1,5 @@
 
-import time
+import time,re
 
 def splitAt(string, number):
 	if len(string) > number:

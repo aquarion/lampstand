@@ -6,7 +6,6 @@ def question():
 		"Ask again later",
 		"Better not tell you now",
 		"Cannot predict now",
-		"Concentrate and ask again",
 		"Don't count on it",
 		"It is certain",
 		"It is decidedly so",
@@ -35,7 +34,29 @@ def question():
 		"No idea. Shall I phone a friend?",
 		"Over my dead body",
 		"Hah. No",
-		"Hah. Yes"
+		"Hah. Yes",
+		"Consecrate and ask again",
+		"An Eidolon will be around shortly to answer",
+		"Go ask someone who gives a damn",
+		"Purple hatstand fur elysian triumverate",
+		"Don't be silly",
+		"Ask eliza",
+		"Supplicate and see",
+		"Not in this universe. Try another",
+		"As soon as downtime is open",
+		"Supplicate and see what happens",
+		"Pray and see what happens",
+		"Not this time",
+		"Only once",
+		"yes, but bricks will fall after",
+		"Pah, do not bother me with such trifles",
+		"A suffusion of yellow",
+		"Ask your mother",
+		"Go ask your father",
+		"Go play in the traffic",
+		"Go play with a triffid"
+
 		)
 	
-	return answers[(random.randint(0,len(answers)))]
+	#return answers[(random.randint(0,len(answers)))]
+	return random.choice(answers)
