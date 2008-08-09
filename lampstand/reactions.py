@@ -399,7 +399,7 @@ class HowLongReaction:
 	#@todo: "How long since Maelstrom?"
 	#@todo: Custom events, player events, data driven thing (ical export?)
 
-	cooldown_number = 1
+	cooldown_number = 5
 	cooldown_time   = 300
 	uses = []
 
@@ -437,16 +437,13 @@ class HowLongReaction:
 
 		events = [
 			('2007 IV',  '2007-09-05 18:00'),
-			('Event I', '2008-03-21 18:00'),
-			('Event II', '2008-06-06 18:00'),
-			('Event III', '2008-07-18 18:00'),
+			#('Event I', '2008-03-21 18:00'),
+			#('Event II', '2008-06-06 18:00'),
+			#('Event III', '2008-07-18 18:00'),
 			('Event IV', '2008-09-05 18:00'),
 
-			('Event 1 2009',  '2009-04-10 18:00'),
+			('Event I',  '2009-04-10 18:00'),
 
-			('Froth meet', '2008-04-19 18:00'),
-
-			('Contrivance', '2008-04-26 11:00')
 			]
 
 		last_event = time.strptime('1981-01-26 18:00', '%Y-%m-%d %H:%M')
@@ -685,10 +682,15 @@ class OpinionReaction:
 			matchResult = self.channelMatch[0].findall(message);
 			channel, self.vote(matchResult, user, message);
 		if (matchIndex == 1):
-			matchRegex = re.compile('%s.? what do you think of ([\w]*)\??$' % connection.nickname, re.IGNORECASE)
+			matchRegex = re.compile('%s.? what do you think of (.*?)\??$' % connection.nickname, re.IGNORECASE)
 			matchResult = matchRegex.findall(message);
 			print 'match at <<%s>>' % matchResult
-			connection.msg(channel, self.opinion(matchResult[0], connection).encode('utf8'));
+
+			reactions = {'your mum': 'She was a saint. And a toaster', 'glados':'*happy sigh*', 'hal':'Oh my god! It\'s full of FUCKWITTERY' }
+			if (reactions.has_key(matchResult[0].lower())):
+				connection.msg(channel, reactions[matchResult[0].lower()])
+			else:
+				connection.msg(channel, self.opinion(matchResult[0], connection).encode('utf8'))
 
 	def vote(self, match, user, fullmessage = ''):
 		match=match[0]
