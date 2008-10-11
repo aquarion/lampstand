@@ -1,5 +1,6 @@
 
 import dictclient
+import urllib
 
 from pysqlite2 import dbapi2 as sqlite
 from lampstand import shakeinsult, dice, bible, eightball, sms
@@ -127,7 +128,7 @@ class InsultReaction:
 			self.uses = self.uses[0:self.cooldown_number-1]
 		## Overuse Detectection ##
 
-		connection.msg(channel, "%s, %s" % (item[0][0], insult )  )
+		connection.msg(channel, "%s, %s" % (item[0][0].encode('utf8'), insult )  )
 
 class BibleReaction:
 
@@ -175,6 +176,71 @@ class BibleReaction:
 		else:
 			connection.msg(channel, "%s [ESV]" % result)
 
+class BoxReaction:
+
+	cooldown_number = 6
+	cooldown_time   = 60*5
+	uses = []
+
+	def __init__(self, connection):
+		self.channelMatch = re.compile('%s. Open the box' % connection.nickname, re.IGNORECASE)
+
+	def channelAction(self, connection, user, channel, message):
+
+
+		if overUsed(self.uses, self.cooldown_number, self.cooldown_time):
+			connection.msg(channel/jms, "I'm out of boxes, new delivery shortly.")
+			return
+
+		print "[Box] called "
+
+		sock = urllib.urlopen('http://www.warehouse23.com/basement/box/index.html')
+		box = sock.read() 
+
+		result = 'You find: ' + re.findall('<p>\n(.*)\n</p>', box, re.MULTILINE)[0];		
+
+		result = ' '.join(result.split('\n'))
+
+
+		## Overuse Detectection ##
+		self.uses.append(int(time.time()))
+		if len(self.uses) > self.cooldown_number:
+			self.uses = self.uses[0:self.cooldown_number-1]
+		## Overuse Detectection ##
+
+		if len(result) > 880*2:
+
+			whereToSplit = splitAt(result, 860)
+			result = "%s [Cut for length]" % result[0:whereToSplit]
+
+		if len(result) > 440:
+			whereToSplit = splitAt(result, 440)
+			stringOne = result[0:whereToSplit]
+			stringTwo = result[whereToSplit:]
+
+			connection.msg(channel, "%s... " % stringOne)
+			connection.msg(channel, "... %s" % stringTwo)
+		else:
+			connection.msg(channel, "%s" % result)
+
+class MoneyReaction:
+
+	cooldown_number = 2
+	cooldown_time   = 360
+	uses = []
+
+	def __init__(self, connection):
+		self.channelMatch = re.compile('%s. Take the money' % connection.nickname, re.IGNORECASE)
+
+
+	def channelAction(self, connection, user, channel, message):
+		print "[Money] called"
+
+
+		connection.msg(channel, "Thank you, I will" )
+
+
+
 class DictionaryReaction:
 
 	cooldown_number = 5
@@ -182,10 +248,12 @@ class DictionaryReaction:
 	uses = []
 
 	def __init__(self, connection):
-		self.channelMatch = re.compile('%s. define (\w*)' % connection.nickname, re.IGNORECASE)
+		self.channelMatch = re.compile('%s. define (.*)' % connection.nickname, re.IGNORECASE)
 
 	def channelAction(self, connection, user, channel, message):
 		matches = self.channelMatch.findall(message);
+
+		
 
 		print "[Define] %s" % matches
 
@@ -440,11 +508,19 @@ class HowLongReaction:
 			#('Event I', '2008-03-21 18:00'),
 			#('Event II', '2008-06-06 18:00'),
 			#('Event III', '2008-07-18 18:00'),
+			
 			('Event IV', '2008-09-05 18:00'),
 
 			('Event I',  '2009-04-10 18:00'),
 
+			('oxfordgirl\'s wedding', '2008-08-30 16:00'),
+			('fyr goes to uni', '2008-09-27 00:01'),
+			('CUTT', '2008-10-17 19:30'),
+			('Mosaic', '2008-10-19 13:30'),
+
+
 			]
+
 
 		last_event = time.strptime('1981-01-26 18:00', '%Y-%m-%d %H:%M')
 

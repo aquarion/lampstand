@@ -59,10 +59,7 @@ class MessageLogger:
 		self.file = file
 
 	def log(self, message):
-		"""Write a message to the file."""
-		timestamp = time.strftime("[%H:%M:%S]", time.localtime(time.time()))
-		self.file.write('%s %s\n' % (timestamp, message))
-		self.file.flush()
+		return
 
 	def close(self):
 		self.file.close()
@@ -235,6 +232,8 @@ class LampstandLoop(irc.IRCClient):
 		self.channelModules.append(lampstand.reactions.FavouriteReaction(self))
 		self.channelModules.append(lampstand.reactions.CohanReaction(self))
 		self.channelModules.append(lampstand.reactions.EightballReaction(self))
+		self.channelModules.append(lampstand.reactions.BoxReaction(self))
+		self.channelModules.append(lampstand.reactions.MoneyReaction(self))
 
 		self.privateModules = []
 		self.privateModules.append(lampstand.reactions.TellAqReaction(self))
@@ -434,7 +433,7 @@ class LampstandFactory(protocol.ClientFactory):
 	def clientConnectionLost(self, connector, reason):
 		"""If we get disconnected, reconnect to server."""
 		#connector.connect()
-		#sms.send('Lampstand: HAZ NO CONEXON')
+		sms.send('Lampstand: HAZ NO CONEXON')
 
 	def clientConnectionFailed(self, connector, reason):
 		print "connection failed:", reason
@@ -449,7 +448,7 @@ if __name__ == '__main__':
 		print "Not enough arguments. Try %s #channel logfile [server]" % sys.argv[0]
 		sys.exit(1)
 
-	server = "cosmos.esper.net"
+	server = "irc.esper.net"
 		
 	if len(sys.argv) == 4:
 		server = sys.argv[3]
