@@ -12,14 +12,3 @@ def splitAt(string, number):
 		return index
 	else:
 		return number
-
-def overUsed(uses, number, cooldown):
-
-		if len(uses) >= number:
-			first_use = int(uses[0])
-			use_allowed_again = first_use + cooldown
-			if time.time() < use_allowed_again:
-				print "Use Blocked. Try again in %s" % (int(use_allowed_again) - time.time());
-				return True
-
-		return False

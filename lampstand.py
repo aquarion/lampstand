@@ -39,6 +39,7 @@ from twisted.python import log
 import time, sys
 import re, os
 import string
+import exceptions
 
 from pysqlite2 import dbapi2 as sqlite
 
@@ -59,7 +60,10 @@ class MessageLogger:
 		self.file = file
 
 	def log(self, message):
-		return
+		"""Write a message to the file."""
+		timestamp = time.strftime("[%H:%M:%S]", time.localtime(time.time()))
+		self.file.write('%s %s\n' % (timestamp, message))
+		self.file.flush()
 
 	def close(self):
 		self.file.close()
@@ -73,7 +77,7 @@ class ChannelActions:
 
 	def action(self, user, channel, message):
 			for channelModule in self.connection.channelModules:
-				if isinstance(channelModule.channelMatch, tuple):
+				if isinstance(channelModule.channelMatch, tuple) or isinstance(channelModule.channelMatch, list):
 					indx = 0
 					for channelSubMatch in channelModule.channelMatch:
 						if channelSubMatch.match(message):
@@ -94,6 +98,9 @@ class ChannelActions:
 			else:
 				print "No %s in %s" % (user, self.connection.people)
 
+			if user == self.connection.original_nickname and self.connection.nickname != connection.original_nickname:
+					self.connection.register(self.original_nickname)
+
 			for leaveModule in self.connection.leaveModules:
 				if isinstance(leaveModule.leaveMatch, tuple):
 					for leaveSubMatch in leaveModule.leaveMatch:
@@ -102,6 +109,7 @@ class ChannelActions:
 				elif leaveModule.leaveMatch.match(message):
 					#print 'Channel Matched on %s' % channelModule
 					leaveModule.leaveAction(self.connection, user, reason, params)
+
 
 
 	def join(self, user, parameters):
@@ -136,6 +144,8 @@ class ChannelActions:
 			self.connection.people.remove(old_nick)
 			print "Removed %s from user list" % old_nick
 
+		if old_nick == self.connection.original_nickname and self.connection.nickname != self.connection.original_nickname:
+				self.connection.register(self.connection.original_nickname)
 
 		if old_nick in self.peopleToIgnore or new_nick in self.peopleToIgnore:
 			print "(Ignoring)"
@@ -152,21 +162,34 @@ class PrivateActions:
 		self.connection = connection
 
 	def action(self, user, channel, message):
+		print 'Scanning...'
+			
 		if user in self.peopleToIgnore:
 			print "(Ignoring)"
 		else:
+
 			matched = 0
+			
+
 			for privateModule in self.connection.privateModules:
-				if privateModule.privateMatch.match(message):
+				if isinstance(privateModule.privateMatch, tuple) or isinstance(privateModule.privateMatch, list):
+					indx = 0
+					for privateSubMatch in privateModule.privateMatch:
+						if privateSubMatch.match(message):
+							matched = matched + 1
+							privateModule.privateAction(self.connection, user, channel, message, indx)
+						indx = indx+1;
+				elif privateModule.privateMatch.match(message):
 					matched = matched + 1
-					print 'Private Matched on %s' % privateModule
+					print 'private Matched on %s' % privateModule
 					privateModule.privateAction(self.connection, user, channel, message)
+
 			if matched == 0:
-				peopleToIgnore = ('NickServ', 'MemoServ')
+				peopleToIgnore = ('NickServ', 'MemoServ', 'ChanServ')
 				if user in peopleToIgnore:
 					print "(Ignoring)"
 				else:
-					self.connection.msg(user, "I didn't understand that, sorry. Docs: http://www.maelfroth.org/lampstand")
+					self.connection.msg(user, "I didn't understand that, sorry. Docs: http://www.maelfroth.org/lampstand.php")
 
 
 
@@ -176,86 +199,139 @@ class LampstandLoop(irc.IRCClient):
 	nickname = "Lampstand"
 	original_nickname = "Lampstand"
 	alt_nickname = "Catbus"
-	
+
 	chanserv_password = False
 
 
 	dbconnection = False
 
 	def connectionMade(self):
-		
+
 		if os.path.exists('%s.db' % self.factory.channel):
 			print "Loading database database %s " % self.factory.channel
 			self.dbconnection = sqlite.connect('%s.db' % self.factory.channel)
 		else:
 			print "Couldn't load database %s " % self.factory.channel
 			reactor.stop()
-		
-		
+
+
 		if (self.dbconnection):
 			cursor = self.dbconnection.cursor()
 			cursor.execute('SELECT server, password FROM nickserv where server = ?', (self.factory.server,) )
 			result = cursor.fetchone()
-		
+
 			if result != None:
 				self.chanserv_password = result[1];
 				print "Chanserv Password is "+result[1];
-			else: 
+			else:
 				print "Couldn't find a chanserv password for "+self.factory.server
 		else:
 				print "No database, not loading nickserv password"
-				
-		
-		
+
+
+
 		irc.IRCClient.connectionMade(self)
-		self.logger = MessageLogger(open(self.factory.filename, "a"))
+		self.logger = MessageLogger(open(self.factory.channel+'.log', "a"))
 
 		self.channel    = ChannelActions(self)
 		self.private    = PrivateActions(self)
 
 		self.people = []
 
-
 		self.channelModules = []
-		self.channelModules.append(lampstand.reactions.HugReaction(self))
-		self.channelModules.append(lampstand.reactions.PodBayReaction(self))
-		self.channelModules.append(lampstand.reactions.InsultReaction(self))
-		self.channelModules.append(lampstand.reactions.WhowasReaction(self))
-		#self.channelModules.append(lampstand.reactions.RevelationReaction(self))
-		self.channelModules.append(lampstand.reactions.BibleReaction(self))
-		self.channelModules.append(lampstand.reactions.DiceReaction(self))
-		self.channelModules.append(lampstand.reactions.WeblinkReaction(self))
-		self.channelModules.append(lampstand.reactions.PokeReaction(self))
-		self.channelModules.append(lampstand.reactions.DictionaryReaction(self))
-		self.channelModules.append(lampstand.reactions.OpinionReaction(self))
-		self.channelModules.append(lampstand.reactions.HowLongReaction(self))
-		self.channelModules.append(lampstand.reactions.FavouriteReaction(self))
-		self.channelModules.append(lampstand.reactions.CohanReaction(self))
-		self.channelModules.append(lampstand.reactions.EightballReaction(self))
-		self.channelModules.append(lampstand.reactions.BoxReaction(self))
-		self.channelModules.append(lampstand.reactions.MoneyReaction(self))
-
 		self.privateModules = []
-		self.privateModules.append(lampstand.reactions.TellAqReaction(self))
-		self.privateModules.append(lampstand.reactions.WhowasReaction(self))
-		self.privateModules.append(lampstand.reactions.HugReaction(self))
-		self.privateModules.append(lampstand.reactions.SayReaction(self))
-		self.privateModules.append(lampstand.reactions.DoReaction(self))
-		self.privateModules.append(lampstand.reactions.QuitReaction(self))
-		self.privateModules.append(lampstand.reactions.HowLongReaction(self))
-		
-		self.privateModules.append(lampstand.reactions.NickservIdentify(self))
-		self.privateModules.append(lampstand.reactions.NickservRecovery(self))
-
 		self.nickChangeModules = []
-		self.nickChangeModules.append(lampstand.reactions.WhowasReaction(self))
-
 		self.leaveModules = []
-
 		self.joinModules = []
+
+		defaultModules = ('admin', 'hug', 'eightball', 'generic')
+
+		for thingy in defaultModules:
+			self.installModule(thingy)
 
 		self.logger.log("[connected at %s]" %
 						time.asctime(time.localtime(time.time())))
+
+	def installModule(self, moduleName):
+
+		self.removeModuleActions(moduleName);
+
+		module = 'lampstand.reactions.%s' % moduleName
+
+		rtn = '';
+		
+		print "Installing %s" % moduleName
+
+		if (sys.modules.has_key(module)):
+			self.removeModuleActions(moduleName)
+			print 'Reloading %s' % module
+			reload(sys.modules[module]);
+			rtn = 'Reloaded %s' % module
+			print rtn
+		else:
+			try:
+				rtn = 'Loaded %s' % module
+				__import__(module)
+			except exceptions.ImportError:
+				rtn = 'Epic Fail loading %s, Not found' % module
+			except:
+				rtn = 'Epic Fail loading %s, Threw an exception' % module
+
+
+		self.addModuleActions(moduleName)
+		return rtn
+
+
+	def removeModuleActions(self, module):
+
+		module = 'lampstand.reactions.%s' % module
+
+		for reaction in self.channelModules:
+			if reaction.__module__ == module:
+				self.channelModules.remove(reaction)
+
+		for reaction in self.privateModules:
+			if reaction.__module__ == module:
+				self.privateModules.remove(reaction)
+
+		for reaction in self.nickChangeModules:
+			if reaction.__module__ == module:
+				self.nickChangeModules.remove(reaction)
+
+		for reaction in self.leaveModules:
+			if reaction.__module__ == module:
+				self.leaveModules.remove(reaction)
+
+		for reaction in self.joinModules:
+			if reaction.__module__ == module:
+				self.joinModules.remove(reaction)
+
+	def addModuleActions(self, moduleName):
+
+		module = sys.modules['lampstand.reactions.%s' % moduleName]
+
+		reaction = module.Reaction(self)
+
+		if hasattr(reaction, 'channelMatch'):
+			print '[%s] Installing channel text reaction' % (moduleName)
+			self.channelModules.append(reaction)
+
+		if hasattr(reaction, 'privateMatch'):
+			print '[%s] Installing private text reaction' % moduleName
+			self.privateModules.append(reaction)
+
+		if hasattr(reaction, 'nickChangeAction'):
+			print '[%s] Installing nick change reaction' % moduleName
+			self.nickChangeModules.append(reaction)
+
+		if hasattr(reaction, 'leaveAction'):
+			print '[%s] Installing channel leave reaction' % moduleName
+			self.leaveModules.append(reaction)
+
+		if hasattr(reaction, 'joinAction'):
+			print '[%s] Installing channel join reaction' % moduleName
+			self.joinModules.append(reaction)
+
 
 	def connectionLost(self, reason):
 		irc.IRCClient.connectionLost(self, reason)
@@ -264,21 +340,18 @@ class LampstandLoop(irc.IRCClient):
 		self.logger.close()
 
 
-	def nicknameRecovery(self):
+	def nickservGhost(self):
 		if self.chanserv_password != False:
-			print '[IDENTIFY] Recovering my nickname '	
+			print '[IDENTIFY] Recovering my nickname '
 			self.msg('nickserv', "Ghost %s %s" % (self.original_nickname, self.chanserv_password.encode('utf8') ) )
-		else:
-			print '[IDENTIFY] Tried to recovering my nickname, but couldn\'t see a password'	
-
 
 	# callbacks for events
 
 	def signedOn(self):
-		
+
 		if (self.nickname != self.original_nickname):
-			self.nicknameRecovery()
-		
+			self.nickservGhost()
+
 		"""Called when bot has succesfully signed on to server."""
 		self.join(self.factory.channel)
 
@@ -300,10 +373,12 @@ class LampstandLoop(irc.IRCClient):
 			return
 
 		# Check to see if they're sending me a private message
-		if channel == self.nickname:
+		if channel.lower() == self.nickname.lower():
+			print 'Scanning as private message (%s == %s)' % (channel, self.nickname)
 			self.private.action(user, channel, msg)
 			return
 		else:
+			print 'Scanning as public message (%s != %s)' % (channel, self.nickname)
 			self.channel.action(user, channel, msg)
 
 		# Otherwise check to see if it is a message directed at me
@@ -313,6 +388,7 @@ class LampstandLoop(irc.IRCClient):
 
 
 	def action(self, user, channel, msg):
+		print "* %s/%s: %s" % (user, channel, msg)
 		"""This will get called when the bot sees someone do an action."""
 		user = user.split('!', 1)[0]
 		self.channel.action(user, channel, msg)
@@ -370,11 +446,10 @@ class LampstandLoop(irc.IRCClient):
 			print '[IDENTIFY] Downgrading to  '	+self.original_nickname+'_'
 			self.register(self.original_nickname+'_')
 			self.nickname = self.original_nickname+'_'
-			
-		self.nicknameRecovery()
+
 		pass
-		
-		
+
+
 	def irc_RPL_NAMREPLY(self, prefix, params):
 		"""??????????"""
 		print "Saw a irc_RPL_NAMREPLY (!!): %s %s" % (prefix, params)
@@ -425,15 +500,14 @@ class LampstandFactory(protocol.ClientFactory):
 	# the class of the protocol to build when new connection is made
 	protocol = LampstandLoop
 
-	def __init__(self, channel, filename, server):
+	def __init__(self, channel, server):
 		self.channel = channel
-		self.filename = filename
 		self.server = server
 
 	def clientConnectionLost(self, connector, reason):
 		"""If we get disconnected, reconnect to server."""
 		#connector.connect()
-		sms.send('Lampstand: HAZ NO CONEXON')
+		#sms.send('Lampstand: HAZ NO CONEXON')
 
 	def clientConnectionFailed(self, connector, reason):
 		print "connection failed:", reason
@@ -444,17 +518,17 @@ if __name__ == '__main__':
 	# initialize logging
 	log.startLogging(sys.stdout)
 
-	if len(sys.argv) < 3:
-		print "Not enough arguments. Try %s #channel logfile [server]" % sys.argv[0]
+	if len(sys.argv) < 2:
+		print "Not enough arguments. Try %s #channel [server]" % sys.argv[0]
 		sys.exit(1)
 
-	server = "irc.esper.net"
-		
-	if len(sys.argv) == 4:
-		server = sys.argv[3]
+	server = "cosmos.esper.net"
+
+	if len(sys.argv) == 3:
+		server = sys.argv[2]
 
 	# create factory protocol and application
-	f = LampstandFactory(sys.argv[1], sys.argv[2], server)
+	f = LampstandFactory(sys.argv[1], server)
 
 	# connect factory to this host and port
 	reactor.connectTCP(server, 6667, f)
