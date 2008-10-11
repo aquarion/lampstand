@@ -10,20 +10,11 @@ I am Lampstand. Beware.
 Todo:
 
 	* Move databases to MySQL instead of sqlite
-	* Store events in database instead of hash
-	* Same for admins, probably.
-	* Multiple matching regexes for each module
-		* So we can combine do/say into one module
-	* Generic reaction module
-		* Shift favourite/Cohan into same
+	* Database admins, probably.
 	* King James Bible
 	* Quotes Interface
 	* iCal interface
-	* Shift all Reactions into other files
-	* Generify overuse a bit better
-	* Make Overuse code tell the person who is trying to overuse it that they suck
 	* Fix "Since" events.
-	* NickServ support
 	* Choose incoming IP
 	* All the cool shit in your head
 """
@@ -162,7 +153,6 @@ class PrivateActions:
 		self.connection = connection
 
 	def action(self, user, channel, message):
-		print 'Scanning...'
 			
 		if user in self.peopleToIgnore:
 			print "(Ignoring)"
@@ -244,7 +234,7 @@ class LampstandLoop(irc.IRCClient):
 		self.leaveModules = []
 		self.joinModules = []
 
-		defaultModules = ('admin', 'hug', 'eightball', 'generic')
+		defaultModules = ('admin','base','bible','box','dice','dict','eightball','generic','howlong','hug','insult','nickserv','opinion','weblink','whowas')
 
 		for thingy in defaultModules:
 			self.installModule(thingy)
@@ -374,11 +364,9 @@ class LampstandLoop(irc.IRCClient):
 
 		# Check to see if they're sending me a private message
 		if channel.lower() == self.nickname.lower():
-			print 'Scanning as private message (%s == %s)' % (channel, self.nickname)
 			self.private.action(user, channel, msg)
 			return
 		else:
-			print 'Scanning as public message (%s != %s)' % (channel, self.nickname)
 			self.channel.action(user, channel, msg)
 
 		# Otherwise check to see if it is a message directed at me
