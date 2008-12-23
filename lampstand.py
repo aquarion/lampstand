@@ -41,6 +41,7 @@ import lampstand.reactions;
 
 from lampstand import sms
 
+import daemonize
 
 class MessageLogger:
 	"""
@@ -93,13 +94,7 @@ class ChannelActions:
 					self.connection.register(self.original_nickname)
 
 			for leaveModule in self.connection.leaveModules:
-				if isinstance(leaveModule.leaveMatch, tuple):
-					for leaveSubMatch in leaveModule.leaveMatch:
-						if leaveSubMatch.match(message):
-							leaveModule.leaveAction(self.connection, user, reason, params)
-				elif leaveModule.leaveMatch.match(message):
-					#print 'Channel Matched on %s' % channelModule
-					leaveModule.leaveAction(self.connection, user, reason, params)
+				leaveModule.leaveAction(self.connection, user, reason, parameters)
 
 
 
@@ -113,13 +108,7 @@ class ChannelActions:
 
 
 			for joinModule in self.connection.joinModules:
-				if isinstance(joinModule.joinMatch, tuple):
-					for joinSubMatch in joinModule.joinMatch:
-						if joinSubMatch.match(message):
-							joinModule.joinAction(self.connection, user, reason, params)
-				elif joinModule.joinMatch.match(message):
-					#print 'Channel Matched on %s' % channelModule
-					joinModule.joinAction(self.connection, user, reason, params)
+				joinModule.joinAction(self.connection, user, reason, parameters)
 
 			#print "< %s/%s: %s" % (user, channel, message)
 
@@ -154,7 +143,7 @@ class PrivateActions:
 
 	def action(self, user, channel, message):
 			
-		if user in self.peopleToIgnore:
+		if user in self.peopleToIgnore or user == self.connection.nickname:
 			print "(Ignoring)"
 		else:
 
@@ -221,7 +210,7 @@ class LampstandLoop(irc.IRCClient):
 
 
 		irc.IRCClient.connectionMade(self)
-		self.logger = MessageLogger(open(self.factory.channel+'.log', "a"))
+		self.logger = MessageLogger(open('/home/aquarion/projects/lampstand/'+self.factory.channel+'.log', "a"))
 
 		self.channel    = ChannelActions(self)
 		self.private    = PrivateActions(self)
@@ -494,8 +483,10 @@ class LampstandFactory(protocol.ClientFactory):
 
 	def clientConnectionLost(self, connector, reason):
 		"""If we get disconnected, reconnect to server."""
-		#connector.connect()
 		#sms.send('Lampstand: HAZ NO CONEXON')
+		#Todo: Implement backoff
+		time.sleep(45) # Our very own fourty five second claim.
+		connector.connect()
 
 	def clientConnectionFailed(self, connector, reason):
 		print "connection failed:", reason
@@ -503,6 +494,10 @@ class LampstandFactory(protocol.ClientFactory):
 
 
 if __name__ == '__main__':
+	cwd = os.getcwd() 
+	print "Error log is %s/stderr.log" % cwd
+	#daemonize.daemonize('/dev/null', '%s/stdout.log' % cwd, '%s/stderr.log' % cwd)
+	
 	# initialize logging
 	log.startLogging(sys.stdout)
 
@@ -521,5 +516,7 @@ if __name__ == '__main__':
 	# connect factory to this host and port
 	reactor.connectTCP(server, 6667, f)
 
+
 	# run bot
+
 	reactor.run()

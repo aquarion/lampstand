@@ -16,7 +16,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		self.reactions = (('.*pokes %s', '', "Do I look like a facebook user? Fuck off."),
 			('%s. What is best in life?', 'Not Telling', "To crush your enemies, see them driven before you, and to hear the lamentations of their women!"),
-			('%s. Open the pod bay doors', "I think you have your AIs confused.", "I can't do that, Dave")
+			('%s. Take the money', "Thank you, I shall.", "Already did."),
+			('%s. Open the pod bay doors', "I think you have your AIs confused.", "I can't do that, Dave"),
+			('%s. Where do you get the boxes?', "", "The boxes come from SJGames' http://www.warehouse23.com/basement/ Level One")
 			)
 
 		self.channelMatch = []

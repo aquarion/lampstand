@@ -13,7 +13,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	uses = []
 
 	def __init__(self, connection):
-		self.channelMatch = re.compile('%s. insult (\w*)(!?)' % connection.nickname, re.IGNORECASE)
+		self.channelMatch = re.compile('%s. insult (.*)(!?)' % connection.nickname, re.IGNORECASE)
 
 
 	def channelAction(self, connection, user, channel, message):
@@ -26,7 +26,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		item = self.channelMatch.findall(message);
 		
-		insultee = item[0][0]
+		orig_insultee = item[0][0]
+		insultee = re.sub(r'\W', '', item[0][0])
 		
 		if insultee.lower() == 'me':
 			insultee = user
@@ -44,11 +45,18 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.msg(channel, "%s: Do I look suicidal? No." % user )
 			return
 
+		
 		ownerMatch = re.compile('.*aquarion.*', re.IGNORECASE)
 		myNameMatch = re.compile('.*%s.*' % connection.nickname, re.IGNORECASE)
 		if ownerMatch.match(item[0][0]) or myNameMatch.match(insultee):
 			connection.msg(channel, "%s: Hah. Very clever. Still no." % user )
 			return
+			
+		#ownerMatch = re.compile('.*your m.m?*', re.IGNORECASE)
+		#myNameMatch = re.compile('.*%s.*' % connection.nickname, re.IGNORECASE)
+		#if ownerMatch.match(item[0][0]) or myNameMatch.match(insultee):
+		#	connection.msg(channel, "%s: She was a saint. And a toaster." % user )
+		#	return
 
 		print "%s" % item
 		insult = shakeinsult.shakeinsult(1);
@@ -56,4 +64,4 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		self.updateOveruse()
 
-		connection.msg(channel, "%s, %s" % (insultee, insult )  )
+		connection.msg(channel, "%s, %s" % (orig_insultee, insult )  )

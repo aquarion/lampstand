@@ -11,10 +11,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	def __init__(self, connection):
 		self.channelMatch = re.compile('.*')
-		self.seenMatch    = re.compile('%s.? have you seen ([\S,!\?]*)\??' % connection.nickname, re.IGNORECASE)
-		self.privateMatch = re.compile('have you seen ([\S,!\?]*)\??', re.IGNORECASE)
+		self.seenMatch    = re.compile('%s.? have you seen (.*)\??' % connection.nickname, re.IGNORECASE)
+		self.privateMatch = re.compile('have you seen (.*)\??', re.IGNORECASE)
 		self.dbconnection = connection.dbconnection
-
+		
 
 	def channelAction(self, connection, user, channel, message):
 
@@ -27,9 +27,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 			if searchingfor[-1:] == "?":
 				searchingfor = searchingfor[0:-1]
-
-
-			if searchingfor.lower() == user.lower():
+			space = re.compile(".*\s.*")
+			if space.match(searchingfor):
+				connection.msg(channel, "No idea, %s. Have you looked under the sofa?" % user)
+			elif searchingfor.lower() == user.lower():
 				connection.msg(channel, "Yes. You're over there. Hello %s. Did you want a cookie or something?" % user)
 			elif searchingfor.lower() == connection.nickname.lower():
 				connection.msg(channel, "I'm right here.")
@@ -40,10 +41,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 					stringOne = result[0:whereToSplit]
 					stringTwo = result[whereToSplit:]
 		
-					connection.msg(channel, "%s... " % stringOne)
-					connection.msg(channel, "... %s" % stringTwo)
+					connection.msg(channel, "%s... " % stringOne.encode('utf8'))
+					connection.msg(channel, "... %s" % stringTwo.encode('utf8'))
 				else:
-					connection.msg(channel, result)
+					connection.msg(channel, result.encode('utf8'))
 		else:
 			cursor = self.dbconnection.cursor()
 
@@ -53,9 +54,34 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 
 	def privateAction(self, connection, user, channel, message):
+		print "[WHOWAS] privately requested"
 		if self.privateMatch.match(message):
 			matches = self.privateMatch.findall(message)
-			connection.msg(user, self.lastseen(matches[0]))
+			searchingfor = matches[0]
+			if searchingfor[-1:] == "?":
+				searchingfor = searchingfor[0:-1]
+			space = re.compile(".*\s.*")
+			if space.match(searchingfor):
+				connection.msg(user, "No idea, %s. Have you looked under the sofa?" % user)
+			elif searchingfor.lower() == user.lower():
+				connection.msg(user, "Yes. You're over there. Hello %s. Did you want a cookie or something?" % user)
+			elif searchingfor.lower() == connection.nickname.lower():
+				connection.msg(user, "I'm right here.")
+			else:
+				result = self.lastseen(searchingfor);
+				if len(result) > 440:
+					whereToSplit = splitAt(result, 440)
+					stringOne = result[0:whereToSplit]
+					stringTwo = result[whereToSplit:]
+		
+					connection.msg(user, "%s... " % stringOne.encode('utf8'))
+					connection.msg(user, "... %s" % stringTwo.encode('utf8'))
+				else:
+					connection.msg(user, result.encode('utf8'))
+					
+			#returnMessage = self.lastseen(searchingfor)
+			#print "[WHOWAS] %s " % returnMessage
+			#connection.msg(user, returnMessage.encode('utf8'))
 
 
 	def nickChangeAction(self, connection, old_nick, new_nick):
@@ -64,16 +90,29 @@ class Reaction(lampstand.reactions.base.Reaction):
 		cursor = self.dbconnection.cursor()
 		cursor.execute('replace into lastseen (username, last_seen, last_words) values (?, ?, ?)', (old_nick, time.time(), new_nick) )
 
+	def leaveAction(self, connection, user, reason, params):
+		cursor = self.dbconnection.cursor()
+		cursor.execute('replace into lastquit (username, last_quit, reason, method) values (?, ?, ?, ?)', (user, time.time(), params[1], reason) )
+		#print 'replace into lastquit (username, last_quit, reason) values (%s, %s, %s)' % (user, time.time(), params[1])
+		print "[WHOWAS] saw a nick leave: %s quit, saying %s (%s)" % (user, reason, params)
 
-
-	def lastseen(self, searchingfor):
+	def lastseen(self, searchingfor, after_timestamp = 0, depth = 0):
+	
+		print "Looking for %s after %s" % (searchingfor, after_timestamp)
+		
+		if depth > 4:
+			return ' ... and at that point I gave up';
 
 		cursor = self.dbconnection.cursor()
-		cursor.execute('SELECT * FROM lastseen where username LIKE ? order by last_seen desc', (searchingfor, ) )
+		cursor.execute('SELECT username, last_seen, last_words FROM lastseen where username LIKE ? and last_seen > ? order by last_seen desc', (searchingfor, int(after_timestamp)) )
+		
+		
+		print 'SELECT username, last_seen, last_words FROM lastseen where username LIKE %s and last_seen < %s order by last_seen desc' % ( searchingfor, after_timestamp) 
+				
 		result = cursor.fetchone()
 		if result == None:
-			return "Which universe is %s in?".encode('utf8') % searchingfor
+			return "I haven't seen %s say anything" % searchingfor
 		elif (result[2][0] == ">"):
-			return "I last saw %s on %s relabeling themselves as \"%s\". %s" % (result[0].encode('utf8'), time.strftime('%a, %1d %B %y at %H:%M', time.localtime(result[1])), result[2][1:].encode('utf8'), self.lastseen(result[2][1:]))
+			return "I last saw %s on %s relabeling themselves as \"%s\". %s" % (result[0], time.strftime('%a, %1d %B %y at %H:%M', time.localtime(result[1])), result[2][1:], self.lastseen(result[2][1:], int(result[1]), depth +1 ))
 		else:
-			return "I last saw %s on %s saying \"%s\"" % (result[0].encode('utf8'), time.strftime('%a, %1d %B %y at %H:%M', time.localtime(result[1])), result[2].encode('utf8'))
+			return "I last saw %s on %s saying \"%s\"" % (result[0], time.strftime('%a, %1d %B %y at %H:%M', time.localtime(result[1])), result[2])

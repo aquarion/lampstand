@@ -51,4 +51,4 @@ class Reaction(lampstand.reactions.base.Reaction):
 		elif matchindex == 5: # kick
 			print matches
 			print "Kicking %s from %s with the message %s" % (matches[0][0], channel, matches[0][1])
-			connection.kick(channel, matches[0][0], matches[0][1])
+			connection.kick('#maelfroth', matches[0][0], matches[0][1])

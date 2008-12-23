@@ -36,7 +36,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	def privateAction(self, connection, user, channel, message):
 		match = self.privateMatch.findall(message);
-		connection.msg(user, self.howLong(match))
+		connection.msg(user, self.howLong(match).encode('ascii'))
 
 
 	def howLong(self, match):
@@ -46,21 +46,39 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		cursor = self.dbconnection.cursor()
 		
-		cursor.execute('SELECT datetime, description, class FROM events where description LIKE ? order by datetime desc', (match[0], ) )
+		query = 'SELECT datetime, description, class, datetime_end, strftime("%s", datetime) as datetime_epoch, strftime("%s", datetime_end) as datetime_end_epoch FROM events where description LIKE ? order by datetime desc'
+		
+		cursor.execute(query, (match[0], ) )
+		
 		event = cursor.fetchone()
 
 		if event == None:
-			cursor.execute('SELECT datetime, description, class FROM events where class LIKE ? order by datetime desc', (match[0], ) )
+			cursor.execute('SELECT datetime, description, class, datetime_end, strftime("%s", datetime) as datetime_epoch, strftime("%s", datetime_end) as datetime_end_epoch FROM events where class LIKE ? and datetime > datetime("now") order by datetime asc', (match[0], ) )
 			event = cursor.fetchone()
 		
 		if event == None:
-			return "I don't know when that is."
+			return "No idea, sorry. There's a list of stuff I know about at http://www.maelfroth.org/events.php"
 			
 		print event
 		
+		# 0 datetime, 1 description, 2 class, 3 date_end, 4 date_epoch, 5 date_end_epoch
+		
 		current_time = time.time()
 
-		eventTime = time.mktime(time.strptime(event[0], '%Y-%m-%d %H:%M'))
+		
+		if (int(event[4]) > current_time):
+			print "Using time in"
+			timing_position = "start"
+			eventTime = int(event[4])
+		elif event[5]:
+			print "Using time out"
+			timing_position = "end"
+			eventTime = int(event[5])
+		else:
+			print "Using time in (No time out data)"
+			timing_position = "start"
+			eventTime = int(event[4])
+
 		eventName = event[1]
 		eventClass = event[2]
 		
@@ -68,9 +86,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 			swap = current_time
 			current_time = eventTime
 			eventTime = swap
-			returnformat = "%s time in was %s%s%s ago"
+			returnformat = "%s %sed %s%s%s ago"
 		else:
-			returnformat = "%s is in %s%s%s"
+			returnformat = "%s %ss in %s%s%s"
 
 
 		days = int((eventTime - current_time) / (60*60*24));
@@ -101,6 +119,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 		else:
 			minutes_message = ''
 
+		print returnformat % (eventName, timing_position, days_message, hours_message, minutes_message)
 
-
-		return returnformat % (eventName, days_message, hours_message, minutes_message)
+		return returnformat % (eventName, timing_position, days_message, hours_message, minutes_message)

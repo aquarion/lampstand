@@ -58,6 +58,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		print "Item: %s " % item
 
 		if len(item[0]) > 1 and item[0][1] != '':
+			oldtotal = total
 			modifier = ''.join(item[0][1].split(' '))
 			print "Modifier is %s" % modifier
 			print "Modifier is %s -- %s" % (modifier[0], modifier[1:])
@@ -72,9 +73,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 			if modifier[0] == "/":
 				total = total / string.atof(modifier[1:])
 
-			message = "%s %s = %d " % (display, modifier, total)
+			message = "%s %s = %d = %d " % (display, modifier, oldtotal, total)
 
-
+		connection.msg(channel, message)
 		self.updateOveruse()
 
 	def roll(self, dice):
