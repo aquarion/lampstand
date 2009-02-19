@@ -43,30 +43,43 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		print "[How Long] called with '%s'" % match[0]
 
+		eventSearch = match[0]
+		eventName = match[0]
+
+		aliases = { 'cunts do christmas' : 'Havocstan Midwinter Festival'}
+		if aliases.has_key(match[0].lower()):
+			print "found alias"
+			eventSearch = aliases[match[0].lower()]
 
 		cursor = self.dbconnection.cursor()
 		
 		query = 'SELECT datetime, description, class, datetime_end, strftime("%s", datetime) as datetime_epoch, strftime("%s", datetime_end) as datetime_end_epoch FROM events where description LIKE ? order by datetime desc'
 		
-		cursor.execute(query, (match[0], ) )
+		cursor.execute(query, (eventSearch, ) )
 		
 		event = cursor.fetchone()
 
+
+
 		if event == None:
-			cursor.execute('SELECT datetime, description, class, datetime_end, strftime("%s", datetime) as datetime_epoch, strftime("%s", datetime_end) as datetime_end_epoch FROM events where class LIKE ? and datetime > datetime("now") order by datetime asc', (match[0], ) )
+			cursor.execute('SELECT datetime, description, class, datetime_end, strftime("%s", datetime) as datetime_epoch, strftime("%s", datetime_end) as datetime_end_epoch FROM events where class LIKE ? and datetime > datetime("now") order by datetime asc', (eventSearch, ) )
 			event = cursor.fetchone()
-		
+					
 		if event == None:
 			return "No idea, sorry. There's a list of stuff I know about at http://www.maelfroth.org/events.php"
 			
 		print event
-		
+		eventName  = event[1]
+
 		# 0 datetime, 1 description, 2 class, 3 date_end, 4 date_epoch, 5 date_end_epoch
 		
 		current_time = time.time()
 
-		
-		if (int(event[4]) > current_time):
+		if(event[5] == None):
+			print "Using is (No time out data)"
+			timing_position = "i"
+			eventTime = int(event[4])
+		elif (int(event[4]) > current_time):
 			print "Using time in"
 			timing_position = "start"
 			eventTime = int(event[4])
@@ -76,17 +89,21 @@ class Reaction(lampstand.reactions.base.Reaction):
 			eventTime = int(event[5])
 		else:
 			print "Using time in (No time out data)"
-			timing_position = "start"
+			timing_position = "i"
 			eventTime = int(event[4])
 
-		eventName = event[1]
+		#eventName = event[1]
 		eventClass = event[2]
 		
 		if (eventTime < current_time):
 			swap = current_time
 			current_time = eventTime
 			eventTime = swap
-			returnformat = "%s %sed %s%s%s ago"
+			returnformat = "%s %s %s%s%s ago"
+			if timing_position == 'i':
+				timing_position = 'was'
+			else:
+				timing_position = "%sed" % timing_position
 		else:
 			returnformat = "%s %ss in %s%s%s"
 

@@ -91,11 +91,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 		cursor.execute('replace into lastseen (username, last_seen, last_words) values (?, ?, ?)', (old_nick, time.time(), new_nick) )
 
 	def leaveAction(self, connection, user, reason, params):
-		cursor = self.dbconnection.cursor()
-		cursor.execute('replace into lastquit (username, last_quit, reason, method) values (?, ?, ?, ?)', (user, time.time(), params[1], reason) )
-		#print 'replace into lastquit (username, last_quit, reason) values (%s, %s, %s)' % (user, time.time(), params[1])
 		print "[WHOWAS] saw a nick leave: %s quit, saying %s (%s)" % (user, reason, params)
-
+		cursor = self.dbconnection.cursor()
+		cursor.execute('replace into lastquit (username, last_quit, reason, method) values (?, ?, ?, ?)', (user, time.time(), params[-1], reason) )
+		#print 'replace into lastquit (username, last_quit, reason) values (%s, %s, %s)' % (user, time.time(), params[1])
 	def lastseen(self, searchingfor, after_timestamp = 0, depth = 0):
 	
 		print "Looking for %s after %s" % (searchingfor, after_timestamp)
