@@ -30,6 +30,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			space = re.compile(".*\s.*")
 			if space.match(searchingfor):
 				connection.msg(channel, "No idea, %s. Have you looked under the sofa?" % user)
+			elif searchingfor.lower() == "your mum":
+				connection.msg(channel, "%s: Not since she took on one piece of crumpet too many" % user)
 			elif searchingfor.lower() == user.lower():
 				connection.msg(channel, "Yes. You're over there. Hello %s. Did you want a cookie or something?" % user)
 			elif searchingfor.lower() == connection.nickname.lower():
@@ -110,8 +112,28 @@ class Reaction(lampstand.reactions.base.Reaction):
 				
 		result = cursor.fetchone()
 		if result == None:
-			return "I haven't seen %s say anything" % searchingfor
+			message = "I haven't seen %s say anything" % searchingfor
+			return "%s%s" % (message, self.lastquit(after_timestamp, searchingfor))
 		elif (result[2][0] == ">"):
-			return "I last saw %s on %s relabeling themselves as \"%s\". %s" % (result[0], time.strftime('%a, %1d %B %y at %H:%M', time.localtime(result[1])), result[2][1:], self.lastseen(result[2][1:], int(result[1]), depth +1 ))
+			message = "I last saw %s on %s relabeling themselves as \"%s\". %s" % (result[0], time.strftime('%a, %1d %B %y at %H:%M', time.localtime(result[1])), result[2][1:], self.lastseen(result[2][1:], int(result[1]), depth +1 ))
 		else:
-			return "I last saw %s on %s saying \"%s\"" % (result[0], time.strftime('%a, %1d %B %y at %H:%M', time.localtime(result[1])), result[2])
+			message = "I last saw %s on %s saying \"%s\"" % (result[0], time.strftime('%a, %1d %B %y at %H:%M', time.localtime(result[1])), result[2])
+
+		return "%s%s" % (message, self.lastquit(result[1], searchingfor))
+
+
+	def lastquit(self, lasttime, searchingfor):
+		cursor = self.dbconnection.cursor()
+		cursor.execute('SELECT last_quit, reason from lastquit where username LIKE ? and last_quit > ?', (searchingfor, lasttime ) )
+
+
+		quitresult = cursor.fetchone();
+		if quitresult == None:
+			print "No quit for %s after %s" % (searchingfor, lasttime)
+
+			return "";
+		else:
+			print "Quit result"
+			return ", then quit at %s saying '%s'" % (time.strftime('%a, %1d %B %y at %H:%M', time.localtime(quitresult[0])), quitresult[1])
+
+		return message;
