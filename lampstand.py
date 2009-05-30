@@ -32,8 +32,9 @@ import re, os
 import string
 import exceptions
 
-from pysqlite2 import dbapi2 as sqlite
+#from pysqlite2 import dbapi2 as sqlite
 
+import MySQLdb
 
 #from lampstand.reactions import *
 
@@ -186,17 +187,18 @@ class LampstandLoop(irc.IRCClient):
 
 	def connectionMade(self):
 
-		if os.path.exists('%s.db' % self.factory.channel):
-			print "Loading database database %s " % self.factory.channel
-			self.dbconnection = sqlite.connect('%s.db' % self.factory.channel)
-		else:
-			print "Couldn't load database %s " % self.factory.channel
-			reactor.stop()
+		#if os.path.exists('%s.db' % self.factory.channel):
+		print "Loading database database %s " % self.factory.channel
+		#self.dbconnection = sqlite.connect('%s.db' % self.factory.channel)
+		self.dbconnection = MySQLdb.connect(user = 'lampstand', passwd = 'glados', db = "lampstand")
+		#else:
+		#	print "Couldn't load database %s " % self.factory.channel
+		#	reactor.stop()
 
 
 		if (self.dbconnection):
 			cursor = self.dbconnection.cursor()
-			cursor.execute('SELECT server, password FROM nickserv where server = ?', (self.factory.server,) )
+			cursor.execute('SELECT server, password FROM nickserv where server = %s', (self.factory.server,) )
 			result = cursor.fetchone()
 
 			if result != None:

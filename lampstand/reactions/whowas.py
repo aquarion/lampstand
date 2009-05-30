@@ -51,7 +51,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			cursor = self.dbconnection.cursor()
 
 
-			cursor.execute('replace into lastseen (username, last_seen, last_words) values (?, ?, ?)', (user, time.time(), message) )
+			cursor.execute('replace into lastseen (username, last_seen, last_words) values (%s, %s, %s)', (user, int(time.time()), message) )
 			self.dbconnection.commit()
 
 
@@ -92,12 +92,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 		print "[WHOWAS] saw a nick change"
 		new_nick = ">%s" % new_nick
 		cursor = self.dbconnection.cursor()
-		cursor.execute('replace into lastseen (username, last_seen, last_words) values (?, ?, ?)', (old_nick, time.time(), new_nick) )
+		cursor.execute('replace into lastseen (username, last_seen, last_words) values (%s, %s, %s)', (old_nick, time.time(), new_nick) )
 
 	def leaveAction(self, connection, user, reason, params):
 		print "[WHOWAS] saw a nick leave: %s quit, saying %s (%s)" % (user, reason, params)
 		cursor = self.dbconnection.cursor()
-		cursor.execute('replace into lastquit (username, last_quit, reason, method) values (?, ?, ?, ?)', (user, time.time(), params[-1], reason) )
+		cursor.execute('replace into lastquit (username, last_quit, reason, method) values (%s, %s, %s, %s)', (user, time.time(), params[-1], reason) )
 		#print 'replace into lastquit (username, last_quit, reason) values (%s, %s, %s)' % (user, time.time(), params[1])
 	def lastseen(self, searchingfor, after_timestamp = 0, depth = 0):
 	
@@ -107,7 +107,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			return ' ... and at that point I gave up';
 
 		cursor = self.dbconnection.cursor()
-		cursor.execute('SELECT username, last_seen, last_words FROM lastseen where username LIKE ? and last_seen > ? order by last_seen desc', (searchingfor, int(after_timestamp)) )
+		cursor.execute('SELECT username, last_seen, last_words FROM lastseen where username LIKE %s and last_seen > %s order by last_seen desc', (searchingfor, int(after_timestamp)) )
 		
 		
 		print 'SELECT username, last_seen, last_words FROM lastseen where username LIKE %s and last_seen < %s order by last_seen desc' % ( searchingfor, after_timestamp) 
@@ -126,7 +126,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	def lastquit(self, lasttime, searchingfor):
 		cursor = self.dbconnection.cursor()
-		cursor.execute('SELECT last_quit, reason from lastquit where username LIKE ? and last_quit > ?', (searchingfor, lasttime ) )
+		cursor.execute('SELECT last_quit, reason from lastquit where username LIKE %s and last_quit > %s', (searchingfor, lasttime ) )
 
 
 		quitresult = cursor.fetchone();

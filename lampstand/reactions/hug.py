@@ -51,8 +51,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	def set(self, username, item):
 		cursor = self.dbconnection.cursor()
-		cursor.execute('delete FROM hugReaction where username LIKE ?', (username.lower(), ) )
-		cursor.execute('replace into hugReaction (username, item) values (?, ?)', (username.lower(), item) )
+		cursor.execute('delete FROM hugReaction where username LIKE %s', (username.lower(), ) )
+		cursor.execute('replace into hugReaction (username, item) values (%s, %s)', (username.lower(), item) )
 		self.dbconnection.commit()
 
 		print "Set %s hug reaction to %s" % (username, item);
@@ -61,7 +61,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	def hug(self, username):
 
 		cursor = self.dbconnection.cursor()
-		cursor.execute('SELECT * FROM hugReaction where username LIKE ?', (username.lower(), ) )
+		cursor.execute('SELECT * FROM hugReaction where username LIKE %s', (username.lower(), ) )
 		result = cursor.fetchone()
 
 		if result != None:

@@ -53,7 +53,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		cursor = self.dbconnection.cursor()
 		
-		query = 'SELECT datetime, description, class, datetime_end, strftime("%s", datetime) as datetime_epoch, strftime("%s", datetime_end) as datetime_end_epoch FROM events where description LIKE ? order by datetime desc'
+		query = 'SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch FROM events where description LIKE %s order by datetime desc'
 		
 		cursor.execute(query, (eventSearch, ) )
 		
@@ -62,7 +62,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 
 		if event == None:
-			cursor.execute('SELECT datetime, description, class, datetime_end, strftime("%s", datetime) as datetime_epoch, strftime("%s", datetime_end) as datetime_end_epoch FROM events where class LIKE ? and datetime > datetime("now") order by datetime asc', (eventSearch, ) )
+			cursor.execute('SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch FROM events where class LIKE %s and datetime > now() order by datetime asc', (eventSearch, ) )
 			event = cursor.fetchone()
 					
 		if event == None:

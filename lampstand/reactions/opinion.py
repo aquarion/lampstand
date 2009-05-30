@@ -44,7 +44,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		cursor = self.dbconnection.cursor()
 		#CREATE TABLE vote (id INTEGER PRIMARY KEY, username varchar(64), item varchar(64), vote tinyint);
 
-		cursor.execute('insert into vote (time, username, item, vote, textline) values (?, ?, ?, ?, ?)', (time.time(), user, match[1], vote, fullmessage) )
+		cursor.execute('insert into vote (time, username, item, vote, textline) values (%d, %s, %s, %s, %s)', (time.time(), user, match[1], vote, fullmessage) )
 
 		print '[OPINION] A vote for %s' % match[1]
 
@@ -57,7 +57,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			return "Obviously, I'm awesome"
 
 		cursor = self.dbconnection.cursor()
-		cursor.execute(u'select item, sum(vote) as total, count(*) as votors from vote where item LIKE ?', (item,) )
+		cursor.execute(u'select item, sum(vote) as total, count(*) as votors from vote where item LIKE %s', (item,) )
 		result = cursor.fetchone()
 
 
@@ -68,14 +68,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		OpinionOptions = [];
 
-		cursor.execute('select item, sum(vote) as total, count(*) as votors from vote group by item having sum(vote) > ? limit 3', (result[1],) )
+		cursor.execute('select item, sum(vote) as total, count(*) as votors from vote group by item having sum(vote) > %d limit 3', (result[1],) )
 
 		rows = cursor.fetchall();
 		print "Better: %s " % rows;
 		OpinionOptions.extend(rows);
 
 
-		cursor.execute('select item, sum(vote) as total, count(*) as votors from vote group by item having sum(vote) < ? limit 3', (result[1],) )
+		cursor.execute('select item, sum(vote) as total, count(*) as votors from vote group by item having sum(vote) < %d limit 3', (result[1],) )
 
 		rows = cursor.fetchall();
 		print "Worse: %s " % rows;
