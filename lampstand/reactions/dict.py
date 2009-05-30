@@ -37,7 +37,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 			'catbus' : 'You don\'t want to know.',
 			'glados' : '*happy sigh*',
 			'lampstand' : "That's me. Hi there",
-			'hal' : 'grrrrr.'
+			'hal' : 'grrrrr.',
+			'inconceivable' : 'adj. Not what you think it means.',
+			#'tenant' : 'n. An opinion, doctrine, or principle held as being true by a person or especially by an organization',
+			#'tenet' : 'n. One that pays rent to use or occupy land, a building, or other property owned by another.' 
 			}
 
 

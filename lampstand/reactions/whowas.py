@@ -28,10 +28,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 			if searchingfor[-1:] == "?":
 				searchingfor = searchingfor[0:-1]
 			space = re.compile(".*\s.*")
-			if space.match(searchingfor):
-				connection.msg(channel, "No idea, %s. Have you looked under the sofa?" % user)
-			elif searchingfor.lower() == "your mum":
+			if searchingfor.lower() == "your mum":
 				connection.msg(channel, "%s: Not since she took on one piece of crumpet too many" % user)
+			elif space.match(searchingfor):
+				connection.msg(channel, "No idea, %s. Have you looked under the sofa?" % user)
 			elif searchingfor.lower() == user.lower():
 				connection.msg(channel, "Yes. You're over there. Hello %s. Did you want a cookie or something?" % user)
 			elif searchingfor.lower() == connection.nickname.lower():
@@ -63,7 +63,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 			if searchingfor[-1:] == "?":
 				searchingfor = searchingfor[0:-1]
 			space = re.compile(".*\s.*")
-			if space.match(searchingfor):
+			if searchingfor.lower() == "your mum":
+				connection.msg(user, "%s: Not since she took on one piece of crumpet too many" % user)
+			elif space.match(searchingfor):
 				connection.msg(user, "No idea, %s. Have you looked under the sofa?" % user)
 			elif searchingfor.lower() == user.lower():
 				connection.msg(user, "Yes. You're over there. Hello %s. Did you want a cookie or something?" % user)
