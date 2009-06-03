@@ -16,8 +16,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 	uses = []
 
 	def __init__(self, connection):
-		self.channelMatch = re.compile('%s. how long until (.*?)\?' % connection.nickname, re.IGNORECASE)
-		self.privateMatch = re.compile('how long until (.*?)\?', re.IGNORECASE)
+		self.channelMatch = re.compile('%s. how long (until|since) (.*?)\?' % connection.nickname, re.IGNORECASE)
+		self.privateMatch = re.compile('how long (until|since) (.*?)\?', re.IGNORECASE)
 		self.dbconnection = connection.dbconnection
 
 
@@ -41,30 +41,61 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	def howLong(self, match):
 
-		print "[How Long] called with '%s'" % match[0]
+		print "[How Long] called with '%s'" % match[0][1]
+		
+		
 
-		eventSearch = match[0]
-		eventName = match[0]
+		eventSearch = match[0][1]
+		eventName = match[0][1]
 
 		aliases = { 'cunts do christmas' : 'Havocstan Midwinter Festival'}
-		if aliases.has_key(match[0].lower()):
+		if aliases.has_key(eventName.lower()):
 			print "found alias"
-			eventSearch = aliases[match[0].lower()]
+			eventSearch = aliases[eventName.lower()]
+
+
+		if (match[0][0] == "until"):
+			print "Until match"
+			firstTry = (">", "asc")
+			thenTry = ("<", "desc")
+		else:
+			print "since match: %s " % match
+			firstTry = ("<", "desc")
+			thenTry = (">", "asc")
 
 		cursor = self.dbconnection.cursor()
+			
+		# First, try direct description matches. First in the future (past if it's since)...	
+		rawquery = 'SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch FROM events where description LIKE %%s and datetime %s now() order by datetime %s'
 		
-		query = 'SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch FROM events where description LIKE %s order by datetime desc'
+		query = rawquery % (firstTry[0], firstTry[1])
 		
 		cursor.execute(query, (eventSearch, ) )
-		
 		event = cursor.fetchone()
 
-
-
+		# Second, try Description matches in the past (future if it's since)...
 		if event == None:
-			cursor.execute('SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch FROM events where class LIKE %s and datetime > now() order by datetime asc', (eventSearch, ) )
+			query = rawquery % (thenTry[0], thenTry[1])
+			cursor.execute(query, (eventSearch, ) )
 			event = cursor.fetchone()
-					
+
+
+		# Now set up the class query:
+		rawquery =	'SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch FROM events where class LIKE %%s and datetime %s now() order by datetime %s'
+
+		# Third, try Class matches in the future (past if it's since)...
+		if event == None:
+			query = rawquery % (firstTry[0], firstTry[1]) 
+			cursor.execute(query, (eventSearch, ) )
+			event = cursor.fetchone()
+			
+		# Fourth, try Class matches in the past (future if it's since)...
+		if event == None:
+			query = rawquery % (thenTry[0], thenTry[1]) 
+			cursor.execute(query, (eventSearch, ) )
+			event = cursor.fetchone()
+		
+		# Then give up
 		if event == None:
 			return "No idea, sorry. There's a list of stuff I know about at http://www.maelfroth.org/events.php"
 			
@@ -113,6 +144,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 		hours = remainder / (60*60)
 		remainder = (eventTime - current_time) % (60*60);
 		minutes = remainder / 60
+
+		if (days < 5):
+			hours = hours + (24*days)
+			days = 0;
 
 		if int(days) == 1:
 			days_message = "1 day, "

@@ -15,5 +15,5 @@ class Reaction(lampstand.reactions.base.Reaction):
 		print "[WEBLINK] That looks like a weblink : %s" % message
 
 		cursor = self.dbconnection.cursor()
-		cursor.execute('insert into urllist (time, username, message) values (%d, %s, %s)', (time.time(), user, message) )
+		cursor.execute('insert into urllist (time, username, message) values (%s, %s, %s)', (time.time(), user, message) )
 		self.dbconnection.commit()
