@@ -1,7 +1,197 @@
-CREATE TABLE events (id int primary key, creator varchar(64), datetime datetime, description varchar(255), class varchar(64), datetime_end datetime default null);
-CREATE TABLE hugReaction (username varchar(64), item varchar(255), primary key(username));
-CREATE TABLE lastquit (username varchar(64), last_quit float, reason varchar(255), method varchar(7), primary key(username));
-CREATE TABLE lastseen (username varchar(64), last_seen float, last_words varchar(255), primary key(username));
-CREATE TABLE nickserv (server varchar(255) PRIMARY KEY, password varchar(255));
-CREATE TABLE urllist (username varchar(64), time float, message varchar(255));
-CREATE TABLE vote (id INTEGER PRIMARY KEY, username varchar(64), item varchar(64), vote tinyint, time float, textline varchar(255));
+-- MySQL dump 10.11
+--
+-- Host: localhost    Database: maelfroth
+-- ------------------------------------------------------
+-- Server version	5.0.51a-24+lenny1
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `events`
+--
+
+DROP TABLE IF EXISTS `events`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `events` (
+  `id` int(11) NOT NULL auto_increment,
+  `creator` varchar(64) default NULL,
+  `datetime` datetime default NULL,
+  `description` varchar(255) default NULL,
+  `class` varchar(64) default NULL,
+  `datetime_end` datetime default NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=56 DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `hugReaction`
+--
+
+DROP TABLE IF EXISTS `hugReaction`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `hugReaction` (
+  `username` varchar(64) NOT NULL default '',
+  `item` varchar(255) default NULL,
+  PRIMARY KEY  (`username`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `lastquit`
+--
+
+DROP TABLE IF EXISTS `lastquit`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `lastquit` (
+  `username` varchar(64) NOT NULL default '',
+  `last_quit` float default NULL,
+  `reason` varchar(255) default NULL,
+  `method` varchar(7) default NULL,
+  PRIMARY KEY  (`username`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `lastseen`
+--
+
+DROP TABLE IF EXISTS `lastseen`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `lastseen` (
+  `username` varchar(64) NOT NULL default '',
+  `last_seen` float default NULL,
+  `last_words` varchar(255) default NULL,
+  PRIMARY KEY  (`username`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `nickserv`
+--
+
+DROP TABLE IF EXISTS `nickserv`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `nickserv` (
+  `server` varchar(255) NOT NULL,
+  `password` varchar(255) default NULL,
+  PRIMARY KEY  (`server`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `revision`
+--
+
+DROP TABLE IF EXISTS `revision`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `revision` (
+  `revision` int(10) unsigned NOT NULL auto_increment,
+  `page` int(10) NOT NULL default '0',
+  `content` mediumtext NOT NULL,
+  `comment` tinytext,
+  `creator` tinytext NOT NULL,
+  `created` datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY  (`revision`)
+) ENGINE=MyISAM AUTO_INCREMENT=292 DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `urllist`
+--
+
+DROP TABLE IF EXISTS `urllist`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `urllist` (
+  `username` varchar(64) default NULL,
+  `time` float default NULL,
+  `message` varchar(255) default NULL
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `users` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `username` varchar(64) NOT NULL default '',
+  `real_name` tinytext,
+  `email` tinytext,
+  `birthday` date default NULL,
+  `password` tinytext,
+  `location` int(11) default NULL,
+  `last_access` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `date_creation` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `access_level` int(11) default '0',
+  `creationsite` varchar(255) default NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=48 DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `vote`
+--
+
+DROP TABLE IF EXISTS `vote`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `vote` (
+  `id` int(11) NOT NULL,
+  `username` varchar(64) default NULL,
+  `item` varchar(64) default NULL,
+  `vote` tinyint(4) default NULL,
+  `time` float default NULL,
+  `textline` varchar(255) default NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `wikipage`
+--
+
+DROP TABLE IF EXISTS `wikipage`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `wikipage` (
+  `page` int(10) unsigned NOT NULL auto_increment,
+  `wiki` tinytext NOT NULL,
+  `name` tinytext NOT NULL,
+  `spinlock` bigint(20) default NULL,
+  `created` datetime default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `origin` tinytext,
+  `yalelock` tinytext,
+  PRIMARY KEY  (`page`)
+) ENGINE=MyISAM AUTO_INCREMENT=98 DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2009-06-29  9:52:02
