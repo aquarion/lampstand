@@ -17,7 +17,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	def __init__(self, connection):
 		self.channelMatch = re.compile('^%s. (.* or .*)' % connection.nickname, re.IGNORECASE)
-		self.privateMatch = re.compile('Lampstand: (.* or .*)\??$', re.IGNORECASE)
+		self.privateMatch = re.compile('(.* or .*)\??$', re.IGNORECASE)
 
 	def channelAction(self, connection, user, channel, message):
 		print "[Choose] called"
@@ -32,7 +32,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		match = self.channelMatch.findall(message)
 		
 		reaction = self.choose(match[0])
-		if reaction.lower() == "death":
+		if reaction.lower() == "death" and user.lower() != "aquarion":
 			connection.kick(channel,user, "Death")
 		else:
 			connection.msg(channel, "%s: %s" % (user, reaction))
@@ -63,7 +63,15 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		print message[0:7]
 		print message
-		choose = message.split(" or ")
+		orsplit = message.split(" or ")
+
+		choose = []
+
+		for thing in orsplit:
+			lst = thing.split(", ")
+			for x in lst:
+				choose.append(x)
+		print choose
 
 		for thing in choose:
 			if thing.lower() == "glados":

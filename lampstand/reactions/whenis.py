@@ -8,7 +8,7 @@ def __init__ ():
 	pass
 
 class Reaction(lampstand.reactions.base.Reaction):
-	__name = 'Howlong'
+	__name = 'When Is'
 
 	#@todo: "How long since $specific event"
 	#@todo: "How long since Maelstrom?"
@@ -19,8 +19,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 	uses = []
 
 	def __init__(self, connection):
-		self.channelMatch = re.compile('%s. how long (until|since) (.*?)\?' % connection.nickname, re.IGNORECASE)
-		self.privateMatch = re.compile('how long (until|since) (.*?)\?', re.IGNORECASE)
+		self.channelMatch = re.compile('%s. when (is|was) (.*?)\?' % connection.nickname, re.IGNORECASE)
+		self.privateMatch = re.compile('when (is|was) (.*?)\?', re.IGNORECASE)
 		self.dbconnection = connection.dbconnection
 
 
@@ -44,13 +44,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	def howLong(self, match):
 
-		print "[How Long] called with '%s'" % match[0][1]
+		print "[When is] called with '%s'" % match[0][1]
 		
+		
+
 		eventSearch = match[0][1]
 		eventName = match[0][1]
-		
-		if eventName.lower() == "downtime opens":
-			return "FOIP."
 
 		aliases = { 'cunts do christmas' : 'Havocstan Midwinter Festival'}
 		if aliases.has_key(eventName.lower()):
@@ -131,43 +130,16 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 		current_time = time.time()
 
+		timeformat = "%A %d %B %Y at %H:%M";
+
 		if(event[5] == None):
+			start = datetime.datetime.fromtimestamp(event[4]).strftime(timeformat);
+			message = "%s is %s" % (eventName, start);
 			print "Using is (No time out data)"
-			timing_position = "i"
-			eventTime = int(event[4])
-		elif (int(event[4]) > current_time):
-			print "Using time in"
-			timing_position = "start"
-			eventTime = int(event[4])
-		elif event[5]:
-			print "Using time out"
-			timing_position = "end"
-			eventTime = int(event[5])
 		else:
+			start = datetime.datetime.fromtimestamp(event[4]).strftime(timeformat)
+			end   = datetime.datetime.fromtimestamp(event[5]).strftime(timeformat)
+			message = "%s is from %s to %s" % (eventName, start, end);
 			print "Using time in (No time out data)"
-			timing_position = "i"
-			eventTime = int(event[4])
 
-		#eventName = event[1]
-		eventClass = event[2]
-		
-		if (eventTime < current_time):
-			swap = current_time
-			current_time = eventTime
-			eventTime = swap
-			returnformat = "%s %s %s ago"
-			if timing_position == 'i':
-				timing_position = 'was'
-			else:
-				timing_position = "%sed" % timing_position
-		else:
-			returnformat = "%s %ss in %s"
-
-
-		timedelta = (eventTime - current_time)
-
-		deltastring = tools.niceTimeDelta(timedelta)
-
-		print returnformat % (eventName, timing_position, deltastring)
-
-		return returnformat % (eventName, timing_position,deltastring)
+		return message

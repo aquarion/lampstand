@@ -1,6 +1,7 @@
 from lampstand.tools import splitAt
-import re, time, random, sys
+import re, time, random, sys, datetime
 import lampstand.reactions.base
+from lampstand import tools
 
 def __init__ ():
 	pass
@@ -115,11 +116,66 @@ class Reaction(lampstand.reactions.base.Reaction):
 		result = cursor.fetchone()
 		if result == None:
 			message = "I haven't seen %s say anything" % searchingfor
+			print "Looking for a quit for %s after %s" % (searchingfor, after_timestamp)
 			return "%s%s" % (message, self.lastquit(after_timestamp, searchingfor))
 		elif (result[2][0] == ">"):
-			message = "I last saw %s on %s relabeling themselves as \"%s\". %s" % (result[0], time.strftime('%a, %1d %B %y at %H:%M', time.localtime(result[1])), result[2][1:], self.lastseen(result[2][1:], int(result[1]), depth +1 ))
+		
+			deltadesc = "ago"
+			
+			if (after_timestamp == 0):
+				print "No after timestamp"
+				print result[1]
+				print "Now"
+				print time.localtime()
+				print "Lastseen"
+				print time.localtime(result[1])
+				now = time.mktime(time.localtime())
+			else:
+				print "After timestamp %s" % after_timestamp
+				print time.localtime()
+				now = after_timestamp
+				deltadesc = "later"
+			
+			deltastring = tools.niceTimeDelta(now - result[1])
+		
+			if ((now - result[1]) > 86400):
+				timefmt = "%a %d/%b/%Y %H:%M"
+			else:
+				timefmt = "%H:%M";			
+
+			timechanged = datetime.datetime.fromtimestamp(result[1]).strftime(timefmt)
+		
+			message = "I last saw %s %s %s (%s) relabeling themselves as \"%s\". %s" % (result[0], deltastring, deltadesc, timechanged, result[2][1:], self.lastseen(result[2][1:], int(result[1]), depth +1 ))
+		
+			#message = "I last saw %s on %s relabeling themselves as \"%s\". %s" % (result[0], time.strftime('%a, %1d %B %y at %H:%M', time.localtime(result[1])), result[2][1:], self.lastseen(result[2][1:], int(result[1]), depth +1 ))
 		else:
-			message = "I last saw %s on %s saying \"%s\"" % (result[0], time.strftime('%a, %1d %B %y at %H:%M', time.localtime(result[1])), result[2])
+		
+			#message = "I last saw %s on %s saying \"%s\"" % (result[0], time.strftime('%a, %1d %B %y at %H:%M', time.localtime(result[1])), result[2])
+			
+			deltadesc = "ago"
+			
+			if (after_timestamp == 0):
+				print "No after timestamp"
+				print result[1]
+				print time.localtime()
+				print time.localtime(result[1])
+				now = time.mktime(time.localtime())
+			else:
+				print "After timestamp %s" % after_timestamp
+				print time.localtime()
+				now = after_timestamp
+				deltadesc = "later"
+			
+			deltastring = tools.niceTimeDelta(now - result[1])
+
+			if ((now - result[1]) > 86400):
+				timefmt = "%a %d/%b/%Y %H:%M"
+			else:
+				timefmt = "%H:%M";			
+
+			timechanged = datetime.datetime.fromtimestamp(result[1]).strftime(timefmt)
+	
+			message = "I last saw %s %s %s (%s) saying \"%s\"" % (result[0], deltastring, deltadesc, timechanged, result[2])
 
 		return "%s%s" % (message, self.lastquit(result[1], searchingfor))
 
@@ -136,6 +192,24 @@ class Reaction(lampstand.reactions.base.Reaction):
 			return "";
 		else:
 			print "Quit result"
-			return ", then quit at %s saying '%s'" % (time.strftime('%a, %1d %B %y at %H:%M', time.localtime(quitresult[0])), quitresult[1])
+			
+			quittime = time.localtime(quitresult[0])
+			timedelta = time.mktime(quittime) - lasttime;
+
+
+			if(timedelta < 60):
+				deltastring = "seconds"
+			else:
+				deltastring = tools.niceTimeDelta(timedelta);
+
+			if (timedelta > 86400):
+				timefmt = "%a %d/%b/%Y %H:%M"
+			else:
+				timefmt = "%H:%M";			
+
+			quittime = datetime.datetime.fromtimestamp(quitresult[0] - 3600).strftime(timefmt)
+			#quittime = datetime.datetime.fromtimestamp(quitresult[0]).strftime("%H:%M")			
+
+			return ", they quit %s later (%s) with the message '%s'" % (deltastring, quittime, quitresult[1])
 
 		return message;

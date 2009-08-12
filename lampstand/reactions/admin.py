@@ -1,4 +1,4 @@
-
+from twisted.internet import reactor
 import re, time, random, sys
 import lampstand.reactions.base
 

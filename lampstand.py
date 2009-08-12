@@ -9,12 +9,9 @@ I am Lampstand. Beware.
 
 Todo:
 
-	* Move databases to MySQL instead of sqlite
 	* Database admins, probably.
 	* King James Bible
 	* Quotes Interface
-	* iCal interface
-	* Fix "Since" events.
 	* Choose incoming IP
 	* All the cool shit in your head
 """
@@ -23,7 +20,7 @@ Todo:
 
 # twisted imports
 from twisted.words.protocols import irc
-from twisted.internet import reactor, protocol
+from twisted.internet import reactor, protocol, threads, defer
 from twisted.python import log
 
 # system imports
@@ -170,8 +167,9 @@ class PrivateActions:
 					print "(Ignoring)"
 				else:
 					self.connection.msg(user, "I didn't understand that, sorry. Docs: http://www.maelfroth.org/lampstand.php")
+					print "Sending Sorry to %s" % user
 
-
+	
 
 class LampstandLoop(irc.IRCClient):
 	"""An IRC Bot for #maelfroth."""
@@ -182,19 +180,27 @@ class LampstandLoop(irc.IRCClient):
 
 	chanserv_password = False
 
-
 	dbconnection = False
+
+
+	def scheduledTasks(self):
+		while True:
+			print "** HELLO!"
+			self.msg("#lampstand", "Hello!")
+			time.sleep(10)
 
 	def connectionMade(self):
 
 		#if os.path.exists('%s.db' % self.factory.channel):
 		print "Loading database database %s " % self.factory.channel
 		#self.dbconnection = sqlite.connect('%s.db' % self.factory.channel)
-		self.dbconnection = MySQLdb.connect(user = 'lampstand', passwd = 'glados', db = "lampstand")
+		self.dbconnection = MySQLdb.connect(user = 'lampstand', passwd = 'glados', db = "maelfroth")
 		#else:
 		#	print "Couldn't load database %s " % self.factory.channel
 		#	reactor.stop()
-
+	
+		#threads.deferToThread(self.scheduledTasks)
+		#reactor.callInThread(self.scheduledTask);
 
 		if (self.dbconnection):
 			cursor = self.dbconnection.cursor()
@@ -225,7 +231,7 @@ class LampstandLoop(irc.IRCClient):
 		self.leaveModules = []
 		self.joinModules = []
 
-		defaultModules = ('admin','base','bible','box','dice','dict','eightball','generic','howlong','hug','insult','nickserv','opinion','weblink','whowas', 'choose')
+		defaultModules = ('admin','base','bible','box','dice','dict','eightball','generic','howlong','hug','insult','nickserv','opinion','weblink','whowas', 'choose', "whenis")
 
 		for thingy in defaultModules:
 			self.installModule(thingy)
@@ -485,7 +491,7 @@ class LampstandFactory(protocol.ClientFactory):
 
 	def clientConnectionLost(self, connector, reason):
 		"""If we get disconnected, reconnect to server."""
-		#sms.send('Lampstand: HAZ NO CONEXON')
+		sms.send('Lampstand: HAZ NO CONEXON')
 		#Todo: Implement backoff
 		time.sleep(45) # Our very own fourty five second claim.
 		connector.connect()
@@ -501,7 +507,7 @@ if __name__ == '__main__':
 	#daemonize.daemonize('/dev/null', '%s/stdout.log' % cwd, '%s/stderr.log' % cwd)
 	
 	# initialize logging
-	log.startLogging(sys.stdout)
+	#log.startLogging(sys.stdout)
 
 	if len(sys.argv) < 2:
 		print "Not enough arguments. Try %s #channel [server]" % sys.argv[0]
