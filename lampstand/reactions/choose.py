@@ -25,17 +25,27 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		if self.overUsed(self.uses, self.cooldown_number, self.cooldown_time):
 			connection.msg(channel, "I'm not running your life for you, go away." )
-			return
+			return True
 		
 		self.updateOveruse()
 		
 		match = self.channelMatch.findall(message)
+
+                if random.randint(0,100) == 69:
+                        connection.msg(channel, "%s: Yes", user)
+                
+		if random.randint(0,100) == 67:
+                        connection.msg(channel, "%s: edge", user)
 		
 		reaction = self.choose(match[0])
 		if reaction.lower() == "death" and user.lower() != "aquarion":
-			connection.kick(channel,user, "Death")
+			connection.kick(channel,user, "Death.")
+		elif reaction.lower() == "boom" and user.lower():
+			connection.kick(channel,user, "BOOM")
 		else:
 			connection.msg(channel, "%s: %s" % (user, reaction))
+
+		return True
 
 
 	def privateAction(self, connection, user, channel, message):

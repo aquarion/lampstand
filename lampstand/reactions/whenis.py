@@ -36,6 +36,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	 	self.updateOveruse()
 
 		connection.msg(channel, self.howLong(match).encode('ascii'))
+		return True
 
 	def privateAction(self, connection, user, channel, message):
 		match = self.privateMatch.findall(message);
@@ -49,7 +50,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 
 		eventSearch = match[0][1]
-		eventName = match[0][1]
+		eventName   = match[0][1]
+		tiswas      = match[0][0]
 
 		aliases = { 'cunts do christmas' : 'Havocstan Midwinter Festival'}
 		if aliases.has_key(eventName.lower()):
@@ -57,7 +59,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			eventSearch = aliases[eventName.lower()]
 
 
-		if (match[0][0] == "until"):
+		if (match[0][0] == "is"):
 			print "Until match"
 			firstTry = (">", "asc")
 			thenTry = ("<", "desc")
@@ -69,17 +71,18 @@ class Reaction(lampstand.reactions.base.Reaction):
 		cursor = self.dbconnection.cursor()
 			
 		# First, try direct description matches. First in the future (past if it's since)...	
-		rawquery = 'SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch FROM events where description LIKE %%s and datetime %s now() order by datetime %s'
-		
+                rawquery = 'SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch FROM events where (description LIKE %%s or aliases LIKE %%s) and datetime %s now() order by datetime %s'
+                
+
 		query = rawquery % (firstTry[0], firstTry[1])
 		
-		cursor.execute(query, (eventSearch, ) )
+		cursor.execute(query, (eventSearch, "%%%s%%" % eventSearch) )
 		event = cursor.fetchone()
 
 		# Second, try Description matches in the past (future if it's since)...
 		if event == None:
 			query = rawquery % (thenTry[0], thenTry[1])
-			cursor.execute(query, (eventSearch, ) )
+			cursor.execute(query, (eventSearch, "%%%s%%" % eventSearch) )
 			event = cursor.fetchone()
 
 
@@ -132,14 +135,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		timeformat = "%A %d %B %Y at %H:%M";
 
-		if(event[5] == None):
+		if(event[5] == None or event[5] == 0):
 			start = datetime.datetime.fromtimestamp(event[4]).strftime(timeformat);
-			message = "%s is %s" % (eventName, start);
+			message = "%s %s %s" % (eventName, tiswas, start);
 			print "Using is (No time out data)"
 		else:
 			start = datetime.datetime.fromtimestamp(event[4]).strftime(timeformat)
 			end   = datetime.datetime.fromtimestamp(event[5]).strftime(timeformat)
-			message = "%s is from %s to %s" % (eventName, start, end);
+			message = "%s %s from %s to %s" % (eventName, tiswas, start, end);
 			print "Using time in (No time out data)"
 
 		return message

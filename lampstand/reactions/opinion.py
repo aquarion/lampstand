@@ -8,9 +8,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 	__name = 'Opinion'
 
 	def __init__(self, connection):
-		self.channelMatch = (re.compile('(.*?)(\S*)\s*(\+\+|--)'),
+		self.channelMatch = (re.compile('(.*?)(\S*)(\+\+|--)\s*$'),
 			re.compile('%s.? what do you think of (.*?)\??' % connection.nickname, re.IGNORECASE))
+		self.privateMatch = re.compile('what do you think of (.*?)\??', re.IGNORECASE)
 		self.dbconnection = connection.dbconnection
+	
 
 	def channelAction(self, connection, user, channel, message, matchIndex = False):
 		print 'Looking at <<%s>>' % message
@@ -27,6 +29,15 @@ class Reaction(lampstand.reactions.base.Reaction):
 				connection.msg(channel, reactions[matchResult[0].lower()])
 			else:
 				connection.msg(channel, self.opinion(matchResult[0], connection).encode('utf8'))
+			return True
+
+        def privateAction(self, connection, user, channel, message):
+
+                match = self.privateMatch.findall(message);
+		print "Private Match";
+		print match
+                connection.msg(self.opinion(match[0], connection).encode('ascii'), user)
+
 
 	def vote(self, match, user, fullmessage = ''):
 		match=match[0]
@@ -53,37 +64,41 @@ class Reaction(lampstand.reactions.base.Reaction):
 	def opinion(self, item, connection):
 		print '[OPINION] A query on %s' % item
 
-		if item == connection.nickname:
+		if item.lower() == connection.nickname.lower():
 			return "Obviously, I'm awesome"
 
 		cursor = self.dbconnection.cursor()
-		cursor.execute(u'select item, sum(vote) as total, count(*) as votors from vote where item LIKE %s', (item,) )
+		cursor.execute(u'select item, sum(vote) as total, count(*) as votors from vote where item LIKE %s group by item', (item,) )
 		result = cursor.fetchone()
 
 
 
 		print result
-		if result[0] == None:
+		if not result or result[0] == None:
 			return 'I have no opinions on that';
 
 		OpinionOptions = [];
 
-		cursor.execute('select item, sum(vote) as total, count(*) as votors from vote group by item having sum(vote) > %d limit 3', (result[1],) )
+		print result[1]
+		rating = int(result[1])
+		
+		cursor.execute(u'select item, sum(vote) as total, count(*) as votors from vote group by item having sum(vote) > %s limit 3', (rating,) )
 
 		rows = cursor.fetchall();
-		print "Better: %s " % rows;
+		print rows;
+		#print "Better: %s " % rows;
 		OpinionOptions.extend(rows);
 
 
-		cursor.execute('select item, sum(vote) as total, count(*) as votors from vote group by item having sum(vote) < %d limit 3', (result[1],) )
+		cursor.execute('select item, sum(vote) as total, count(*) as votors from vote group by item having sum(vote) < %s limit 3', rating )
 
 		rows = cursor.fetchall();
-		print "Worse: %s " % rows;
+		#print "Worse: %s " % rows;
 		OpinionOptions.extend(rows);
 
 		Choice = random.choice(OpinionOptions);
 
-		if Choice[1] > result[1]:
+		if Choice[1] > rating:
 			return "Not as good as %s" % Choice[0];
 		else:
 			return "Better than %s" % Choice[0];

@@ -75,7 +75,9 @@ class ChannelActions:
 						indx = indx+1;
 				elif channelModule.channelMatch.match(message):
 					#print 'Channel Matched on %s' % channelModule
-					channelModule.channelAction(self.connection, user, channel, message)
+					result = channelModule.channelAction(self.connection, user, channel, message)
+					if result == True:
+						return True;
 
 			#print "< %s/%s: %s" % (user, channel, message)
 
@@ -231,7 +233,7 @@ class LampstandLoop(irc.IRCClient):
 		self.leaveModules = []
 		self.joinModules = []
 
-		defaultModules = ('admin','base','bible','box','dice','dict','eightball','generic','howlong','hug','insult','nickserv','opinion','weblink','whowas', 'choose', "whenis")
+		defaultModules = ('admin','base','bible', 'box','dice','dict','eightball','generic','howlong','hug','insult','nickserv','weblink','whowas', 'choose', "whenis", "opinion", "items")
 
 		for thingy in defaultModules:
 			self.installModule(thingy)
@@ -341,6 +343,7 @@ class LampstandLoop(irc.IRCClient):
 
 		"""Called when bot has succesfully signed on to server."""
 		self.join(self.factory.channel)
+		self.join("#lampstand")
 
 	def joined(self, channel):
 		"""This will get called when the bot joins the channel."""
@@ -445,20 +448,22 @@ class LampstandLoop(irc.IRCClient):
 		channel = params[2]
 		names = params[3].split(' ');
 
-		people = []
+		#people = []
 
 		for nickname in names:
 			print "saw %s" % nickname
 			if len(nickname) == 0:
 				pass
 			elif nickname[0] == '@' or nickname[0] == '+':
-				people.append(nickname[1:])
+				if not nickname[1:] in self.people:
+					self.people.append(nickname[1:])
 			else:
-				people.append(nickname)
+				if not nickname[1:] in self.people:
+					self.people.append(nickname)
 
-		print 'People: %s' % people
+		print 'People: %s' % self.people
 
-		self.people = people
+		#self.people = people
 
 
 		pass

@@ -19,8 +19,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 	uses = []
 
 	def __init__(self, connection):
-		self.channelMatch = re.compile('%s. how long (until|since) (.*?)\?' % connection.nickname, re.IGNORECASE)
-		self.privateMatch = re.compile('how long (until|since) (.*?)\?', re.IGNORECASE)
+		self.channelMatch = re.compile('%s. how long (until|since) (.*?)\??$' % connection.nickname, re.IGNORECASE)
+		self.privateMatch = re.compile('how long (until|since) (.*?)\??$', re.IGNORECASE)
 		self.dbconnection = connection.dbconnection
 
 
@@ -36,6 +36,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	 	self.updateOveruse()
 
 		connection.msg(channel, self.howLong(match).encode('ascii'))
+		return True
 
 	def privateAction(self, connection, user, channel, message):
 		match = self.privateMatch.findall(message);
@@ -48,41 +49,48 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 		eventSearch = match[0][1]
 		eventName = match[0][1]
-		
+	
 		if eventName.lower() == "downtime opens":
 			return "FOIP."
 
-		aliases = { 'cunts do christmas' : 'Havocstan Midwinter Festival'}
-		if aliases.has_key(eventName.lower()):
-			print "found alias"
-			eventSearch = aliases[eventName.lower()]
+		#aliases = { 'cunts do christmas' : 'Havocstan Midwinter Festival', "cdc" : 'Havocstan Midwinter Festival'}
+		#if aliases.has_key(eventName.lower()):
+		#	print "found alias"
+		#	eventSearch = aliases[eventName.lower()]
 
 
 		if (match[0][0] == "until"):
 			print "Until match"
 			firstTry = (">", "asc")
 			thenTry = ("<", "desc")
+			tiswas = "is"
 		else:
 			print "since match: %s " % match
 			firstTry = ("<", "desc")
 			thenTry = (">", "asc")
+			tiswas = "was"
 
 		cursor = self.dbconnection.cursor()
 			
 		# First, try direct description matches. First in the future (past if it's since)...	
-		rawquery = 'SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch FROM events where description LIKE %%s and datetime %s now() order by datetime %s'
+		rawquery = 'SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch FROM events where (description LIKE %%s or aliases LIKE %%s) and datetime %s now() order by datetime %s'
 		
 		query = rawquery % (firstTry[0], firstTry[1])
 		
-		cursor.execute(query, (eventSearch, ) )
+		cursor.execute(query, (eventSearch, "%%%s%%" % eventSearch) )
 		event = cursor.fetchone()
+
+		print query % (eventSearch, "%%%s%%" % eventSearch)
 
 		# Second, try Description matches in the past (future if it's since)...
 		if event == None:
 			query = rawquery % (thenTry[0], thenTry[1])
-			cursor.execute(query, (eventSearch, ) )
+			cursor.execute(query, (eventSearch, "%%%s%%" % eventSearch) )
 			event = cursor.fetchone()
-
+			if tiswas == "was":
+				tiswas = "is"
+			else:
+				tiswas = "was"
 
 		# Now set up the class query:
 		rawquery =	'SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch FROM events where class LIKE %%s and datetime %s now() order by datetime %s'

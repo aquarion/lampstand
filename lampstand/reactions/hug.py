@@ -40,6 +40,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		print "[HUG REACTION] GET %s" % user;
 		connection.me(channel, self.hug(user))
+		return True
 
 	def privateAction(self, connection, user, channel, message):
 
@@ -59,7 +60,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		return "When you hug me, I'll give you '%s'" % item;
 
 	def hug(self, username):
-
+		print "Hug %s" % username
 		cursor = self.dbconnection.cursor()
 		cursor.execute('SELECT * FROM hugReaction where username LIKE %s', (username.lower(), ) )
 		result = cursor.fetchone()

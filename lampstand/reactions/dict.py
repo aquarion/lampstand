@@ -50,17 +50,17 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 
 		try:
-			dictcxn = dictclient.Connection()
+			dictcxn = dictclient.Connection("dict.org")
 			dfn = dictcxn.define("*", matches[0])
 		except socket.error:
 			print "[Define] Argh. Dictionary server's offline"
 			connection.msg(channel, "Sorry, but my dictionary server's not working.")
-			return
+			return True
 
 	
 		if not dfn:
 			connection.msg(channel, "%s: There is no such word as '%s' in my dictionary. In fact, everything between 'herring' and 'marmalade' appears to be completely missing." % (user, matches[0]))
-			return
+			return True
 
 		result = ' '.join(dfn[0].getdefstr().split('\n'))
 
@@ -80,3 +80,5 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.msg(channel, "... %s" % stringTwo)
 		else:
 			connection.msg(channel, "%s" % result)
+
+		return True

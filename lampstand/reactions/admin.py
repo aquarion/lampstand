@@ -17,11 +17,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 			re.compile('quit (.*)', re.IGNORECASE),
 			re.compile('status', re.IGNORECASE),
 			re.compile('reload (.*)', re.IGNORECASE),
-			re.compile('kick (\w*) (.*)', re.IGNORECASE))
+			re.compile('kick (\w*) (.*)', re.IGNORECASE),
+			re.compile('join (\w*)', re.IGNORECASE),
+			re.compile('leave (\w*)', re.IGNORECASE))
 
 
 	def privateAction(self, connection, user, channel, message, matchindex = 0):
-		print "[Say] called"
+		print "[Admin] called"
 
 		if user not in self.canSay:
 			return
@@ -52,3 +54,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 			print matches
 			print "Kicking %s from %s with the message %s" % (matches[0][0], channel, matches[0][1])
 			connection.kick('#maelfroth', matches[0][0], matches[0][1])
+		elif matchindex == 6: # join
+			print matches
+			print "Joining %s " % (matches[0])
+			connection.join('#'+matches[0])
+		elif matchindex == 7: # leave
+			print matches
+			print "Leaving %s " % (matches[0])
+			connection.leave('#'+matches[0])

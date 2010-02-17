@@ -15,13 +15,23 @@ def splitAt(string, number):
 		
 def niceTimeDelta(timedelta):
 
-		days = int(timedelta / (60*60*24));
+		years = int(timedelta / (60*60*24*365));
+		remainder = timedelta % (60*60*24*365);
+		days = int(remainder / (60*60*24));
 		remainder = timedelta % (60*60*24);
 		hours = remainder / (60*60)
 		remainder = timedelta % (60*60);
 		minutes = remainder / 60
 
-		if (days < 5):
+
+		if int(years) == 1:
+			years_message = "1 year, "
+		elif years > 1:
+			years_message = "%d years, " % years
+		else:
+			years_message = ''
+
+		if (days < 5 and years == 0):
 			hours = hours + (24*days)
 			days = 0;
 
@@ -47,4 +57,9 @@ def niceTimeDelta(timedelta):
 		else:
 			minutes_message = ''
 			
-		return days_message+hours_message+minutes_message
+		string = years_message+days_message+hours_message+minutes_message
+
+		if string == "":
+			return "seconds"
+		else:
+			return string

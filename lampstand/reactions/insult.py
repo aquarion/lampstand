@@ -52,11 +52,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.msg(channel, "%s: Hah. Very clever. Still no." % user )
 			return
 			
-		#ownerMatch = re.compile('.*your m.m?*', re.IGNORECASE)
-		#myNameMatch = re.compile('.*%s.*' % connection.nickname, re.IGNORECASE)
-		#if ownerMatch.match(item[0][0]) or myNameMatch.match(insultee):
-		#	connection.msg(channel, "%s: She was a saint. And a toaster." % user )
-		#	return
+		ownerMatch = re.compile('.*your m.m.*', re.IGNORECASE)
+		myNameMatch = re.compile('.*%s.*' % connection.nickname, re.IGNORECASE)
+		if ownerMatch.match(item[0][0]) or myNameMatch.match(insultee):
+			connection.msg(channel, "%s: She was a saint. And a toaster." % user )
+			return
 
 		print "%s" % item
 		insult = shakeinsult.shakeinsult(1);
@@ -65,3 +65,4 @@ class Reaction(lampstand.reactions.base.Reaction):
 		self.updateOveruse()
 
 		connection.msg(channel, "%s, %s" % (orig_insultee, insult )  )
+		return True

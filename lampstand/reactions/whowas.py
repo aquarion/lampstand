@@ -23,7 +23,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 			print "[WHOWAS] requested"
 
 			matches = self.seenMatch.findall(message)
-
 			searchingfor = matches[0];
 
 			if searchingfor[-1:] == "?":
@@ -39,6 +38,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 				connection.msg(channel, "I'm right here.")
 			else:
 				result = self.lastseen(searchingfor);
+				if searchingfor in connection.people:
+					result = "%s. Also, they're just over there. Hello %s!" % (result, searchingfor)
 				if len(result) > 440:
 					whereToSplit = splitAt(result, 440)
 					stringOne = result[0:whereToSplit]
@@ -48,13 +49,23 @@ class Reaction(lampstand.reactions.base.Reaction):
 					connection.msg(channel, "... %s" % stringTwo.encode('utf8'))
 				else:
 					connection.msg(channel, result.encode('utf8'))
+			return True
 		else:
 			cursor = self.dbconnection.cursor()
 
-
-			cursor.execute('replace into lastseen (username, last_seen, last_words) values (%s, %s, %s)', (user, int(time.time()), message) )
+			cursor.execute('replace into lastseen (username, last_seen, last_words, channel) values (%s, %s, %s, %s)', (user, int(time.time()), message, channel) )
+			
+			print int(time.time());
+			
 			self.dbconnection.commit()
 
+	def leaveAction(self, connection, user, reason, params):
+		print "[WHOWAS] saw a nick leave: %s quit, saying %s (%s)" % (user, reason, params)
+		cursor = self.dbconnection.cursor()
+			
+		cursor.execute('replace into lastquit (username, last_quit, reason, method) values (%s, %s, %s, %s)', (user, int(time.time()), params[-1], reason) )
+		
+		print int(time.time())
 
 	def privateAction(self, connection, user, channel, message):
 		print "[WHOWAS] privately requested"
@@ -74,6 +85,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 				connection.msg(user, "I'm right here.")
 			else:
 				result = self.lastseen(searchingfor);
+				if searchingfor in connection.people:
+					result = "%s, plus, they're just over there. Hello %s!" % (result, searchingfor)
+					
 				if len(result) > 440:
 					whereToSplit = splitAt(result, 440)
 					stringOne = result[0:whereToSplit]
@@ -95,11 +109,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 		cursor = self.dbconnection.cursor()
 		cursor.execute('replace into lastseen (username, last_seen, last_words) values (%s, %s, %s)', (old_nick, time.time(), new_nick) )
 
-	def leaveAction(self, connection, user, reason, params):
-		print "[WHOWAS] saw a nick leave: %s quit, saying %s (%s)" % (user, reason, params)
-		cursor = self.dbconnection.cursor()
-		cursor.execute('replace into lastquit (username, last_quit, reason, method) values (%s, %s, %s, %s)', (user, time.time(), params[-1], reason) )
-		#print 'replace into lastquit (username, last_quit, reason) values (%s, %s, %s)' % (user, time.time(), params[1])
 	def lastseen(self, searchingfor, after_timestamp = 0, depth = 0):
 	
 		print "Looking for %s after %s" % (searchingfor, after_timestamp)
@@ -111,14 +120,15 @@ class Reaction(lampstand.reactions.base.Reaction):
 		cursor.execute('SELECT username, last_seen, last_words FROM lastseen where username LIKE %s and last_seen > %s order by last_seen desc', (searchingfor, int(after_timestamp)) )
 		
 		
-		print 'SELECT username, last_seen, last_words FROM lastseen where username LIKE %s and last_seen < %s order by last_seen desc' % ( searchingfor, after_timestamp) 
+		print 'SELECT username, last_seen, last_words FROM lastseen where username LIKE %s and last_seen > %s order by last_seen desc limit 1' % ( searchingfor, after_timestamp) 
 				
 		result = cursor.fetchone()
 		if result == None:
 			message = "I haven't seen %s say anything" % searchingfor
 			print "Looking for a quit for %s after %s" % (searchingfor, after_timestamp)
 			return "%s%s" % (message, self.lastquit(after_timestamp, searchingfor))
-		elif (result[2][0] == ">"):
+		elif (result[2][0] == ">"): 
+			# Last action is a rename
 		
 			deltadesc = "ago"
 			
@@ -130,43 +140,53 @@ class Reaction(lampstand.reactions.base.Reaction):
 				print "Lastseen"
 				print time.localtime(result[1])
 				now = time.mktime(time.localtime())
+				deltadiff = now - result[1]
 			else:
 				print "After timestamp %s" % after_timestamp
 				print time.localtime()
 				now = after_timestamp
 				deltadesc = "later"
+				deltadiff = result[1] - after_timestamp
 			
-			deltastring = tools.niceTimeDelta(now - result[1])
+			deltastring = tools.niceTimeDelta(deltadiff)
 		
 			if ((now - result[1]) > 86400):
 				timefmt = "%a %d/%b/%Y %H:%M"
 			else:
 				timefmt = "%H:%M";			
+			#timefmt = "%a %d/%b/%Y %H:%M"
 
 			timechanged = datetime.datetime.fromtimestamp(result[1]).strftime(timefmt)
 		
 			message = "I last saw %s %s %s (%s) relabeling themselves as \"%s\". %s" % (result[0], deltastring, deltadesc, timechanged, result[2][1:], self.lastseen(result[2][1:], int(result[1]), depth +1 ))
 		
-			#message = "I last saw %s on %s relabeling themselves as \"%s\". %s" % (result[0], time.strftime('%a, %1d %B %y at %H:%M', time.localtime(result[1])), result[2][1:], self.lastseen(result[2][1:], int(result[1]), depth +1 ))
 		else:
-		
-			#message = "I last saw %s on %s saying \"%s\"" % (result[0], time.strftime('%a, %1d %B %y at %H:%M', time.localtime(result[1])), result[2])
-			
+			# Last action is a phrase
+			print "Found a last phrase:"
+			print result
 			deltadesc = "ago"
 			
 			if (after_timestamp == 0):
 				print "No after timestamp"
 				print result[1]
-				print time.localtime()
-				print time.localtime(result[1])
+				print "Now is %s" % time.localtime()
+				print "Localtime of %s is %s" % (result[1], time.localtime(result[1]))
 				now = time.mktime(time.localtime())
+				deltastring = tools.niceTimeDelta(now - result[1])
 			else:
-				print "After timestamp %s" % after_timestamp
-				print time.localtime()
-				now = after_timestamp
+				#print "After timestamp %s" % after_timestamp
+				#print time.localtime()
+				#print "Localtime of %s is %s" % (result[1], time.localtime(result[1]))
+				#now = after_timestamp
+				
+				now = time.mktime(time.localtime(result[1]))
+				
 				deltadesc = "later"
+				deltastring = tools.niceTimeDelta(result[1] - after_timestamp)
+				print "Happening after %s" % after_timestamp
+				print "Event happened  %s" % result[1]
+
 			
-			deltastring = tools.niceTimeDelta(now - result[1])
 
 			if ((now - result[1]) > 86400):
 				timefmt = "%a %d/%b/%Y %H:%M"
@@ -193,9 +213,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 		else:
 			print "Quit result"
 			
+			print quitresult
+			
 			quittime = time.localtime(quitresult[0])
 			timedelta = time.mktime(quittime) - lasttime;
 
+			print quittime
+			
+			print "Localtime of %s is %s" % (quitresult[0], time.localtime(quitresult[0]))
 
 			if(timedelta < 60):
 				deltastring = "seconds"
@@ -207,7 +232,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			else:
 				timefmt = "%H:%M";			
 
-			quittime = datetime.datetime.fromtimestamp(quitresult[0] - 3600).strftime(timefmt)
+			quittime = datetime.datetime.fromtimestamp(quitresult[0]).strftime(timefmt)
 			#quittime = datetime.datetime.fromtimestamp(quitresult[0]).strftime("%H:%M")			
 
 			return ", they quit %s later (%s) with the message '%s'" % (deltastring, quittime, quitresult[1])

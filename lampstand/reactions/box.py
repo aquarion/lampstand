@@ -49,3 +49,5 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.msg(channel, "... %s" % stringTwo)
 		else:
 			connection.msg(channel, "%s" % result)
+
+		return True

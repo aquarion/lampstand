@@ -29,7 +29,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		if random.randint(0,100) == 66:
 			connection.msg(channel, "You rolled %s. You get Rick Astley.", item[0][0] )
 			print "[ROLLING DICE] Rickroll!"
-			return
+			return True
 
 
 		print "[ROLLING DICE] %s" % item
@@ -37,14 +37,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 			result = self.roll(item[0][0]);
 		except:
 			connection.msg(channel, "The dice blew up." )
-			return
+			return True
 
 		print "[ROLLING DICE] %s, got %s" % (item[0], result)
 
 
 		if result == False:
 			connection.msg(channel, "%s: I don't understand that format yet, sorry :(" % user )
-			return
+			return True
 
 		display = result[0]
 		total = 0
@@ -77,6 +77,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		connection.msg(channel, message)
 		self.updateOveruse()
+		return True
 
 	def roll(self, dice):
 	   '''dice is a string of form idj, e.g. 2d6, and rolls i j-sided dice, and returns the result as an array'''
@@ -95,7 +96,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	   except:
 		  return False
 
-	   if(howmany > 32):
+	   if(howmany > 128):
 		  return False
 
 	   if(howmany <1 or type <1): return False
