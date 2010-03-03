@@ -2,6 +2,8 @@ from lampstand.tools import splitAt
 import re, time, random, sys, datetime
 import lampstand.reactions.base
 from lampstand import tools
+import cPickle  as pickle
+import os.path
 
 def __init__ ():
 	pass
@@ -15,17 +17,35 @@ class Reaction(lampstand.reactions.base.Reaction):
 	cooldown_time     = 120
 	uses              = []
 	
-	items = ["a baseball bat"]
-	inventorysize = 8
+	items = []
+	defaultItems = ["a lantern", "a baseball bat"]
+	inventorysize = 10
 	
 	def __init__(self, connection):
-		self.channelMatch = (re.compile('gives %s ([\w\s\'\-]*)' % connection.nickname, re.IGNORECASE),
+		self.channelMatch = (re.compile('gives %s ([\w\s\'\-]*\S)\s?$' % connection.nickname, re.IGNORECASE),
 			re.compile('%s. inventory' % connection.nickname, re.IGNORECASE),
 			re.compile('%s. attack (\S*)' % connection.nickname, re.IGNORECASE),
 			re.compile('%s. do science\!?' % connection.nickname, re.IGNORECASE),
 			re.compile('%s. drop (.*)' % connection.nickname, re.IGNORECASE))
 		self.dbconnection = connection.dbconnection
 		
+		
+		self.load()
+			
+	def save(self):
+		print "[ITEMS] Saving database..."
+		output = open("inventory.pkl.db", 'wb')
+		pickle.dump(self.items, output)
+		output.close()
+		
+	def load(self):
+		print "[ITEMS] Loading database..."
+		try:
+			input = open("inventory.pkl.db", 'rb')
+			self.items = pickle.load(input)
+			input.close()
+		except:
+			self.items = self.defaultItems
 
 	def channelAction(self, connection, user, channel, message, matchIndex = False):
 		
@@ -44,13 +64,24 @@ class Reaction(lampstand.reactions.base.Reaction):
 			if len(self.items) >= self.inventorysize:
 				drop = random.choice(self.items)
 				dropi = self.items.index(drop);
+				# Drop the lantern over my cold, dead, grue bitten corpse
+				if self.items[dropi] == "a lantern":
+					dropi += 1
+					if dropi > (len(self.items)-1):
+						dropi = dropi - 2
 				del self.items[dropi]
 				self.items.append(item)
 				result = "Dropped \"%s\" in order to take \"%s\"" % (drop, item)
 			else:
 				result = "Taken \"%s\"" % item;
 				self.items.append(item)
-				
+			
+			
+			cursor = self.dbconnection.cursor()
+			cursor.execute('insert into item (item, author) values (%s, %s)', (item, user) )
+			self.dbconnection.commit()
+			
+			self.save()
 			connection.msg(channel, result.encode('utf8'))
 			#connection.notice(channel, "I have %d items" % self.items.count(True))
 		elif (matchIndex == 1):
@@ -120,7 +151,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			
 			attributes = ("neutron flow", "positrons", "third aspect", "cangrip", "buckelfier-subsystem", "pseudodancer", "electron river", "Danson", "neurotoxin flow", "contraits", "buckminster routine", "reverse cowgirl", "complexigon", "oxygen depriver", "elysia simulation routine", "splines")
 			
-			# Lampstand $actions the $attribute on the $item and $actions the $item to create $hugresponse
+			# Lampstand $actions the $attribute on $item and $actions $item to create $hugresponse
 			
 			item = random.choice(self.items)
 			item2 = random.choice(self.items)
@@ -136,7 +167,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			
 			hugresponse = result[0]
 			
-			connection.me(channel, "%s the %s on the %s and %s the %s to create %s" % (action, attribute, item, action2, item2, hugresponse))
+			connection.me(channel, "%s the %s on %s and %s %s to create %s" % (action, attribute, item, action2, item2, hugresponse))
 			
 			#if len(self.items) >= self.inventorysize:
 			#	drop = random.choice(self.items)
@@ -149,12 +180,20 @@ class Reaction(lampstand.reactions.base.Reaction):
 		elif (matchIndex == 4): # drop
 			item = self.channelMatch[4].findall(message)[0];
 			
-			if item.lower() == "everything" and user.lower() in self.admin:
-				connection.me(channel, 'drops everything, then manifests a baseball bat and dashes all the items to their component atoms')
-				self.items = ["a baseball bat"]
+			if item.lower() == "everything":
+				if user.lower() in self.admin:
+					connection.me(channel, 'drops everything, then manifests a baseball bat and dashes all the items to their component atoms')
+					self.items = self.defaultItems
+					self.save()
+				else:
+					connection.msg(channel, "I don't have to listen to you. So neh.")
+			elif item == "a lantern":
+				connection.msg(channel, '%s: Nuh-uh. This is grue country.' % user)
 			elif item in self.items:
 				self.items.remove(item)
 				connection.msg(channel, '%s: Dropped "%s"' % (user, item))
+				self.save()
+				
 			else:
 				connection.msg(channel, '%s: I don\'t have one.' % user)
 				

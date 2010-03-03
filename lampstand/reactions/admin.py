@@ -8,7 +8,7 @@ def __init__ ():
 class Reaction(lampstand.reactions.base.Reaction):
 	__name = 'Admin'
 
-	canSay = ("Aquarion")
+	canSay = ("Aquarion", "ccooke")
 	
 	def __init__(self, connection):
 		self.privateMatch = (
@@ -19,7 +19,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			re.compile('reload (.*)', re.IGNORECASE),
 			re.compile('kick (\w*) (.*)', re.IGNORECASE),
 			re.compile('join (\w*)', re.IGNORECASE),
-			re.compile('leave (\w*)', re.IGNORECASE))
+			re.compile('leave (\w*)', re.IGNORECASE),
+			re.compile('unload (\w*)', re.IGNORECASE))
 
 
 	def privateAction(self, connection, user, channel, message, matchindex = 0):
@@ -62,3 +63,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 			print matches
 			print "Leaving %s " % (matches[0])
 			connection.leave('#'+matches[0])
+		elif matchindex == 8: # unload
+			result = connection.removeModuleActions(matches[0])
+			connection.msg(user, result)

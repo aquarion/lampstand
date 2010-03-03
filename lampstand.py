@@ -343,7 +343,7 @@ class LampstandLoop(irc.IRCClient):
 
 		"""Called when bot has succesfully signed on to server."""
 		self.join(self.factory.channel)
-		self.join("#lampstand")
+		self.join("#lstest")
 
 	def joined(self, channel):
 		"""This will get called when the bot joins the channel."""
