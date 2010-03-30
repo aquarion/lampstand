@@ -22,12 +22,20 @@ class Reaction(lampstand.reactions.base.Reaction):
 	inventorysize = 10
 	
 	def __init__(self, connection):
-		self.channelMatch = (re.compile('gives %s ([\w\s\'\-]*\S)\s?$' % connection.nickname, re.IGNORECASE),
+		self.channelMatch = (re.compile('(%s: take|gives %s) ([\w\s\d\'\-]*?\S)\.?$' % (connection.nickname, connection.nickname), re.IGNORECASE),
 			re.compile('%s. inventory' % connection.nickname, re.IGNORECASE),
-			re.compile('%s. attack (\S*)' % connection.nickname, re.IGNORECASE),
+			re.compile('%s. (attack|smite) (\S*)' % connection.nickname, re.IGNORECASE),
 			re.compile('%s. do science\!?' % connection.nickname, re.IGNORECASE),
-			re.compile('%s. drop (.*)' % connection.nickname, re.IGNORECASE))
+			re.compile('%s. drop (.*).?' % connection.nickname, re.IGNORECASE),
+			re.compile('%s. (mis|)quote ben(|jamin) franklin' % connection.nickname, re.IGNORECASE))
 		self.dbconnection = connection.dbconnection
+
+		self.overuseReactions = ("I am not a bag of holding, leave me alone.",
+			"Stuff. Go away.",
+			"No. Get some men at arms.",
+			"Do your own weird experiments",
+			"But it's *mine*",
+			"He that falls in love with himself will have no rivals.");
 		
 		
 		self.load()
@@ -50,8 +58,30 @@ class Reaction(lampstand.reactions.base.Reaction):
 	def channelAction(self, connection, user, channel, message, matchIndex = False):
 		
 		print 'Looking at <<%s>>' % message
+
+
+                if self.overUsed(self.uses):
+                        connection.msg(channel, self.overuseReactions[matchIndex])
+                        return True
+
+
+                ## Overuse Detectection ##
+                self.uses.append(int(time.time()))
+                if len(self.uses) > self.cooldown_number:
+                        self.uses = self.uses[0:self.cooldown_number-1]
+                ## Overuse Detectection ##
+
+			
+
 		if (matchIndex == 0):
-			item = self.channelMatch[0].findall(message)[0];
+
+			if (channel == "#lampstand" and user.lower() != "aquarion"):
+				print "Not allowing %s on %s to do that" % (user, channel)
+				connection.msg(channel, "%s: no." % user)
+				return
+				
+
+			item = self.channelMatch[0].findall(message)[0][1];
 			
 			if item in connection.people:
 				connection.msg(channel, "I'm not a fucking transit system, either.")
@@ -101,9 +131,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 			
 			connection.msg(channel, "I currently have %s and %s" % (message, last))
 		elif (matchIndex == 2): # attack
-			person = self.channelMatch[2].findall(message)[0];
+
+			person = self.channelMatch[2].findall(message)[0][1];
 			
 			print "Searching %s for <<%s>>" % (connection.people, person)
+			print "for %s" % person;
 			
 			
 			if person.lower() == 'me':
@@ -126,7 +158,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 				connection.msg(channel, "%s: With great pleasure" % user )
 				return
 
-			if not person in connection.people:
+			if person.lower() == 'someone':
+				person = random.choice(connection.people);
+
+			elif not person in connection.people:
 				connection.msg(channel, "%s: Not going to attack someone I can't see." % user)
 				return
 			
@@ -136,12 +171,15 @@ class Reaction(lampstand.reactions.base.Reaction):
 				return True
 			
 			item = random.choice(self.items)
-			
+
+			attacks = ("smites", "beats", "wallops", "gently taps", "murderises", "waps")
+			attack = random.choice(attacks)
+
 			bodypart = ("head", "body", "arms", "legs", "soul", "brain", "elbow")
 			
 			part = random.choice(bodypart)
 			
-			connection.me(channel, "beats %s around the %s with %s" % (person, part, item))
+			connection.me(channel, "%s %s around the %s with %s" % (attack, person, part, item))
 			
 			return True
 			
@@ -196,8 +234,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 				
 			else:
 				connection.msg(channel, '%s: I don\'t have one.' % user)
+
+		elif (matchIndex == 5): # franklin
+                        cursor = self.dbconnection.cursor()
+                        cursor.execute('select item from item ORDER BY RAND() limit 2');
+			itemone = cursor.fetchone()[0];
+			itemtwo = cursor.fetchone()[0];
+
+			connection.msg(channel, "They who can give up %s to obtain %s, deserve neither %s or %s" % (itemone, itemtwo, itemone, itemtwo))
+			return 1
 				
-			
-			
-			
-					

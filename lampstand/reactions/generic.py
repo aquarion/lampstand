@@ -44,7 +44,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		print "[Generic Reaction] called"
 
 
-		if self.overUsed(self.uses, self.cooldown_number, self.cooldown_time):
+		if self.overUsed(self.uses):
 			if self.reactions[matchindex][1] != '':
 				connection.msg(channel, self.reactions[matchindex][1])
 				return True

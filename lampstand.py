@@ -39,8 +39,6 @@ import lampstand.reactions;
 
 from lampstand import sms
 
-import daemonize
-
 class MessageLogger:
 	"""
 	An independent logger class (because separation of application
@@ -343,7 +341,7 @@ class LampstandLoop(irc.IRCClient):
 
 		"""Called when bot has succesfully signed on to server."""
 		self.join(self.factory.channel)
-		self.join("#lstest")
+		self.join("#lampstand")
 
 	def joined(self, channel):
 		"""This will get called when the bot joins the channel."""

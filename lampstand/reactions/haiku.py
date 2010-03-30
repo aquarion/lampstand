@@ -44,6 +44,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 		if syllables == 1:
 			ordinal = ""
+		elif syllables == -1:
+			connection.msg(channel, "%s: I don't know, so I ignore it." % user)
+			return True
 		else:
 			ordinal = "s"
 		
