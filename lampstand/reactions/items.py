@@ -82,7 +82,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 				
 
 			item = self.channelMatch[0].findall(message)[0][1];
-			
+
+			if item.lower() == "a hug":
+				hug = lampstand.reactions.hug.Reaction(connection);
+				connection.me(channel, hug.hug(user))
+				return 
+
 			if item in connection.people:
 				connection.msg(channel, "I'm not a fucking transit system, either.")
 				return
@@ -101,9 +106,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 						dropi = dropi - 2
 				del self.items[dropi]
 				self.items.append(item)
-				result = "Dropped \"%s\" in order to take \"%s\"" % (drop, item)
+				result = "gives %s %s in return for %s" % (user, drop, item)
 			else:
-				result = "Taken \"%s\"" % item;
+				result = "takes \"%s\"" % item;
 				self.items.append(item)
 			
 			
@@ -112,7 +117,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			self.dbconnection.commit()
 			
 			self.save()
-			connection.msg(channel, result.encode('utf8'))
+			connection.me(channel, result.encode('utf8'))
 			#connection.notice(channel, "I have %d items" % self.items.count(True))
 		elif (matchIndex == 1):
 			
