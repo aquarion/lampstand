@@ -27,7 +27,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			re.compile('%s. (attack|smite) (\S*)' % connection.nickname, re.IGNORECASE),
 			re.compile('%s. do science\!?' % connection.nickname, re.IGNORECASE),
 			re.compile('%s. drop (.*).?' % connection.nickname, re.IGNORECASE),
-			re.compile('%s. (mis|)quote ben(|jamin) franklin' % connection.nickname, re.IGNORECASE))
+			re.compile('%s. (mis|)quote ben(|jamin) franklin' % connection.nickname, re.IGNORECASE),
+			re.compile('%s. what have I forgotten(| to pack)\??' % connection.nickname, re.IGNORECASE))
 		self.dbconnection = connection.dbconnection
 
 		self.overuseReactions = ("I am not a bag of holding, leave me alone.",
@@ -35,7 +36,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			"No. Get some men at arms.",
 			"Do your own weird experiments",
 			"But it's *mine*",
-			"He that falls in love with himself will have no rivals.");
+			"He that falls in love with himself will have no rivals.",
+			"The kitchin sink. Leave me alone.");
 		
 		
 		self.load()
@@ -248,4 +250,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 			connection.msg(channel, "They who can give up %s to obtain %s, deserve neither %s or %s" % (itemone, itemtwo, itemone, itemtwo))
 			return 1
+		elif (matchIndex == 6): # Packing
+                        cursor = self.dbconnection.cursor()
+                        cursor.execute('select item from item ORDER BY RAND() limit 1');
+			itemone = cursor.fetchone()[0];
+
+			connection.msg(channel, "%s: You have forgotten %s" % (user, itemone))
+			return 1
+				
 				
