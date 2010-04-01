@@ -40,7 +40,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 		if random.randint(0,100) == 66:
 			print "[ROLLING DICE] Rickroll!"
-			return "You rolled %s. You get Rick Astley.", item[0][0]
+			return "You rolled %s. You get Rick Astley." % item[0][0]
 
 		modifiers = {
 			'openended': False,
