@@ -29,6 +29,29 @@ class Reaction(lampstand.reactions.base.Reaction):
 			self.memory[channel] = self.memory[channel][limit:]
 
 	def search(self, channel, user = False, filter = False):
+		if not self.memory.has_key(channel):
+			return []
+		lines = self.memory[channel][:]
+		if user:
+			print "looking for user %s " % user
+			for line in lines[:]:
+				if not line['user'] == user:
+					lines.remove(line)
+					print "Dropping %s: %s" % (line['user'], line['message'])
+		
+		if filter:
+			filter = filter.lower()
+			print "looking for filter %s " % filter
+			for line in lines[:]:
+				if line['message'].lower().find(filter) == -1:
+					lines.remove(line)
+					print "Dropping %s: %s" % (line['user'], line['message'])
+
+		for line in lines:
+			print "Kept %s: %s" % (line['user'], line['message'])
+			
+		return lines
+					
 		pass
 
 	def dump(self, connection, user, reason, params):
