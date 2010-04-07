@@ -65,17 +65,22 @@ class ChannelActions:
 
 	def action(self, user, channel, message):
 			for channelModule in self.connection.channelModules:
-				if isinstance(channelModule.channelMatch, tuple) or isinstance(channelModule.channelMatch, list):
-					indx = 0
-					for channelSubMatch in channelModule.channelMatch:
-						if channelSubMatch.match(message):
-							channelModule.channelAction(self.connection, user, channel, message, indx)
-						indx = indx+1;
-				elif channelModule.channelMatch.match(message):
-					#print 'Channel Matched on %s' % channelModule
-					result = channelModule.channelAction(self.connection, user, channel, message)
-					if result == True:
-						return True;
+				if hasattr(channelModule, "channelMatch"):
+					if isinstance(channelModule.channelMatch, tuple) or isinstance(channelModule.channelMatch, list):
+						indx = 0
+						for channelSubMatch in channelModule.channelMatch:
+							if channelSubMatch.match(message):
+								channelModule.channelAction(self.connection, user, channel, message, indx)
+							indx = indx+1;
+					elif channelModule.channelMatch.match(message):
+						print 'Channel Matched on %s' % channelModule
+						result = channelModule.channelAction(self.connection, user, channel, message)
+						if result == True:
+							return True;
+				
+				if hasattr(channelModule, "everyLine"):
+					channelModule.everyLine(self.connection, user, channel, message)
+					
 
 			#print "< %s/%s: %s" % (user, channel, message)
 
@@ -299,7 +304,7 @@ class LampstandLoop(irc.IRCClient):
 
 		reaction = module.Reaction(self)
 
-		if hasattr(reaction, 'channelMatch'):
+		if hasattr(reaction, 'channelMatch') or hasattr(reaction, 'everyLine'):
 			print '[%s] Installing channel text reaction' % (moduleName)
 			self.channelModules.append(reaction)
 
