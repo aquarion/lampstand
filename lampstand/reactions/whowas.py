@@ -11,46 +11,48 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 
 	def __init__(self, connection):
-		self.channelMatch = re.compile('.*')
-		self.seenMatch    = re.compile('%s.? have you seen (.*)\??' % connection.nickname, re.IGNORECASE)
+		#self.channelMatch = re.compile('.*')
+		self.channelMatch    = re.compile('%s.? have you seen (.*)\??' % connection.nickname, re.IGNORECASE)
+		#self.seenMatch    = re.compile('%s.? have you seen (.*)\??' % connection.nickname, re.IGNORECASE)
 		self.privateMatch = re.compile('have you seen (.*)\??', re.IGNORECASE)
 		self.dbconnection = connection.dbconnection
 		
 
 	def channelAction(self, connection, user, channel, message):
 
-		if self.seenMatch.match(message):
-			print "[WHOWAS] requested"
+		print "[WHOWAS] requested"
 
-			matches = self.seenMatch.findall(message)
-			searchingfor = matches[0];
+		matches = self.channelMatch.findall(message)
+		searchingfor = matches[0];
 
-			if searchingfor[-1:] == "?":
-				searchingfor = searchingfor[0:-1]
-			space = re.compile(".*\s.*")
-			if searchingfor.lower() == "your mum":
-				connection.msg(channel, "%s: Not since she took on one piece of crumpet too many" % user)
-			elif space.match(searchingfor):
-				connection.msg(channel, "No idea, %s. Have you looked under the sofa?" % user)
-			elif searchingfor.lower() == user.lower():
-				connection.msg(channel, "Yes. You're over there. Hello %s. Did you want a cookie or something?" % user)
-			elif searchingfor.lower() == connection.nickname.lower():
-				connection.msg(channel, "I'm right here.")
-			else:
-				result = self.lastseen(searchingfor);
-				if searchingfor in connection.people:
-					result = "%s. Also, they're just over there. Hello %s!" % (result, searchingfor)
-				if len(result) > 440:
-					whereToSplit = splitAt(result, 440)
-					stringOne = result[0:whereToSplit]
-					stringTwo = result[whereToSplit:]
-		
-					connection.msg(channel, "%s... " % stringOne.encode('utf8'))
-					connection.msg(channel, "... %s" % stringTwo.encode('utf8'))
-				else:
-					connection.msg(channel, result.encode('utf8'))
-			return True
+		if searchingfor[-1:] == "?":
+			searchingfor = searchingfor[0:-1]
+		space = re.compile(".*\s.*")
+		if searchingfor.lower() == "your mum":
+			connection.msg(channel, "%s: Not since she took on one piece of crumpet too many" % user)
+		elif space.match(searchingfor):
+			connection.msg(channel, "No idea, %s. Have you looked under the sofa?" % user)
+		elif searchingfor.lower() == user.lower():
+			connection.msg(channel, "Yes. You're over there. Hello %s. Did you want a cookie or something?" % user)
+		elif searchingfor.lower() == connection.nickname.lower():
+			connection.msg(channel, "I'm right here.")
 		else:
+			result = self.lastseen(searchingfor);
+			if searchingfor in connection.people:
+				result = "%s. Also, they're just over there. Hello %s!" % (result, searchingfor)
+			if len(result) > 440:
+				whereToSplit = splitAt(result, 440)
+				stringOne = result[0:whereToSplit]
+				stringTwo = result[whereToSplit:]
+	
+				connection.msg(channel, "%s... " % stringOne.encode('utf8'))
+				connection.msg(channel, "... %s" % stringTwo.encode('utf8'))
+			else:
+				connection.msg(channel, result.encode('utf8'))
+		return True
+		
+	def everyLine(self, connection, user, channel, message):
+			print "Triggered Whowas Everyline"
 			cursor = self.dbconnection.cursor()
 
 			cursor.execute('replace into lastseen (username, last_seen, last_words, channel) values (%s, %s, %s, %s)', (user, int(time.time()), message, channel) )
