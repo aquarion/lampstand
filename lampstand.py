@@ -70,7 +70,9 @@ class ChannelActions:
 						indx = 0
 						for channelSubMatch in channelModule.channelMatch:
 							if channelSubMatch.match(message):
-								channelModule.channelAction(self.connection, user, channel, message, indx)
+								result = channelModule.channelAction(self.connection, user, channel, message, indx)
+								if result == True:
+									return True
 							indx = indx+1;
 					elif channelModule.channelMatch.match(message):
 						print 'Channel Matched on %s' % channelModule
@@ -236,7 +238,7 @@ class LampstandLoop(irc.IRCClient):
 		self.leaveModules = []
 		self.joinModules = []
 
-		defaultModules = ('admin','base','bible', 'box','dice','dict','eightball','generic','howlong','hug','insult','nickserv','weblink','whowas', 'choose', "whenis", "opinion", "items")
+		defaultModules = ('admin','base', 'memory', 'bible', 'box','dice','dict','eightball','generic','howlong','hug','insult','nickserv','weblink','whowas', 'choose', "whenis", "opinion", "items", "quote")
 
 		for thingy in defaultModules:
 			self.installModule(thingy)
