@@ -81,7 +81,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		print haikus
 		
 		if len(haikus):
-			connection.msg(channel, "Hey, cool. A haiku: %s " % " // ".join(haikus[0]))
+			connection.msg("#lampstand", "Hey, cool. A haiku on %s: %s " % (channel, " // ".join(haikus[0])))
 			self.channels[channel] = []
 			return True
 		
