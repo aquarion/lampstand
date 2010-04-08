@@ -81,7 +81,10 @@ class ChannelActions:
 							return True;
 				
 				if hasattr(channelModule, "everyLine"):
-					channelModule.everyLine(self.connection, user, channel, message)
+					result = False
+					result = channelModule.everyLine(self.connection, user, channel, message)
+					if result == True:
+						return True
 					
 
 			#print "< %s/%s: %s" % (user, channel, message)
