@@ -60,12 +60,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		if quotedUser.lower() == user.lower():
 			connection.msg(channel, "%s: Don't do that, you'll go blind" % user);
-			return
+			return True
 
 
 		if len(result) == 0:
 			connection.msg(channel, "%s: Sorry, I've no idea what you're talking about" % user)
-			return False
+			return True
+
 		else:
 			print result
 			line = result[-1]
