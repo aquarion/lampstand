@@ -74,38 +74,43 @@ class Reaction(lampstand.reactions.base.Reaction):
 			
 		# First, try direct description matches. First in the future (past if it's since)...	
 		rawquery = 'SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch FROM events where (description LIKE %%s or aliases LIKE %%s) and datetime %s now() order by datetime %s'
-		
-		query = rawquery % (firstTry[0], firstTry[1])
-		
-		cursor.execute(query, (eventSearch, "%%%s%%" % eventSearch) )
-		event = cursor.fetchone()
 
-		print query % (eventSearch, "%%%s%%" % eventSearch)
+		try:
+			result = dateutil.parser.parse(eventSearch)
+			event = (result,eventSearch,"",None,time.mktime(result.timetuple()),None)
+		except ValueError: 		
 
-		# Second, try Description matches in the past (future if it's since)...
-		if event == None:
-			query = rawquery % (thenTry[0], thenTry[1])
+			query = rawquery % (firstTry[0], firstTry[1])
+		
 			cursor.execute(query, (eventSearch, "%%%s%%" % eventSearch) )
 			event = cursor.fetchone()
-			if tiswas == "was":
-				tiswas = "is"
-			else:
-				tiswas = "was"
+	
+			print query % (eventSearch, "%%%s%%" % eventSearch)
+		
+			# Second, try Description matches in the past (future if it's since)...
+			if event == None:
+				query = rawquery % (thenTry[0], thenTry[1])
+				cursor.execute(query, (eventSearch, "%%%s%%" % eventSearch) )
+				event = cursor.fetchone()
+				if tiswas == "was":
+					tiswas = "is"
+				else:
+					tiswas = "was"
 
-		# Now set up the class query:
-		rawquery =	'SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch FROM events where class LIKE %%s and datetime %s now() order by datetime %s'
+			# Now set up the class query:
+			rawquery =	'SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch FROM events where class LIKE %%s and datetime %s now() order by datetime %s'
 
-		# Third, try Class matches in the future (past if it's since)...
-		if event == None:
-			query = rawquery % (firstTry[0], firstTry[1]) 
-			cursor.execute(query, (eventSearch, ) )
-			event = cursor.fetchone()
+			# Third, try Class matches in the future (past if it's since)...
+			if event == None:
+				query = rawquery % (firstTry[0], firstTry[1]) 
+				cursor.execute(query, (eventSearch, ) )
+				event = cursor.fetchone()
 			
-		# Fourth, try Class matches in the past (future if it's since)...
-		if event == None:
-			query = rawquery % (thenTry[0], thenTry[1]) 
-			cursor.execute(query, (eventSearch, ) )
-			event = cursor.fetchone()
+			# Fourth, try Class matches in the past (future if it's since)...
+			if event == None:
+				query = rawquery % (thenTry[0], thenTry[1]) 
+				cursor.execute(query, (eventSearch, ) )
+				event = cursor.fetchone()
 
 
 		# Aborted attempt to handle arbitary dates
