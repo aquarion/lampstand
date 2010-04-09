@@ -13,8 +13,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	admin = ("aquarion")
 
-	cooldown_number   = 5
-	cooldown_time     = 120
+	cooldown_number   = 10
+	cooldown_time     = 300
 	uses              = []
 	
 	items = []
@@ -99,13 +99,16 @@ class Reaction(lampstand.reactions.base.Reaction):
 				return
 			
 			if len(self.items) >= self.inventorysize:
-				drop = random.choice(self.items)
+				drop = "a lantern"
+				while drop == "a lantern":
+					drop = random.choice(self.items)
+				#drop = random.choice(self.items)
 				dropi = self.items.index(drop);
-				# Drop the lantern over my cold, dead, grue bitten corpse
-				if self.items[dropi] == "a lantern":
-					dropi += 1
-					if dropi > (len(self.items)-1):
-						dropi = dropi - 2
+				## Drop the lantern over my cold, dead, grue bitten corpse
+				#if self.items[dropi] == "a lantern":
+				#	dropi += 1
+				#	if dropi > (len(self.items)-1):
+				#		dropi = dropi - 2
 				del self.items[dropi]
 				self.items.append(item)
 				result = "gives %s %s in return for %s" % (user, drop, item)
@@ -227,7 +230,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			
 			if item.lower() == "everything":
 				if user.lower() in self.admin:
-					connection.me(channel, 'drops everything, then manifests a baseball bat and dashes all the items to their component atoms')
+					connection.me(channel, 'drops everything except the lantern, then manifests a baseball bat and dashes all the items to their component atoms')
 					self.items = self.defaultItems
 					self.save()
 				else:
