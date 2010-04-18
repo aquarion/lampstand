@@ -35,7 +35,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		if user:
 			print "looking for user %s " % user
 			for line in lines[:]:
-				if not line['user'] == user:
+				if not line['user'].lower() == user.lower():
 					lines.remove(line)
 					print "Dropping %s: %s" % (line['user'], line['message'])
 		
