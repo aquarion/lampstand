@@ -33,9 +33,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 
                 if random.randint(0,100) == 69:
                         connection.msg(channel, "%s: Yes", user)
+			return True
                 
 		if random.randint(0,100) == 67:
                         connection.msg(channel, "%s: edge", user)
+			return True
 		
 		reaction = self.choose(match[0])
 		if reaction.lower() == "death" and user.lower() != "aquarion":
