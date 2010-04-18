@@ -17,6 +17,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 		self.reactions = [
 			('What is best in life?', 'Not Telling', (
 				"To crush your enemies, see them driven before you, and to hear the lamentations of their women!", 
+				"Peppermint Vodka.",
+				"Deadly neurotoxin, ICBM launch codes, and the loving arms of the AI of your dreams.",
+				"Having enough neurotoxin generated to not have to be ordered around by meatsacks.",
+				"Hot chocolate with marshmallows",
+				"Your mum.",
+				"Like I'd tell you, meatsack",
+				"To crush laminated women, drive your enemies, and hear the sight of before you.", 
+				"Hot water, Good dentishtry and Shoft lavatory paper", 
 				"To obsess over and romanticise your enemies, see them get in a taxi you wanted, and to hear their girlfriends enclosed in plastic", 
 				"To crush your enemies, see them driven before you, and to hear the laminations of their women!",
 				"To crush your anemones, see them driven before you, and to hear the lamentations of their women!"
