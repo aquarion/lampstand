@@ -78,7 +78,10 @@ class ChannelActions:
 						print 'Channel Matched on %s' % channelModule
 						result = channelModule.channelAction(self.connection, user, channel, message)
 						if result == True:
+							print "ChannelAction successfully replied, returning to loop"
 							return True;
+						else:
+							print "ChannelAction declined, returning to loop"
 				
 				if hasattr(channelModule, "everyLine"):
 					result = False
@@ -526,7 +529,7 @@ if __name__ == '__main__':
 		print "Not enough arguments. Try %s #channel [server]" % sys.argv[0]
 		sys.exit(1)
 
-	server = "cosmos.esper.net"
+	server = "dream.esper.net"
 
 	if len(sys.argv) == 3:
 		server = sys.argv[2]
