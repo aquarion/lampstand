@@ -23,7 +23,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 		self.channelMatch = (re.compile('%s: (re|)define (.*?) as (.*)\s*$' % connection.nickname, re.IGNORECASE),
 			re.compile('%s: What is (.*?)\??$' % connection.nickname, re.IGNORECASE),
 			re.compile('%s: Who defined that\??$' % connection.nickname, re.IGNORECASE),
-			re.compile('%s: Literal (.*)\s*$' % connection.nickname, re.IGNORECASE))
+			re.compile('%s: Literal (.*)\s*$' % connection.nickname, re.IGNORECASE),
+			re.compile('%s: (|give me a) Random definition' % connection.nickname, re.IGNORECASE))
 		self.dbconnection = connection.dbconnection
 
 	def channelAction(self, connection, user, channel, message, matchIndex = False):
@@ -41,6 +42,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			return self.getBlame(connection, user, channel, message, matches)
 		elif (matchIndex ==3):
 			return self.getLiteral(connection, user, channel, message, matches)
+		elif (matchIndex ==4):
+			return self.randomThing(connection, user, channel, message)
 			
 
                 #if self.overUsed(self.uses):
@@ -59,6 +62,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 		key = matches[1]
 		value = matches[2]
 
+		if key.lower() == "glados":
+			connection.msg(channel, "%s: Nope" % user)
+			return True
+
 		cursor = self.dbconnection.cursor()
 
 		query = "Select * from define where lower(word) = %s and lower(definition) = %s"
@@ -74,6 +81,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 
 	def getDefinition(self, connection, user, channel, message, matches):
+
+		if matches.lower() == "glados":
+			connection.msg(channel, "%s: The AI of my dreams" % user)
+			return True
+
 		cursor = self.dbconnection.cursor()
 		query = "Select word,definition,author from define where lower(word) = %s order by rand()"
 
@@ -101,6 +113,20 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.msg(channel, "%s: %s" % (user, self.blame))
 
 		return True
+
+	def randomThing(self, connection, user, channel, message):
+		
+                cursor = self.dbconnection.cursor()
+                query = "Select word,definition,author from define order by rand()"
+
+                cursor.execute(query)
+                row = cursor.fetchone()
+
+                connection.msg(channel, "%s: %s is %s" % (user, row[0], row[1]))
+                self.blame = row[2]
+
+                return True
+
 
 
 	def getLiteral(self, connection, user, channel, message, matches):
