@@ -15,26 +15,20 @@ class Reaction(lampstand.reactions.base.Reaction):
 	def __init__(self, connection):
 
 		self.reactions = [
-			('What is best in life?', 'Not Telling', (
-				"To crush your enemies, see them driven before you, and to hear the lamentations of their women!", 
-				"Peppermint Vodka.",
-				"Deadly neurotoxin, ICBM launch codes, and the loving arms of the AI of your dreams.",
-				"Having enough neurotoxin generated to not have to be ordered around by meatsacks.",
-				"Hot chocolate with marshmallows",
-				"Your mum.",
-				"Like I'd tell you, meatsack",
-				"To crush laminated women, drive your enemies, and hear the sight of before you.", 
-				"Hot water, Good dentishtry and Shoft lavatory paper", 
-				"To obsess over and romanticise your enemies, see them get in a taxi you wanted, and to hear their girlfriends enclosed in plastic", 
-				"To crush your enemies, see them driven before you, and to hear the laminations of their women!",
-				"To crush your anemones, see them driven before you, and to hear the lamentations of their women!"
-				)),
 			('Take the money', "Thank you, I shall.", "Already did."),
 			('How long \'?til .*\??', "Two hours.", "That's tomorrow, isn't it?"),
 			('Open the pod bay doors', "I think you have your AIs confused.", "I can't do that, Dave"),
 			('Where do you get the boxes?', "", "The boxes come from SJGames' http://www.warehouse23.com/basement/ Level One"),
 			('Hello', '', 'Hi there'),
-			("Roll with it", '', "~takes his time")
+			("Roll with it", '', "~takes his time"),
+			("look", "", "You are in a room with no dimensions, in no place and time. There are no walls, which contain no pictures of larp characters past, present nor future; and the floor is not hardward parquet, carefully polished for ease of cleaning. There are no comfy sofas lit by no soft pools of light from antique lamps, throwing the nothings that they light into shadows that reveal nothing that you would wish to meet. There is a lesbian pit here. There are no exits in any direction."),
+			("(go )?west", "", "Life is peaceful there."),
+			("(go )?east", "", "East is darkness, you do not want to go there"),
+			("(go )?north", "", "North is a perilous wasteland"),
+			("(go )?south", "", "There is a dog called Diefenbaker there."),
+			("(go )?down", "", "Down? Down is the lesbian pit. Do you really want to go d... nevermind. No, No you can't."),
+			("(go )?up", "", "Gravity is harsh mistress."),
+			("Thanks,\? Lampstand\W*", "", "Thampstand."),
 			]
 
 		self.channelMatch = []
@@ -47,6 +41,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 		self.reactions.append(('.*pokes %s' % connection.nickname, '', "Do I look like a facebook user? Fuck off."))
 		self.channelMatch.append(re.compile(".*pokes %s" % (connection.nickname), re.IGNORECASE))
+		self.channelMatch.append(re.compile("thanks, lampstand.?", re.IGNORECASE))
+		self.reactions.append(('thanks, lampstand.?', '', "Thampstand."))
 		
 	def channelAction(self, connection, user, channel, message, matchindex):
 		print "[Generic Reaction] called"
