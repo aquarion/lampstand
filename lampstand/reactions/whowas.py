@@ -52,12 +52,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 		return True
 		
 	def everyLine(self, connection, user, channel, message):
-			print "Triggered Whowas Everyline"
 			cursor = self.dbconnection.cursor()
-
 			cursor.execute('replace into lastseen (username, last_seen, last_words, channel) values (%s, %s, %s, %s)', (user, int(time.time()), message, channel) )
-			
-			print int(time.time());
 			
 			self.dbconnection.commit()
 
