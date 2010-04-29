@@ -31,12 +31,18 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 		match = self.channelMatch.findall(message)
 
+		if match[0][0:7].lower() == "define ":
+			return False
+
+
                 if random.randint(0,100) == 69:
-                        connection.msg(channel, "%s: Yes", user)
+			print "Yes";
+                        connection.msg(channel, "%s: Yes" % user)
 			return True
                 
 		if random.randint(0,100) == 67:
-                        connection.msg(channel, "%s: edge", user)
+			print "Edge";
+                        connection.msg(channel, "%s: edge" % user)
 			return True
 		
 		reaction = self.choose(match[0])
@@ -72,6 +78,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		if message[0:7].lower() == "choose ":
 			message = message[7:]
+		else:
+			pass
+			#return "Sorry, You need to prefix that with \"choose\" now."
 
 		print message[0:7]
 		print message
@@ -87,9 +96,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		for thing in choose:
 			if thing.lower() == "glados":
+				print "Chosen Glados"
 				return "GLaDOS. Obviously"
 
 			if thing.lower() == "hal":
+				print "Removed a Hal";
 				choose.remove(thing)
 
 		print choose
