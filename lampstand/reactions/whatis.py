@@ -17,6 +17,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 	uses              = []
 
 	blame = "No idea"
+	lastasked = ""
+	lastasked2 = ""
 	
 	
 	def __init__(self, connection):
@@ -82,28 +84,42 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	def getDefinition(self, connection, user, channel, message, matches):
 
-		if matches.lower() == "glados":
+		key = matches
+
+		if key == self.lastasked and key == self.lastasked2:
+			connection.kick(channel, user, "Bored now.")
+			return True
+
+		if key == self.lastasked:
+			connection.msg(channel, "%s: I just said, %s" % (user, self.answered))
+			return True
+
+		if key.lower() == "glados":
 			connection.msg(channel, "%s: The AI of my dreams" % user)
 			return True
 
-		cursor = self.dbconnection.cursor()
-		query = "Select word,definition,author from define where lower(word) = %s order by rand()"
-
-		print matches
-
-		key = matches
-		cursor.execute(query, (key.lower(), ) )
-		row = cursor.fetchone()
-
-		print row
+		row = self.define(key)
 
 		if row:
 			connection.msg(channel, "%s: %s" % (user, row[1]))
 			self.blame = row[2]
+			self.lastasked2 = self.lastasked
+			self.lastasked = key
+			self.answered = row[1]
 		else:
 			connection.msg(channel, "%s: No Clue" % user)
-
+		
 		return True
+
+
+	def define(self, key):
+
+		cursor = self.dbconnection.cursor()
+		query = "Select word,definition,author from define where lower(word) = %s order by rand()"
+
+		cursor.execute(query, (key.lower(), ) )
+		return cursor.fetchone()
+
 
 	def getBlame(self, connection, user, channel, message, matches):
 
@@ -131,12 +147,23 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	def getLiteral(self, connection, user, channel, message, matches):
 
+		key = matches
+
+		if not user.lower() in self.admin:
+			row = self.define(key)
+			if row:
+				connection.msg(channel, "%s: %s is *literally* \"%s\"" % (user, row[0], row[1]))
+				self.blame = row[2]
+				self.lastasked2 = self.lastasked
+				self.lastasked = key
+				self.answered = row[1]
+			else:
+				connection.msg(channel, "%s: Literally No Clue" % user)
+			
+
 		cursor = self.dbconnection.cursor()
 		query = "Select word,definition,author from define where lower(word) = %s"
 
-		print matches
-
-		key = matches
 		cursor.execute(query, (key.lower(), ) )
 
 		defines = []
@@ -150,8 +177,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 			result = '"'
 			result += "\", \"".join(defines[0:-1])
 			result += "\" & \"%s\"" % defines[-1]
-		else:
+		elif len(defines) == 1:
 			result = defines[0]
+		else:
+			result = "No idea"
 			
 
 
