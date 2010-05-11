@@ -28,7 +28,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 			re.compile('%s. do science\!?' % connection.nickname, re.IGNORECASE),
 			re.compile('%s. drop (.*).?' % connection.nickname, re.IGNORECASE),
 			re.compile('%s. (mis|)quote ben(|jamin) franklin' % connection.nickname, re.IGNORECASE),
-			re.compile('%s. what have I forgotten(| to pack)\??' % connection.nickname, re.IGNORECASE))
+			re.compile('%s. what have I forgotten(| to pack)\??' % connection.nickname, re.IGNORECASE),
+			re.compile('%s. are you pondering what I\'m pondering\?' % connection.nickname, re.IGNORECASE),
+			re.compile('%s. examine (.*)' % connection.nickname, re.IGNORECASE))
 		self.dbconnection = connection.dbconnection
 
 		self.overuseReactions = ("I am not a bag of holding, leave me alone.",
@@ -37,7 +39,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 			"Do your own weird experiments",
 			"But it's *mine*",
 			"He that falls in love with himself will have no rivals.",
-			"The kitchin sink. Leave me alone.");
+			"The kitchen sink. Leave me alone.",
+			"No. LEAVE ME ALONE.",
+			"It looks like one of those things that it is. GO AWAY.")
 		
 		
 		self.load()
@@ -261,4 +265,70 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.msg(channel, "%s: You have forgotten %s" % (user, itemone))
 			return 1
 				
+		elif (matchIndex ==7 ): #Pinky
+			cursor = self.dbconnection.cursor()
+			cursor.execute('select item from item ORDER BY RAND() limit 5');
+			itemone = cursor.fetchone()[0];
+			itemtwo = cursor.fetchone()[0];
+			itemthree = cursor.fetchone()[0];
+
+			person = user
+
+			while person == user or person == connection.nickname:
+				person = random.choice(connection.people);
+
+			#Good gravy I hope not.
+			#Yes
+			#No.
+
+			out = "I think so %s, but " % user
+
+			options = ("We'll never find %s at this hour" % itemone,
+				"I'm pretty sure you can't combine %s and %s safely" % (itemone, itemtwo),
+				"I don't think you could make out with %s realistically" % person,
+				"I don't think you could mold a %s to look like %s" % (itemone, person),
+				"I don't think pants made out of %s would work" % itemone,
+				"you and %s? What would the children look like?" % person,
+				"I'm pretty sure %s won't like it" % person,
+				"nothing good ever comes of eating %s" % itemone,
+				"%s isn't very good rocket fuel" % itemone,
+				"first you'd have to insert %s, and that sounds painful" % itemone,
+				"\"apply %s\" to what?" % itemone,
+				"snort* no, no, it's too stupid!",
+				"why would %s do a musical?" % person,
+				"what if %s won't wear %s?" % (person, itemone),
+				"isn't that why they invented %s?" % itemone,
+				"if Jimmy cracks corn, and no one cares, why does he keep doing it?",
+				"are you sure we can trust %s?" % person,
+				"%s is not a valid pie filling" % itemone,
+				"we'll never know."
+				"... *poit* ... were we saying something?"
+			)
+
+			
+			
+
+			connection.msg(channel, out + random.choice(options) )
+			return 1
+
+		elif (matchIndex == 8): # examine
+	                cursor = self.dbconnection.cursor()
+			item = self.channelMatch[8].findall(message)[0];
+			
+			if item == "a lantern":
+				connection.msg(channel, '%s: It is a battery powered brass lantern' % user)
+			elif item.lower() == connection.nickname.lower():
+				connection.msg(channel, '%s: I am he as you are he as you are me and we are all together.' % user)
+			elif item in self.items:
+				cursor.execute('select item, date_created, author from item where item = %s ORDER BY date_created desc limit 1', item);
+	                        itemone = cursor.fetchone();
+				connection.msg(channel, '%s: %s was given to me by %s on %s.' % (user, itemone[0], itemone[2], itemone[1]))
+				return True
+
+			elif person in connection.people:
+				connection.msg(channel, '%s: look at them yourself, meatsack' % user)
+					
 				
+			else:
+				connection.msg(channel, '%s: I don\'t have one.' % user)
+
