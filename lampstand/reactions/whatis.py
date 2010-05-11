@@ -19,14 +19,15 @@ class Reaction(lampstand.reactions.base.Reaction):
 	blame = "No idea"
 	lastasked = ""
 	lastasked2 = ""
+	lastid = 0
 	
 	
 	def __init__(self, connection):
-		self.channelMatch = (re.compile('%s: (re|)define (.*?) as (.*)\s*$' % connection.nickname, re.IGNORECASE),
-			re.compile('%s: What is (.*?)\??$' % connection.nickname, re.IGNORECASE),
-			re.compile('%s: Who defined that\??$' % connection.nickname, re.IGNORECASE),
-			re.compile('%s: Literal (.*)\s*$' % connection.nickname, re.IGNORECASE),
-			re.compile('%s: (|give me a) Random definition' % connection.nickname, re.IGNORECASE))
+		self.channelMatch = (re.compile('%s. (re|)define (.*?) as (.*)\s*$' % connection.nickname, re.IGNORECASE),
+			re.compile('%s. What is (.*?)\??$' % connection.nickname, re.IGNORECASE),
+			re.compile('%s. Who defined that\??$' % connection.nickname, re.IGNORECASE),
+			re.compile('%s. Literal (.*)\s*$' % connection.nickname, re.IGNORECASE),
+			re.compile('%s. (|give me a) Random definition' % connection.nickname, re.IGNORECASE))
 		self.dbconnection = connection.dbconnection
 
 	def channelAction(self, connection, user, channel, message, matchIndex = False):
@@ -85,16 +86,20 @@ class Reaction(lampstand.reactions.base.Reaction):
 	def getDefinition(self, connection, user, channel, message, matches):
 
 		key = matches
+		print "Getting definition for %s " % key
 
 		if key == self.lastasked and key == self.lastasked2:
+			print "Bored of this now"
 			connection.kick(channel, user, "Bored now.")
 			return True
 
 		if key == self.lastasked:
+			print "A repeat"
 			connection.msg(channel, "%s: I just said, %s" % (user, self.answered))
 			return True
 
 		if key.lower() == "glados":
+			print "a Glados"
 			connection.msg(channel, "%s: The AI of my dreams" % user)
 			return True
 
@@ -113,6 +118,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 
 	def define(self, key):
+		print "Looking up %s" % key
 
 		cursor = self.dbconnection.cursor()
 		query = "Select word,definition,author from define where lower(word) = %s order by rand()"
@@ -133,10 +139,16 @@ class Reaction(lampstand.reactions.base.Reaction):
 	def randomThing(self, connection, user, channel, message):
 		
                 cursor = self.dbconnection.cursor()
-                query = "Select word,definition,author from define order by rand()"
-
+                query = "Select word,definition,author, count(*) from define group by word order by rand() limit 1"
                 cursor.execute(query)
                 row = cursor.fetchone()
+
+		if(row[3] > 1):
+			print "%s has %s definitions, randomizing..." % (row[0], row[3])
+                	query = "Select word,definition,author from define where word = %s order by rand() limit 1"
+                	cursor.execute(query, (row[0],))
+                	row = cursor.fetchone()
+
 
                 connection.msg(channel, "%s: %s is %s" % (user, row[0], row[1]))
                 self.blame = row[2]
@@ -157,8 +169,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 				self.lastasked2 = self.lastasked
 				self.lastasked = key
 				self.answered = row[1]
+				return True
 			else:
 				connection.msg(channel, "%s: Literally No Clue" % user)
+				return True
 			
 
 		cursor = self.dbconnection.cursor()
@@ -199,5 +213,4 @@ class Reaction(lampstand.reactions.base.Reaction):
 		else:
 			connection.msg(channel, "%s" % result)
 		return True
-
 
