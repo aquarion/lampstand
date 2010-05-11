@@ -79,8 +79,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 		if message[0:7].lower() == "choose ":
 			message = message[7:]
 		else:
+			return "Sorry, You need to prefix that with \"choose\" now."
 			pass
-			#return "Sorry, You need to prefix that with \"choose\" now."
 
 		print message[0:7]
 		print message
