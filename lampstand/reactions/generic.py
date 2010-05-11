@@ -27,6 +27,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			("(go )?north", "", "North is a perilous wasteland"),
 			("(go )?south", "", "There is a dog called Diefenbaker there."),
 			("(go )?down", "", "Down? Down is the lesbian pit. Do you really want to go d... nevermind. No, No you can't."),
+			("make me a sandwich", "", "Yeah, right."),
+			("sudo make me a sandwich", "", "sudo go stick your head in a pig"),
 			("(go )?up", "", "Gravity is harsh mistress."),
 			("Thanks,\? Lampstand\W*", "", "Thampstand."),
 			]
