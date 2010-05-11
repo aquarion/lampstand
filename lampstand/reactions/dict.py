@@ -14,7 +14,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	cooldown_time   = 420
 
 	def __init__(self, connection):
-		self.channelMatch = re.compile('%s. define (\w*)' % connection.nickname, re.IGNORECASE)
+		self.channelMatch = re.compile('%s. define (\w*)\s*$' % connection.nickname, re.IGNORECASE)
 
 	def channelAction(self, connection, user, channel, message):
 		matches = self.channelMatch.findall(message);
@@ -66,7 +66,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		print "[Define] %s" % result
 
-		if len(result) > 880*2:
+		if len(result) > 880:
 
 			whereToSplit = splitAt(result, 860)
 			result = "%s [Cut for length]" % result[0:whereToSplit]
