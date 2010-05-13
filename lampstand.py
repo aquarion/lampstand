@@ -11,7 +11,6 @@ Todo:
 
 	* Database admins, probably.
 	* King James Bible
-	* Quotes Interface
 	* Choose incoming IP
 	* All the cool shit in your head
 """
