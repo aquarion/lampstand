@@ -30,7 +30,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 			("make me a sandwich", "", "Yeah, right."),
 			("sudo make me a sandwich", "", "sudo go stick your head in a pig"),
 			("(go )?up", "", "Gravity is harsh mistress."),
-			("Thanks,\? Lampstand\W*", "", "Thampstand."),
 			]
 
 		self.channelMatch = []
@@ -43,8 +42,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 		self.reactions.append(('.*pokes %s' % connection.nickname, '', "Do I look like a facebook user? Fuck off."))
 		self.channelMatch.append(re.compile(".*pokes %s" % (connection.nickname), re.IGNORECASE))
-		self.channelMatch.append(re.compile("thanks, lampstand.?", re.IGNORECASE))
-		self.reactions.append(('thanks, lampstand.?', '', "Thampstand."))
 		
 	def channelAction(self, connection, user, channel, message, matchindex):
 		print "[Generic Reaction] called"
