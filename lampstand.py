@@ -100,7 +100,7 @@ class ChannelActions:
 			else:
 				print "No %s in %s" % (user, self.connection.people)
 
-			if user == self.connection.original_nickname and self.connection.nickname != connection.original_nickname:
+			if user == self.connection.original_nickname and self.connection.nickname != self.connection.original_nickname:
 					self.connection.register(self.original_nickname)
 
 			for leaveModule in self.connection.leaveModules:

@@ -17,9 +17,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 			re.compile('quit (.*)', re.IGNORECASE),
 			re.compile('status', re.IGNORECASE),
 			re.compile('reload (.*)', re.IGNORECASE),
-			re.compile('kick (\w*) (.*)', re.IGNORECASE),
-			re.compile('join (\w*)', re.IGNORECASE),
-			re.compile('leave (\w*)', re.IGNORECASE),
+			re.compile('kick (\w*?)( .*)?', re.IGNORECASE),
+			re.compile('join (\#\w*)', re.IGNORECASE),
+			re.compile('leave (\#\w*)( .*)?', re.IGNORECASE),
 			re.compile('unload (\w*)', re.IGNORECASE))
 
 
@@ -58,11 +58,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 		elif matchindex == 6: # join
 			print matches
 			print "Joining %s " % (matches[0])
-			connection.join('#'+matches[0])
+			connection.join(matches[0])
 		elif matchindex == 7: # leave
 			print matches
-			print "Leaving %s " % (matches[0])
-			connection.leave('#'+matches[0])
+			print "Leaving %s " % (matches[0][0],)
+			if(matches[0][1]):
+				connection.part(matches[0][0], matches[0][1])
+			else:
+				connection.part(matches[0][0])
 		elif matchindex == 8: # unload
 			result = connection.removeModuleActions(matches[0])
 			connection.msg(user, result)
