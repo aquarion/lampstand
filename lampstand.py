@@ -28,6 +28,10 @@ import re, os
 import string
 import exceptions
 
+import random
+
+random.seed()
+
 #from pysqlite2 import dbapi2 as sqlite
 
 import MySQLdb
