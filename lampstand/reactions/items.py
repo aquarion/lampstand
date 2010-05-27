@@ -30,7 +30,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			re.compile('%s. (mis|)quote ben(|jamin) franklin' % connection.nickname, re.IGNORECASE),
 			re.compile('%s. what have I forgotten(| to pack)\??' % connection.nickname, re.IGNORECASE),
 			re.compile('%s. are you pondering what I\'m pondering\?' % connection.nickname, re.IGNORECASE),
-			re.compile('%s. examine (.*)' % connection.nickname, re.IGNORECASE))
+			re.compile('%s. examine (.*?)\.?$' % connection.nickname, re.IGNORECASE))
 		self.dbconnection = connection.dbconnection
 
 		self.overuseReactions = ("I am not a bag of holding, leave me alone.",
@@ -320,12 +320,19 @@ class Reaction(lampstand.reactions.base.Reaction):
 			elif item.lower() == connection.nickname.lower():
 				connection.msg(channel, '%s: I am he as you are he as you are me and we are all together.' % user)
 			elif item in self.items:
+				define = lampstand.reactions.whatis.Reaction(connection);
+				definition = define.define(item)
+
 				cursor.execute('select item, date_created, author from item where item = %s ORDER BY date_created desc limit 1', item);
 	                        itemone = cursor.fetchone();
-				connection.msg(channel, '%s: %s was given to me by %s on %s.' % (user, itemone[0], itemone[2], itemone[1]))
+
+				if definition:
+					connection.msg(channel, '%s: %s is %s. It was given to me by %s on %s.' % (user, itemone[0], definition[1], itemone[2], itemone[1]))
+				else:
+					connection.msg(channel, '%s: %s was given to me by %s on %s.' % (user, itemone[0], itemone[2], itemone[1]))
 				return True
 
-			elif person in connection.people:
+			elif item in connection.people:
 				connection.msg(channel, '%s: look at them yourself, meatsack' % user)
 					
 				
