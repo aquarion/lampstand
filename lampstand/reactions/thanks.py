@@ -14,7 +14,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	def __init__(self, connection):
 
-		self.channelMatch = re.compile(".*Thanks,? (\w+)\.?$", re.IGNORECASE)
+		self.channelMatch = re.compile(".*Thanks,? (\S+)\s*\.?$", re.IGNORECASE)
 		self.privateMatch = []
 
 	def channelAction(self, connection, user, channel, message):
@@ -39,21 +39,38 @@ class Reaction(lampstand.reactions.base.Reaction):
 		word = word.lower().strip()
 		if not word:
 			return false	
-	
-		scrugg = re.split(r'[aeiouy]', word, 1);
-	
-		#scrugg = re.split(r'[^aeiouy]+', word)
-	
-		if len(scrugg) < 2:
-			return false
-	
-	
-		if(len(scrugg) > 1):
-			thanks = scrugg[1]
-		else:
+
+
+		print "Thanks, %s" % word
+
+		if word[0] in ("a","e","i","o","u"):
+
+			print "That starts with a vowel, using the whole word"
+
 			thanks = word
+
+		else:	
+
+			scrugg = re.split(r'[aeiouy]', word, 1);
+	
+			#scrugg = re.split(r'[^aeiouy]+', word)
+	
+			print scrugg
+
+			if len(scrugg) < 2:
+				print "Failed to split on vowels"
+				return false
+	
+	
+			if(len(scrugg) > 1):
+				print "Using second element"
+				thanks = scrugg[1]
+			else:
+				print "Using whole word"
+				thanks = word
 	
 		if not thanks or len(thanks) < 1:
+			print "Thanks isn't good enough: %s" % thanks
 			return false
 
 		print thanks	
@@ -61,7 +78,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		if(thanks[0] == "a"):
 			thanks = "Th%s" % thanks 
 		elif(thanks[0] == "o"):
-			thanks = "Tho%s" % thanks 
+			thanks = "Th%s" % thanks 
 		else:
 			thanks = "Tha%s" % thanks
 	
