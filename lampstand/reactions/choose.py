@@ -84,14 +84,19 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		print message[0:7]
 		print message
-		orsplit = message.split(" or ")
 
-		choose = []
+		#new regex by ccooke - 2010-05-28
+		regex = re.compile("(?:\s*(?:\s*(?:,|x?or)\s*)+\s*)+", re.IGNORECASE);
 
-		for thing in orsplit:
-			lst = thing.split(", ")
-			for x in lst:
-				choose.append(x)
+		#choose = []
+
+		#for thing in orsplit:
+		#	lst = thing.split(", ")
+		#	for x in lst:
+		#		choose.append(x)
+		#print choose
+
+		choose = regex.split(message);
 		print choose
 
 		for thing in choose:
