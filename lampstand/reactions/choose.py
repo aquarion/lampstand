@@ -86,17 +86,21 @@ class Reaction(lampstand.reactions.base.Reaction):
 		print message
 
 		#new regex by ccooke - 2010-05-28
-		regex = re.compile("(?:\s*(?:\s*(?:,|x?or)\s*)+\s*)+", re.IGNORECASE);
+		#regex = re.compile("(?:\s*(?:\s*(?:,|x?or)\s*)+\s*)+", re.IGNORECASE);
+		#regex = re.compile("(?:\s+(?:\s*(?:x?or)\s*)+\s*|,)+", re.IGNORECASE);
+		regex = re.compile("(?:\s+(?:\s*(?:x?or(?=\W))\s*)+\s*|,)+\s*", re.IGNORECASE);
+		choose = regex.split(message);
+		
 
 		#choose = []
 
+		#orsplit = message.split(" or ")
 		#for thing in orsplit:
 		#	lst = thing.split(", ")
 		#	for x in lst:
 		#		choose.append(x)
 		#print choose
 
-		choose = regex.split(message);
 		print choose
 
 		for thing in choose:
