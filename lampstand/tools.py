@@ -35,7 +35,7 @@ def niceTimeDelta(timedelta):
 			hours = hours + (24*days)
 			days = 0;
 		
-		if (hours < 48 and years == 0):
+		if (hours < 48 and years == 0 and days < 3):
 			minutes = minutes + (60*hours)
 			hours = 0;
 
