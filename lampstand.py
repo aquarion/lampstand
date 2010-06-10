@@ -532,7 +532,7 @@ if __name__ == '__main__':
 		print "Not enough arguments. Try %s #channel [server]" % sys.argv[0]
 		sys.exit(1)
 
-	server = "dream.esper.net"
+	server = "irc.esper.net"
 
 	if len(sys.argv) == 3:
 		server = sys.argv[2]
