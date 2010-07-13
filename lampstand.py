@@ -98,12 +98,6 @@ class ChannelActions:
 
 	def leave(self, reason, user, parameters):
 
-			if (user in self.connection.people):
-				self.connection.people.remove(user)
-				print "Removed %s from user list" % user
-			else:
-				print "No %s in %s" % (user, self.connection.people)
-
 			if user == self.connection.original_nickname and self.connection.nickname != self.connection.original_nickname:
 					self.connection.register(self.original_nickname)
 
@@ -113,13 +107,6 @@ class ChannelActions:
 
 
 	def join(self, user, parameters):
-
-			if user not in self.connection.people:
-				self.connection.people.append(user)
-				print "Added %s to user list" % user
-			else:
-				print "%s is in %s" % (user, self.connection.people)
-
 
 			for joinModule in self.connection.joinModules:
 				joinModule.joinAction(self.connection, user, reason, parameters)
@@ -192,6 +179,8 @@ class LampstandLoop(irc.IRCClient):
 
 	nickname = "Lampstand"
 	original_nickname = "Lampstand"
+	#nickname = "Newstand"
+	#original_nickname = "Newstand"
 	alt_nickname = "Catbus"
 
 	chanserv_password = False
@@ -240,6 +229,7 @@ class LampstandLoop(irc.IRCClient):
 		self.private    = PrivateActions(self)
 
 		self.people = []
+		self.population = {}
 
 		self.channelModules = []
 		self.privateModules = []
@@ -356,12 +346,15 @@ class LampstandLoop(irc.IRCClient):
 			self.nickservGhost()
 
 		"""Called when bot has succesfully signed on to server."""
-		self.join(self.factory.channel)
+		self.join("#maelfroth")
 		self.join("#lampstand")
+		#self.join("#lstest")
+		self.join("#PharaohCommands")
 
 	def joined(self, channel):
 		"""This will get called when the bot joins the channel."""
 		self.logger.log("[I have joined %s]" % channel)
+		#self.population[channel] = []
 		#sms.send('Lampstand: I have returned to %s' % channel)
 
 	def privmsg(self, user, channel, msg):
@@ -405,12 +398,32 @@ class LampstandLoop(irc.IRCClient):
 		new_nick = params[0]
 		self.logger.log("%s is now known as %s" % (old_nick, new_nick))
 		self.channel.nickChange(old_nick, new_nick)
+		for channel, people in self.population.items():
+			if old_nick in people:
+				self.population[channel].remove(old_nick)
+			
+			if not new_nick in people:
+				self.population[channel].append(new_nick)
+		
+		if not new_nick in self.people:
+			self.people.append(new_nick)
+		
+		if old_nick in self.people:
+			self.people.remove(old_nick)
+
+		print self.people
+		print self.population
+
 
 	def irc_PART(self, prefix, params):
 		"""Saw someone part from the channel"""
 		print "Saw a part: %s %s" % (prefix, params)
 		nickname = prefix.split('!')[0]
 		self.channel.leave('part', nickname, params)
+
+		print params
+
+		self.leave(nickname, params[0])
 		pass
 
 	def irc_QUIT(self, prefix, params):
@@ -418,6 +431,10 @@ class LampstandLoop(irc.IRCClient):
 		print "Saw a quit: %s %s" % (prefix, params)
 		nickname = prefix.split('!')[0]
 		self.channel.leave('quit', nickname, params)
+
+		for channel, people in self.population.items():
+			self.leave(nickname, channel)
+			
 		pass
 
 	def irc_TOPIC(self, prefix, params):
@@ -429,6 +446,23 @@ class LampstandLoop(irc.IRCClient):
 		"""Saw someone Join the channel"""
 		print "Saw a join: %s %s" % (prefix, params)
 		nickname = prefix.split('!')[0]
+		channel = params[0]
+
+
+		if nickname not in self.people:
+			self.people.append(nickname)
+			print "Added %s to user list" % nickname
+		else:
+			print "%s is in %s" % (nickname, self.people)
+			
+		if nickname not in self.population[channel]:
+			self.population[channel].append(nickname)
+			print "Added %s to %s user list" % (nickname, channel)
+		else:
+			print "%s is in %s already" % (nickname, channel)
+
+		print self.population
+
 		self.channel.join(nickname, params)
 		pass
 
@@ -464,6 +498,8 @@ class LampstandLoop(irc.IRCClient):
 
 		#people = []
 
+		self.population[channel] = []
+
 		for nickname in names:
 			print "saw %s" % nickname
 			if len(nickname) == 0:
@@ -471,11 +507,14 @@ class LampstandLoop(irc.IRCClient):
 			elif nickname[0] == '@' or nickname[0] == '+':
 				if not nickname[1:] in self.people:
 					self.people.append(nickname[1:])
+				self.population[channel].append(nickname[1:])
 			else:
-				if not nickname[1:] in self.people:
+				if not nickname in self.people:
 					self.people.append(nickname)
+				self.population[channel].append(nickname)
 
 		print 'People: %s' % self.people
+		print 'Population: %s' % self.population
 
 		#self.people = people
 
@@ -491,8 +530,31 @@ class LampstandLoop(irc.IRCClient):
 		"""Saw someone kicked from the channel"""
 		print "Saw a kick: %s kicked %s saying %s" % (kickee, kicker, message)
 		self.channel.leave('kick', kickee, message)
+		self.leave(kickee, channel)
+
 		pass
 
+	def leave(self, nickname, channel):
+		
+		if nickname[1:] in self.population[channel]:
+			self.population[channel].remove(nickname[1:])
+			print "[LEAVE] Removed %s from %s user list" % (nickname, channel)
+		
+		if nickname in self.population[channel]:
+			self.population[channel].remove(nickname)
+			print "[LEAVE] Removed %s from %s user list" % (nickname, channel)
+
+		found = False
+		for channel, people in self.population.items():
+			if nickname in people:
+				found = True
+				print "[LEAVE] Found %s in %s user list, keeping in dictionary" % (nickname, channel)
+				return
+		if not found:
+			print "[LEAVE] Lost %s entirely" % nickname
+			self.people.remove(nickname)
+			
+			
 
 
 class LampstandFactory(protocol.ClientFactory):
