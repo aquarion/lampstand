@@ -237,7 +237,7 @@ class LampstandLoop(irc.IRCClient):
 		self.leaveModules = []
 		self.joinModules = []
 
-		defaultModules = ('admin','base', 'memory', 'bible', 'box','dice','dict','eightball','generic','howlong','hug','insult','nickserv','weblink','whowas', 'choose', "whenis", "opinion", "items", "quote", "haiku", "thanks", "whatis")
+		defaultModules = ('admin','base', 'memory', 'bible', 'box','dice','dict','eightball','generic','howlong','hug','insult','nickserv','weblink','whowas', 'choose', "whenis", "opinion", "items", "quote", "haiku", "thanks", "whatis", "cutout")
 
 		for thingy in defaultModules:
 			self.installModule(thingy)
