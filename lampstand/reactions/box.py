@@ -1,4 +1,5 @@
 import re, time, urllib, sys
+import random
 import lampstand.reactions.base
 from lampstand.tools import splitAt
 
@@ -24,10 +25,15 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		print "[Box] called "
 
-		sock = urllib.urlopen('http://www.warehouse23.com/basement/box/index.html')
+		level = random.randint(1,5);
+
+
+		sock = urllib.urlopen('http://www.warehouse23.com/basement/box/index.html?level=%d' % level)
 		box = sock.read() 
 
-		result = 'You find: ' + re.findall('<p>\n(.*)\n</p>', box, re.MULTILINE)[0];		
+		description = re.findall('<p>\n(.*)\n</p>', box, re.MULTILINE)[0];		
+
+		result = 'In a box on level %d, I found: %s ' % (level, description)
 
 		result = ' '.join(result.split('\n'))
 
