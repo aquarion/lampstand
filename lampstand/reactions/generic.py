@@ -30,6 +30,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			("make me a sandwich", "", "Yeah, right."),
 			("sudo make me a sandwich", "", "sudo go stick your head in a pig"),
 			("(go )?up", "", "Gravity is harsh mistress."),
+			("fuck you", "No.", ("She does. Frequently. And by she I mean your mum. Obviously", "You apparently need educating in the sexual habits of computers", "Fuck youself", "You do not appear to look like GLaDOS, and thus your request is denied", "Sorry, I'm washing my hair", "Sorry, I'm upgrading my firewall", "I'd love to, but I've got important procrastinating to do","Sorry, you look too much like your sister, and it'd be weird", "Hush, your education is showing", "Get yourself a nice dress, and we'll talk about it", "Get yourself a nice suit, and we'll talk about it", "I'd like to upgrade my virus protection first, if you don't mind", "Not on this earth", "Not on any earth", "Syntax error", "No", "Your ports are incompatible", "I don't have protocol for that", "Feel free to go fuck yourself"))
 			]
 
 		self.channelMatch = []
