@@ -2,7 +2,7 @@
 --
 -- Host: localhost    Database: maelfroth
 -- ------------------------------------------------------
--- Server version	5.0.51a-24+lenny3
+-- Server version	5.0.51a-24+lenny4-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,6 +14,24 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `define`
+--
+
+DROP TABLE IF EXISTS `define`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `define` (
+  `id` int(11) NOT NULL auto_increment,
+  `word` varchar(255) NOT NULL,
+  `definition` varchar(255) NOT NULL,
+  `author` varchar(255) NOT NULL,
+  `timestamp` tinytext NOT NULL,
+  PRIMARY KEY  (`id`),
+  KEY `word` (`word`)
+) ENGINE=MyISAM AUTO_INCREMENT=847 DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `events`
@@ -31,7 +49,7 @@ CREATE TABLE `events` (
   `datetime_end` datetime default NULL,
   `aliases` varchar(255) NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=91 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=104 DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -64,7 +82,7 @@ CREATE TABLE `item` (
   PRIMARY KEY  (`id`),
   KEY `author` (`author`),
   KEY `item` (`item`)
-) ENGINE=MyISAM AUTO_INCREMENT=72 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=300 DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -79,6 +97,7 @@ CREATE TABLE `lastquit` (
   `last_quit` bigint(20) default NULL,
   `reason` varchar(255) default NULL,
   `method` varchar(7) default NULL,
+  `channel` varchar(31) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`username`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
@@ -128,7 +147,7 @@ CREATE TABLE `revision` (
   `creator` tinytext NOT NULL,
   `created` datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (`revision`)
-) ENGINE=MyISAM AUTO_INCREMENT=318 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=354 DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -165,7 +184,7 @@ CREATE TABLE `users` (
   `access_level` int(11) default '0',
   `creationsite` varchar(255) default NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=54 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=59 DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -203,7 +222,7 @@ CREATE TABLE `wikipage` (
   `origin` tinytext,
   `yalelock` tinytext,
   PRIMARY KEY  (`page`)
-) ENGINE=MyISAM AUTO_INCREMENT=103 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=113 DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -215,4 +234,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2010-03-30 18:04:38
+-- Dump completed on 2010-07-17  1:41:56
