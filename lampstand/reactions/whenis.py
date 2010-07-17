@@ -121,6 +121,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		#		pass
 		
 		print event
+		eventClass = event[2]
 	
 		# Then give up
 		if event == None:
@@ -137,12 +138,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		if(event[5] == None or event[5] == 0):
 			start = datetime.datetime.fromtimestamp(event[4]).strftime(timeformat);
-			message = "%s %s %s" % (eventName, tiswas, start);
+			message = "%s: %s %s %s" % (eventClass, eventName, tiswas, start);
 			print "Using is (No time out data)"
 		else:
 			start = datetime.datetime.fromtimestamp(event[4]).strftime(timeformat)
 			end   = datetime.datetime.fromtimestamp(event[5]).strftime(timeformat)
-			message = "%s %s from %s to %s" % (eventName, tiswas, start, end);
+			message = "%s: %s %s from %s to %s" % (eventClass, eventName, tiswas, start, end);
 			print "Using time in (No time out data)"
 
 		return message
