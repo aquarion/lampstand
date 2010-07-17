@@ -20,7 +20,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			re.compile('kick (\w*?)( .*)?', re.IGNORECASE),
 			re.compile('join (\#\w*)', re.IGNORECASE),
 			re.compile('leave (\#\w*)( .*)?', re.IGNORECASE),
-			re.compile('unload (\w*)', re.IGNORECASE))
+			re.compile('unload (\w*)', re.IGNORECASE),
+			re.compile('reconfigure', re.IGNORECASE))
 
 
 	def privateAction(self, connection, user, channel, message, matchindex = 0):
@@ -69,3 +70,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 		elif matchindex == 8: # unload
 			result = connection.removeModuleActions(matches[0])
 			connection.msg(user, result)
+		elif matchindex == 9: # reload config
+			print "Reload Config"
+			result = connection.loadConfig()
+			for thingy in connection.config.items("modules"):
+				connection.installModule(thingy[0])
+			connection.msg(user, connection.config)

@@ -32,13 +32,11 @@ import random
 
 random.seed()
 
-#from pysqlite2 import dbapi2 as sqlite
-
 import MySQLdb
 
-#from lampstand.reactions import *
-
 import lampstand.reactions;
+
+import ConfigParser
 
 from lampstand import sms
 
@@ -186,6 +184,8 @@ class LampstandLoop(irc.IRCClient):
 	chanserv_password = False
 
 	dbconnection = False
+	
+	config = False
 
 
 	def scheduledTasks(self):
@@ -196,34 +196,39 @@ class LampstandLoop(irc.IRCClient):
 
 	def connectionMade(self):
 
-		#if os.path.exists('%s.db' % self.factory.channel):
-		print "Loading database database %s " % self.factory.channel
-		#self.dbconnection = sqlite.connect('%s.db' % self.factory.channel)
-		self.dbconnection = MySQLdb.connect(user = 'lampstand', passwd = 'glados', db = "maelfroth")
-		#else:
-		#	print "Couldn't load database %s " % self.factory.channel
-		#	reactor.stop()
-	
+		self.config = self.factory.config
+		
+		
+		self.dbconnection = MySQLdb.connect(user = self.config.get("database","user"), passwd = self.config.get("database","password"), db = self.config.get("database","database"))
+			
 		#threads.deferToThread(self.scheduledTasks)
 		#reactor.callInThread(self.scheduledTask);
+		
+		
+		self.nickname = self.config.get("irc","nickname")
+		self.original_nickname = self.nickname
+		self.alt_nickname = self.config.get("irc","altnickname")
+		
 
 		if (self.dbconnection):
 			cursor = self.dbconnection.cursor()
-			cursor.execute('SELECT server, password FROM nickserv where server = %s', (self.factory.server,) )
+			cursor.execute('SELECT server, password FROM nickserv where server = %s', (self.config.get("connection","server"),) )
 			result = cursor.fetchone()
 
 			if result != None:
 				self.chanserv_password = result[1];
 				print "Chanserv Password is "+result[1];
 			else:
-				print "Couldn't find a chanserv password for "+self.factory.server
+				print "Couldn't find a chanserv password for "+self.config.get("connection","server")
 		else:
 				print "No database, not loading nickserv password"
 
 
 
+		logfile = self.config.get("logging", "logfile");
+
 		irc.IRCClient.connectionMade(self)
-		self.logger = MessageLogger(open('/home/aquarion/projects/lampstand/'+self.factory.channel+'.log', "a"))
+		self.logger = MessageLogger(open(logfile, "a"))
 
 		self.channel    = ChannelActions(self)
 		self.private    = PrivateActions(self)
@@ -237,10 +242,9 @@ class LampstandLoop(irc.IRCClient):
 		self.leaveModules = []
 		self.joinModules = []
 
-		defaultModules = ('admin','base', 'memory', 'bible', 'box','dice','dict','eightball','generic','howlong','hug','insult','nickserv','weblink','whowas', 'choose', "whenis", "opinion", "items", "quote", "haiku", "thanks", "whatis", "cutout")
 
-		for thingy in defaultModules:
-			self.installModule(thingy)
+		for thingy in config.items("modules"):
+			self.installModule(thingy[0])
 
 		self.logger.log("[connected at %s]" %
 						time.asctime(time.localtime(time.time())))
@@ -278,7 +282,7 @@ class LampstandLoop(irc.IRCClient):
 	def removeModuleActions(self, module):
 
 		module = 'lampstand.reactions.%s' % module
-
+		
 		for reaction in self.channelModules:
 			if reaction.__module__ == module:
 				self.channelModules.remove(reaction)
@@ -346,11 +350,10 @@ class LampstandLoop(irc.IRCClient):
 			self.nickservGhost()
 
 		"""Called when bot has succesfully signed on to server."""
-		self.join("#maelfroth")
-		self.join("#lampstand")
-		#self.join("#lstest")
-		self.join("#PharaohCommands")
-
+				
+		for item in config.items("channels"):
+			self.join("#%s" % item[0])
+		
 	def joined(self, channel):
 		"""This will get called when the bot joins the channel."""
 		self.logger.log("[I have joined %s]" % channel)
@@ -454,6 +457,9 @@ class LampstandLoop(irc.IRCClient):
 			print "Added %s to user list" % nickname
 		else:
 			print "%s is in %s" % (nickname, self.people)
+		
+		if not self.population.has_key(channel):
+			self.population[channel] = []
 			
 		if nickname not in self.population[channel]:
 			self.population[channel].append(nickname)
@@ -553,7 +559,12 @@ class LampstandLoop(irc.IRCClient):
 		if not found:
 			print "[LEAVE] Lost %s entirely" % nickname
 			self.people.remove(nickname)
-			
+
+	def loadConfig(self):
+		basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
+		config = ConfigParser.ConfigParser()
+		config.read(["defaults.ini", basedir+'/config.ini'] )
+		self.config = config		
 			
 
 
@@ -566,9 +577,8 @@ class LampstandFactory(protocol.ClientFactory):
 	# the class of the protocol to build when new connection is made
 	protocol = LampstandLoop
 
-	def __init__(self, channel, server):
-		self.channel = channel
-		self.server = server
+	def __init__(self, config):
+		self.config = config
 
 	def clientConnectionLost(self, connector, reason):
 		"""If we get disconnected, reconnect to server."""
@@ -585,25 +595,20 @@ class LampstandFactory(protocol.ClientFactory):
 if __name__ == '__main__':
 	cwd = os.getcwd() 
 	print "Error log is %s/stderr.log" % cwd
-	#daemonize.daemonize('/dev/null', '%s/stdout.log' % cwd, '%s/stderr.log' % cwd)
 	
-	# initialize logging
-	#log.startLogging(sys.stdout)
+	basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
+	config = ConfigParser.ConfigParser()
+	config.read(["defaults.ini", basedir+'/config.ini'] )
+	
+	server = config.get("connection", "server");
+	port   = config.getint("connection", "port");
 
-	if len(sys.argv) < 2:
-		print "Not enough arguments. Try %s #channel [server]" % sys.argv[0]
-		sys.exit(1)
-
-	server = "irc.esper.net"
-
-	if len(sys.argv) == 3:
-		server = sys.argv[2]
 
 	# create factory protocol and application
-	f = LampstandFactory(sys.argv[1], server)
+	f = LampstandFactory(config)
 
 	# connect factory to this host and port
-	reactor.connectTCP(server, 6667, f)
+	reactor.connectTCP(server, port, f)
 
 
 	# run bot

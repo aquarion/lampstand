@@ -1,4 +1,4 @@
-import time
+import time, ConfigParser
 def __init__ ():
 	pass
 
@@ -21,6 +21,19 @@ class Reaction:
 
 	def __init__(self, connection):
 		pass
+		
+
+	def getconfig(self, connection):
+		try:
+			config = connection.config.items(self.__name)
+			print "Haiku Config!"
+			self.config = {}
+			for item in config:
+				self.config[item[0]] = item[1]
+		except ConfigParser.NoSectionError:
+			print "no config for %s" % self.__name
+			pass
+		
 		
 	#def privateAction(self, connection, user, channel, message, matchindex = 0):
 
