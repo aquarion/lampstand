@@ -14,13 +14,18 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 
 	def __init__(self, connection):
+		self.config = {}
+		
+		self.getconfig(connection)
+		
+		print "Haiku Init!"
 		self.channelMatch = (re.compile('%s. how many syllables in (\w*)\??' % connection.nickname, re.IGNORECASE),
-			re.compile('%s. (\w*) has (\d\d?) syllables?\.?' % connection.nickname, re.IGNORECASE),
-			re.compile('.*')
+			re.compile('%s. (\w*) has (\d\d?) syllables?\.?' % connection.nickname, re.IGNORECASE)
 			)
 		self.dbconnection = connection.dbconnection
 		
 		self.channels = {}
+		
 
 	def channelAction(self, connection, user, channel, message, matchindex):
 				
@@ -29,7 +34,18 @@ class Reaction(lampstand.reactions.base.Reaction):
 			
 		if matchindex == 1: # Cheat sheet
 			return self.cheatSheet(connection, user, channel, message)
-					
+	
+	def everyLine(self, connection, user, channel, message):
+		channelname = channel[1:]
+		if self.config.has_key(channelname) and self.config[channelname] == "ignore":
+			print "[HAIKU] Ignoring channel %s " % channelname
+			return False
+			
+		if self.config.has_key(channelname):
+			print "Configure! %s " % self.config[channelname]
+		else:
+			print self.config
+
 		# Fallback
 		return self.findHaiku(connection, user, channel, message)
 	
@@ -81,7 +97,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 		print haikus
 		
 		if len(haikus):
-			connection.msg("#lampstand", "Hey, cool. A haiku on %s: %s " % (channel, " // ".join(haikus[0])))
+			
+			channelname = channel[1:]
+			if self.config.has_key(channelname) and not self.config[channelname] == "ignore":
+				channel = "#%s" % self.config[channelname]
+			
+			connection.msg(channel, "Hey, cool. A haiku on %s: %s " % (channel, " // ".join(haikus[0])))
 			self.channels[channel] = []
 			return True
 		
