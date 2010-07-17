@@ -35,9 +35,9 @@ def niceTimeDelta(timedelta):
 			hours = hours + (24*days)
 			days = 0;
 		
-		if (hours < 48 and years == 0 and days < 3):
-			minutes = minutes + (60*hours)
-			hours = 0;
+		#if (hours < 48 and years == 0 and days < 3):
+		#	minutes = minutes + (60*hours)
+		#	hours = 0;
 
 		if int(days) == 1:
 			days_message = "1 day, "
