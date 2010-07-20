@@ -41,11 +41,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 			print "[HAIKU] Ignoring channel %s " % channelname
 			return False
 			
-		if self.config.has_key(channelname):
-			print "Configure! %s " % self.config[channelname]
-		else:
-			print self.config
-
 		# Fallback
 		return self.findHaiku(connection, user, channel, message)
 	
@@ -100,9 +95,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 			
 			channelname = channel[1:]
 			if self.config.has_key(channelname) and not self.config[channelname] == "ignore":
-				channel = "#%s" % self.config[channelname]
-			
-			connection.msg(channel, "Hey, cool. A haiku on %s: %s " % (channel, " // ".join(haikus[0])))
+				channelout = "#%s" % self.config[channelname]
+			else:
+				channelout = channel;
+				
+			connection.msg(channelout, "Hey, cool. A haiku on %s: %s " % (channel, " // ".join(haikus[0])))
 			self.channels[channel] = []
 			return True
 		
