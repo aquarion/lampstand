@@ -12,8 +12,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 	
 	def __init__(self, connection):
 		self.privateMatch = (
-			re.compile('say (.*)', re.IGNORECASE),
-			re.compile('do (.*)', re.IGNORECASE),
+			re.compile('say \#(\w*) (.*)', re.IGNORECASE),
+			re.compile('do \#(\w*) (.*)', re.IGNORECASE),
 			re.compile('quit (.*)', re.IGNORECASE),
 			re.compile('status', re.IGNORECASE),
 			re.compile('reload (.*)', re.IGNORECASE),
@@ -33,11 +33,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 		matches = self.privateMatch[matchindex].findall(message)
 
 		if matchindex == 0:
-			print "[Say] %s %s" % (sys.argv[1], matches[0])
-			connection.msg("#%s" % sys.argv[1], matches[0])
+			#print "[Say] %s %s" % (sys.argv[1], matches[0])
+			connection.msg("#%s" % matches[0][0], matches[0][1])
+			connection.msg(user, "%s" % matches)
 		elif matchindex == 1:
-			print "[Do] %s %s" % (sys.argv[1], matches[0])
-			connection.me("#%s" % sys.argv[1], matches[0])
+			#print "[Do] %s %s" % (sys.argv[1], matches[0])
+			connection.me("#%s" % matches[0][0], matches[0][1])
+			connection.msg(user, "%s" % matches)
+			#connection.me("#%s" % sys.argv[1], matches[0])
 		elif matchindex == 2:
 			print "[Quit] %s %s" % (sys.argv[1], matches[0])
 			connection.quit(matches[0])
@@ -76,3 +79,5 @@ class Reaction(lampstand.reactions.base.Reaction):
 			for thingy in connection.config.items("modules"):
 				connection.installModule(thingy[0])
 			connection.msg(user, connection.config)
+			
+		return true
