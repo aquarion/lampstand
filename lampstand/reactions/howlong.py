@@ -17,21 +17,41 @@ class Reaction(lampstand.reactions.base.Reaction):
 	cooldown_number = 5
 	cooldown_time   = 600
 	uses = []
+	timein = "decimal"
 
 	def __init__(self, connection):
-		self.channelMatch = re.compile('%s. how long (until|since) (.*?)\??$' % connection.nickname, re.IGNORECASE)
+		self.channelMatch = [re.compile('%s. how long (until|since) (.*?)\??$' % connection.nickname, re.IGNORECASE),re.compile('%s. how long\?$' % connection.nickname, re.IGNORECASE), re.compile('%s. what\'s next\?$' % connection.nickname, re.IGNORECASE), re.compile("%s: How Long times in (.*)" % connection.nickname, re.IGNORECASE) ]
 		self.privateMatch = re.compile('how long (until|since) (.*?)\??$', re.IGNORECASE)
 		self.dbconnection = connection.dbconnection
 
 
-	def channelAction(self, connection, user, channel, message):
+	def channelAction(self, connection, user, channel, message, matchIndex):
+
+		print "[HOWLONG] Matched with %s" % matchIndex;
+
 
 		if self.overUsed():
 			connection.msg(channel, "Shortly sooner than when you last asked.")
 			return
 
-		match = self.channelMatch.findall(message);
+		print matchIndex;
 
+		if matchIndex == 3:
+			match = self.channelMatch[3].findall(message);
+
+			if (tools.convertNiceTime(1, match[0]) == False):
+				connection.msg(channel, "%s: I don't support that time format. Try: dec, oct, hex, roman" % user)
+				return True
+
+			self.timein = match[0]
+			print "Set timein to %s" % self.timein
+			connection.msg(channel, "%s: Done" % user)
+			return True;
+
+		if(matchIndex == 0):
+			match = self.channelMatch[0].findall(message);
+		else:
+			match = [["until", "%"]]
 
 	 	self.updateOveruse()
 
@@ -179,7 +199,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		timedelta = (eventTime - current_time)
 
-		deltastring = tools.niceTimeDelta(timedelta)
+
+		deltastring = tools.niceTimeDelta(timedelta, self.timein)
 
 		print returnformat % (eventName, timing_position, deltastring)
 
