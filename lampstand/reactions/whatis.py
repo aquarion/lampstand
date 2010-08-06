@@ -8,7 +8,7 @@ def __init__ ():
 	pass
 
 class Reaction(lampstand.reactions.base.Reaction):
-	__name = 'What is this thing?'
+	__name = 'Definitions?'
 
 	admin = ("aquarion")
 
@@ -24,7 +24,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	
 	def __init__(self, connection):
 		self.channelMatch = (re.compile('%s. (re|)define (.*?) as (.*)\s*$' % connection.nickname, re.IGNORECASE),
-			re.compile('%s. What is (.*?)\??$' % connection.nickname, re.IGNORECASE),
+			re.compile('%s. What is (.*?)[\?|\!]*$' % connection.nickname, re.IGNORECASE),
 			re.compile('%s. Who defined that\??$' % connection.nickname, re.IGNORECASE),
 			re.compile('%s. Literal (.*)\s*$' % connection.nickname, re.IGNORECASE),
 			re.compile('%s. (|give me a) Random definition' % connection.nickname, re.IGNORECASE))
