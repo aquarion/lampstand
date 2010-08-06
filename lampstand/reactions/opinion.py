@@ -15,6 +15,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	
 
 	def channelAction(self, connection, user, channel, message, matchIndex = False):
+		return False
 		print 'Looking at <<%s>>' % message
 		if (matchIndex == 0):
 			matchResult = self.channelMatch[0].findall(message);
