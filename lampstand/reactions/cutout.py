@@ -14,7 +14,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 	
 	def everyLine(self, connection, user, channel, message):
 
-		if len(message) > 450:
+		print "[CUTOUT] Message length: %s" % len(message)
+
+		print connection
+		print user
+		print self
+
+		if len(message) > 450 or (len(message) > 357 and len(message) <= 362):
 			print "Looks like a cutout line"
 	                index = len(message)-1
 			words = 0
