@@ -21,7 +21,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			re.compile('join (\#\w*)', re.IGNORECASE),
 			re.compile('leave (\#\w*)( .*)?', re.IGNORECASE),
 			re.compile('unload (\w*)', re.IGNORECASE),
-			re.compile('reconfigure', re.IGNORECASE))
+			re.compile('reconfigure', re.IGNORECASE),
+			re.compile('sysreload (.*)', re.IGNORECASE))
 
 
 	def privateAction(self, connection, user, channel, message, matchindex = 0):
@@ -46,7 +47,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.quit(matches[0])
 			reactor.stop()
 		elif matchindex == 3: # status
-			connection.msg(user, 'State of the union is awesome')
+			connection.msg(user, 'State of the lampstand is awesome')
 			connection.msg(user, 'Channel: %s' % connection.channelModules)
 			connection.msg(user, 'Private: %s' % connection.privateModules)
 			connection.msg(user, 'Nick Change: %s' % connection.nickChangeModules)
@@ -79,5 +80,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 			for thingy in connection.config.items("modules"):
 				connection.installModule(thingy[0])
 			connection.msg(user, connection.config)
-			
+		elif matchindex == 10: # sysreload
+			module = matches[0];
+	                if (sys.modules.has_key(module)):
+       	                	reload(sys.modules[module]);
+                        	rtn = 'Reloaded %s' % module
+                        	connection.msg(user, rtn);
+			else:
+				connection.msg(user, "%s Not found" % matches[0])
+
 		return true
