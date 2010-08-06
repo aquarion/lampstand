@@ -206,16 +206,20 @@ class Reaction(lampstand.reactions.base.Reaction):
 			# Lampstand $actions the $attribute on $item and $actions $item to create $hugresponse
 			
 			item = random.choice(self.items)
-			item2 = random.choice(self.items)
+			item2 = item
+			while item2 == item:
+				item2 = random.choice(self.items)
+
 			action = random.choice(actions)
-			action2 = random.choice(actions)
+			action2 = action
+			while action2 == action:
+				action2 = random.choice(actions)
+			
 			attribute = random.choice(attributes)
 			
 			cursor = self.dbconnection.cursor()
 			cursor.execute('SELECT item from hugReaction order by rand() limit 1')
 			result = cursor.fetchone()
-			
-			print result
 			
 			hugresponse = result[0]
 			
