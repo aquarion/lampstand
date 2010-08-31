@@ -23,15 +23,21 @@ class Reaction(lampstand.reactions.base.Reaction):
 		word = self.channelMatch.findall(message)[0];
 
 		if not word:
-			return false;
+			return False;
 
-		thanks = self.thanks(word);
+		number = random.randint(0,10)
 
-		print "[THANKS] Thanks, %s: %s" % (word, thanks)
+		if word in connection.people and number == 7:
+			thanks = self.thanks(word);
+			print "[THANKS] Thanks, %s: %s" % (word, thanks)
+			connection.msg(channel, thanks)
+			return True
+		elif word in connection.people:
+			print "Found, but not random"
+		else:
+			print "Random was %d" % number
 
-		connection.msg(channel, thanks)
-		return true
-
+		return False
 
 
 	def thanks(self, word):
