@@ -8,7 +8,7 @@ def __init__ ():
 	pass
 
 class Reaction(lampstand.reactions.base.Reaction):
-	__name = 'Definitions?'
+	__name = 'Definitions'
 
 	admin = ("aquarion")
 
@@ -27,6 +27,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			re.compile('%s. What is (.*?)[\?|\!]*$' % connection.nickname, re.IGNORECASE),
 			re.compile('%s. Who defined that\??$' % connection.nickname, re.IGNORECASE),
 			re.compile('%s. Literal (.*)\s*$' % connection.nickname, re.IGNORECASE),
+			re.compile('%s. tell me something about (.*)' % connection.nickname, re.IGNORECASE),
 			re.compile('%s. (|give me a) Random definition' % connection.nickname, re.IGNORECASE))
 		self.dbconnection = connection.dbconnection
 
@@ -46,6 +47,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 		elif (matchIndex ==3):
 			return self.getLiteral(connection, user, channel, message, matches)
 		elif (matchIndex ==4):
+			return self.getDefinition(connection, user, channel, message, matches, True)
+		elif (matchIndex ==5):
 			return self.randomThing(connection, user, channel, message)
 			
 
@@ -83,7 +86,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		return True
 
 
-	def getDefinition(self, connection, user, channel, message, matches):
+	def getDefinition(self, connection, user, channel, message, matches, like = False):
 
 		key = matches
 		print "Getting definition for %s " % key
@@ -103,10 +106,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.msg(channel, "%s: The AI of my dreams" % user)
 			return True
 
-		row = self.define(key)
+		row = self.define(key, like)
 
 		if row:
-			connection.msg(channel, "%s: %s" % (user, row[1]))
+			if like:
+				connection.msg(channel, '%s: "%s" is "%s"' % (user, row[0], row[1]))
+			else:
+				connection.msg(channel, "%s: %s" % (user, row[1]))
 			self.blame = row[2]
 			self.lastasked2 = self.lastasked
 			self.lastasked = key
@@ -117,13 +123,19 @@ class Reaction(lampstand.reactions.base.Reaction):
 		return True
 
 
-	def define(self, key):
+	def define(self, key, like):
 		print "Looking up %s" % key
 
 		cursor = self.dbconnection.cursor()
-		query = "Select word,definition,author from define where lower(word) = %s order by rand()"
 
-		cursor.execute(query, (key.lower(), ) )
+		if like:
+			key = "%%%s%%" % key
+			query = "Select word,definition,author from define where word like %s or definition like %s order by rand()"
+			cursor.execute(query, (key, key) )
+		else:
+			query = "Select word,definition,author from define where lower(word) = %s order by rand()"
+			cursor.execute(query, (key.lower(), ) )
+
 		return cursor.fetchone()
 
 
