@@ -49,6 +49,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 		self.reactions.append(("Fuck you,? %s" % connection.nickname, 'No', fuckyou))
 		self.channelMatch.append(re.compile("Fuck you,? %s" % (connection.nickname), re.IGNORECASE))
 		
+		self.reactions.append(('^\.\.\.$', '', ("%dots!", "%MORE DOTS!", "%[... Suddenly, everything goes quiet...]")))
+		self.channelMatch.append(re.compile("^\.\.\.$", re.IGNORECASE))
+		
 	def channelAction(self, connection, user, channel, message, matchindex):
 		print "[Generic Reaction] called"
 
@@ -72,6 +75,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 				reaction = self.reactions[matchindex][2]
 			if reaction[0] == "~":
 				connection.me(channel, reaction[1:])
+			elif reaction[0] == "%":
+				roll = random.randint(0,50)
+				if roll == 45:
+					connection.msg(channel, reaction[1:])
+				else:
+					print "Rolled %d" % roll;
 			else:
 				connection.msg(channel, reaction)
 			return True
