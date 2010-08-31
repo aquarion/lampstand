@@ -89,7 +89,7 @@ def int2bin(n, count=24):
 
 def convertNiceTime(number,format):
 	if format == "decimal" or format == "dec":
-		return number;
+		return int(number);
 
 	if format == "binary" or format == "bin":
 		return Denary2Binary(number);
