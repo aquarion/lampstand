@@ -14,7 +14,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	cooldown_time   = 420
 
 	def __init__(self, connection):
-		self.channelMatch = re.compile('%s. define (\w*)\s*$' % connection.nickname, re.IGNORECASE)
+		self.channelMatch = re.compile('%s. look up (\w*)\s*$' % connection.nickname, re.IGNORECASE)
 
 	def channelAction(self, connection, user, channel, message):
 		matches = self.channelMatch.findall(message);
