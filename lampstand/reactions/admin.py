@@ -43,9 +43,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.msg(user, "%s" % matches)
 			#connection.me("#%s" % sys.argv[1], matches[0])
 		elif matchindex == 2:
-			print "[Quit] %s %s" % (sys.argv[1], matches[0])
-			connection.quit(matches[0])
-			reactor.stop()
+			print "[Quit] %s" % (matches[0])
+			connection.quit("For the sword outwears its sheath, and the soul wears out the breast. And the heart must pause to breathe, and love itself have rest.")
 		elif matchindex == 3: # status
 			connection.msg(user, 'State of the lampstand is awesome')
 			connection.msg(user, 'Channel: %s' % connection.channelModules)
@@ -89,4 +88,4 @@ class Reaction(lampstand.reactions.base.Reaction):
 			else:
 				connection.msg(user, "%s Not found" % matches[0])
 
-		return true
+		return True
