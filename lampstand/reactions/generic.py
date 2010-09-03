@@ -23,15 +23,15 @@ class Reaction(lampstand.reactions.base.Reaction):
 			('Where do you get the boxes?', "", "The boxes come from SJGames' http://www.warehouse23.com/basement/ Level One"),
 			('Hello', '', 'Hi there'),
 			("Roll with it", '', "~takes his time"),
-			("look", "", "You are in a room with no dimensions, in no place and time. There are no walls, which contain no pictures of larp characters past, present nor future; and the floor is not hardward parquet, carefully polished for ease of cleaning. There are no comfy sofas lit by no soft pools of light from antique lamps, throwing the nothings that they light into shadows that reveal nothing that you would wish to meet. There is a lesbian pit here. There are no exits in any direction."),
-			("(go )?west", "", "Life is peaceful there."),
-			("(go )?east", "", "East is darkness, you do not want to go there"),
-			("(go )?north", "", "North is a perilous wasteland"),
-			("(go )?south", "", "There is a dog called Diefenbaker there."),
-			("(go )?down", "", "Down? Down is the lesbian pit. Do you really want to go d... nevermind. No, No you can't."),
+			("look$", "", "You are in a room with no dimensions, in no place and time. There are no walls, which contain no pictures of larp characters past, present nor future; and the floor is not hardward parquet, carefully polished for ease of cleaning. There are no comfy sofas lit by no soft pools of light from antique lamps, throwing the nothings that they light into shadows that reveal nothing that you would wish to meet. There is a lesbian pit here. There are no exits in any direction."),
+			("(go )?west$", "", "Life is peaceful there."),
+			("(go )?east$", "", "East is darkness, you do not want to go there"),
+			("(go )?north$", "", "North is a perilous wasteland"),
+			("(go )?south$", "", "There is a dog called Diefenbaker there."),
+			("(go )?down$", "", "Down? Down is the lesbian pit. Do you really want to go d... nevermind. No, No you can't."),
 			("make me a sandwich", "", "Yeah, right."),
 			("sudo make me a sandwich", "", "sudo go stick your head in a pig"),
-			("(go )?up", "", "Gravity is harsh mistress."),
+			("(go )?up$", "", "Gravity is harsh mistress."),
 			("fuck you", "No.", fuckyou)
 			]
 
