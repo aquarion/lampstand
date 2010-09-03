@@ -123,7 +123,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		return True
 
 
-	def define(self, key, like):
+	def define(self, key, like = False):
 		print "Looking up %s" % key
 
 		cursor = self.dbconnection.cursor()
