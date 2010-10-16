@@ -48,7 +48,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 		matches = self.channelMatch[0].findall(message)
 		
-		print matches
+		#print matches
 		
 		syllables = haikufinder.LineSyllablizer(matches[0]).count_syllables()
 		#syllables = haikufinder.HaikuFinder(matches[0]).count_syllables()
@@ -85,11 +85,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 		if len(self.channels[channel]) > 3:
 			self.channels[channel] = self.channels[channel][-3:]
 		
-		print "Content for %s: %s " % (channel, " ".join(self.channels[channel]))
+		#print "Content for %s: %s " % (channel, " ".join(self.channels[channel]))
 			
 		haikus = haikufinder.HaikuFinder(" ".join(self.channels[channel])).find_haikus()
 		
-		print haikus
+		#print haikus
 		
 		if len(haikus):
 			
