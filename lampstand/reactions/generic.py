@@ -52,6 +52,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 		self.reactions.append(('^\.\.\.$', '', ("%dots!", "%MORE DOTS!", "%[... Suddenly, everything goes quiet...]")))
 		self.channelMatch.append(re.compile("^\.\.\.$", re.IGNORECASE))
 		
+		self.reactions.append(('^puts on shades$', '', ("YEEEEEEEAAAAAAAAAAAAAAAAAAAAAAAAAAAH", "YEEEEEEEAAAAAAAAAAAAAAAAAAAAAAAAAAAH", "[crickets chirp. The odd dog barks.]")))
+		self.channelMatch.append(re.compile("^puts on shades$", re.IGNORECASE))
+		
 	def channelAction(self, connection, user, channel, message, matchindex):
 		print "[Generic Reaction] called"
 
