@@ -70,7 +70,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		eventSearch = match[0][1]
 		eventName = match[0][1]
 	
-		if eventName.lower() == "downtime opens":
+		if eventName.lower() == "downtime opens" or eventName.lower() == "downtime returns":
 			return "FOIP."
 
 		#aliases = { 'cunts do christmas' : 'Havocstan Midwinter Festival', "cdc" : 'Havocstan Midwinter Festival'}
