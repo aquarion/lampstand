@@ -366,7 +366,7 @@ class LampstandLoop(irc.IRCClient):
 		self.logger.log("<%s> %s" % (user, msg))
 
 
-		print "> %s/%s: %s" % (user, channel, msg)
+		print "%s/%s: %s" % (channel, user, msg)
 		#self.logger.log("<%s> %s" % (self.nickname, msg))
 
 		if (msg[0:3] == '***'):
