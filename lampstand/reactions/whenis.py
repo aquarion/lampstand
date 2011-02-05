@@ -53,12 +53,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 		eventName   = match[0][1]
 		tiswas      = match[0][0]
 
-		aliases = { 'cunts do christmas' : 'Havocstan Midwinter Festival'}
-		if aliases.has_key(eventName.lower()):
-			print "found alias"
-			eventSearch = aliases[eventName.lower()]
-
-
 		if (match[0][0] == "is"):
 			print "Until match"
 			firstTry = (">", "asc")
