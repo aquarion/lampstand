@@ -71,7 +71,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		cursor = self.dbconnection.cursor()
 			
 		# First, try direct description matches. First in the future (past if it's since)...	
-                rawquery = 'SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch FROM events where (description LIKE %%s or aliases LIKE %%s) and datetime %s now() order by datetime %s'
+                rawquery = 'SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch, url FROM events where (description LIKE %%s or aliases LIKE %%s) and datetime %s now() order by datetime %s'
                 
 
 		query = rawquery % (firstTry[0], firstTry[1])
@@ -87,7 +87,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 
 		# Now set up the class query:
-		rawquery =	'SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch FROM events where class LIKE %%s and datetime %s now() order by datetime %s'
+		rawquery =	'SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch, url FROM events where class LIKE %%s and datetime %s now() order by datetime %s'
 
 		# Third, try Class matches in the future (past if it's since)...
 		if event == None:
@@ -145,5 +145,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			end   = datetime.datetime.fromtimestamp(event[5]).strftime(timeformat)
 			message = "%s: %s %s from %s to %s" % (eventClass, eventName, tiswas, start, end);
 			print "Using time in (No time out data)"
+
+		if event[6]:
+			message += ", more info at %s" % event[6]
 
 		return message
