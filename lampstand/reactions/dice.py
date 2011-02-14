@@ -23,7 +23,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		item = self.channelMatch.findall(message);
 		result = self.rollDice(item)
-		connection.msg(channel, "%s, %s" % (user, result))
+		connection.msg(channel, "%s: %s" % (user, result))
 		return True
 		
 	def privateAction(self, connection, user, channel, message, matchindex = 0):
