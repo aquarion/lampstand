@@ -8,14 +8,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 	__name = 'Nickserv'
 
 	def __init__(self, connection):
-		self.privateMatch = (re.compile('This nickname is registered and protected(.*)', re.IGNORECASE),re.compile('Ghost with your nickname has been killed', re.IGNORECASE))
+		self.privateMatch = (re.compile('This nickname is registered(.*)', re.IGNORECASE),re.compile('Ghost with your nickname has been killed', re.IGNORECASE), re.compile('Reidentify'))
 
 
 
 	def privateAction(self, connection, user, channel, message, matchindex = 0):
-		if matchindex == 0:
+		if matchindex == 0 or matchindex == 2:
 
-			if user == 'NickServ':
+			if user == 'NickServ' or user == "Aquarion":
 				if connection.chanserv_password != False:
 					print '[IDENTIFY] Identifying myself to %s ' % user
 					response = "Identify %s" % connection.chanserv_password.encode('ascii')
