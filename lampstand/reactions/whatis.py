@@ -2,7 +2,7 @@ from lampstand.tools import splitAt
 import lampstand.reactions.base
 from lampstand import tools
 import os.path
-import re, time
+import re, time, random
 
 def __init__ ():
 	pass
@@ -80,9 +80,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.msg(channel, "%s: I already had it that way" % user)
 			return True
 
+
+		affermative = ("If you say so.", "Yeath Marthter", "It's done, but I didn't enjoy it", "... Fine", "Your worthless opinion has been recorded for eternity", "Filed under %s" % value[0], "Noted.", "Done", "That doesn't look right, but okay.", "Recorded.", "Carefully crafted consignment collated.", "Fine, done.", "Are you sure you've spelt that right?", "Saved.")
+
+		response = random.choice(affermative)
+
 		query = "insert into define values (0, %s, %s, %s, NOW())";
 		cursor.execute(query, (key, value, user) )
-		connection.msg(channel, "%s: If you say so." % user)
+		connection.msg(channel, "%s: %s" % (user, response))
 		return True
 
 
