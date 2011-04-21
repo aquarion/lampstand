@@ -22,15 +22,17 @@ class Reaction(lampstand.reactions.base.Reaction):
 	inventorysize = 10
 	
 	def __init__(self, connection):
-		self.channelMatch = (re.compile('(%s: take|gives %s) ([\w\s\d\'\-]*?\S)\.?$' % (connection.nickname, connection.nickname), re.IGNORECASE),
-			re.compile('%s. inventory' % connection.nickname, re.IGNORECASE),
-			re.compile('%s. (attack|smite) (\S*)' % connection.nickname, re.IGNORECASE),
-			re.compile('%s. do science\!?' % connection.nickname, re.IGNORECASE),
-			re.compile('%s. drop (.*).?' % connection.nickname, re.IGNORECASE),
-			re.compile('%s. (mis|)quote ben(|jamin) franklin' % connection.nickname, re.IGNORECASE),
-			re.compile('%s. what have I forgotten(| to pack)\??' % connection.nickname, re.IGNORECASE),
-			re.compile('%s. are you pondering what I\'m pondering\?' % connection.nickname, re.IGNORECASE),
-			re.compile('%s. examine (.*?)\.?$' % connection.nickname, re.IGNORECASE))
+		self.channelMatch = (re.compile('(%s: take|gives %s) ([\w\s\d\'\-]*?\S)\.?$' % (connection.nickname, connection.nickname), re.IGNORECASE), #0
+			re.compile('%s. inventory' % connection.nickname, re.IGNORECASE), #1
+			re.compile('%s. (attack|smite) (\S*)' % connection.nickname, re.IGNORECASE), #2
+			re.compile('%s. do science\!?' % connection.nickname, re.IGNORECASE), #3
+			re.compile('%s. drop (.*).?' % connection.nickname, re.IGNORECASE), #4
+			re.compile('%s. (mis|)quote ben(|jamin) franklin' % connection.nickname, re.IGNORECASE), #5
+			re.compile('%s. what have I forgotten(| to pack)\??' % connection.nickname, re.IGNORECASE), #6
+			re.compile('%s. what has (\w*) forgotten(| to pack)\??' % connection.nickname, re.IGNORECASE), #7
+			re.compile('%s. are you pondering what I\'m pondering\?' % connection.nickname, re.IGNORECASE), #8
+			re.compile('%s. examine (.*?)\.?$' % connection.nickname, re.IGNORECASE) #9
+			)
 		self.dbconnection = connection.dbconnection
 
 		self.overuseReactions = ("I am not a bag of holding, leave me alone.",
@@ -268,8 +270,16 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 			connection.msg(channel, "%s: You have forgotten %s" % (user, itemone))
 			return 1
+		elif (matchIndex == 7): # Packing
+			person = self.channelMatch[7].findall(message)[0][0];
+                        cursor = self.dbconnection.cursor()
+                        cursor.execute('select item from item ORDER BY RAND() limit 1');
+			itemone = cursor.fetchone()[0];
+
+			connection.msg(channel, "%s: %s has forgotten %s" % (user, person, itemone))
+			return 1
 				
-		elif (matchIndex ==7 ): #Pinky
+		elif (matchIndex ==8 ): #Pinky
 			cursor = self.dbconnection.cursor()
 			cursor.execute('select item from item ORDER BY RAND() limit 5');
 			itemone = cursor.fetchone()[0];
@@ -315,7 +325,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.msg(channel, out + random.choice(options) )
 			return 1
 
-		elif (matchIndex == 8): # examine
+		elif (matchIndex == 9): # examine
 	                cursor = self.dbconnection.cursor()
 			item = self.channelMatch[8].findall(message)[0];
 			
