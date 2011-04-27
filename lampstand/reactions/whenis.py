@@ -1,6 +1,7 @@
 import re, time, random, sys, string, datetime
 import lampstand.reactions.base
 import dateutil.parser
+from datetime import datetime, timedelta
 from subprocess import *
 from lampstand import tools
 
@@ -47,8 +48,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		print "[When is] called with '%s'" % match[0][1]
 		
-		
-
 		eventSearch = match[0][1]
 		eventName   = match[0][1]
 		tiswas      = match[0][0]
@@ -96,24 +95,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 			event = cursor.fetchone()
 
 
-		# Aborted attempt to handle arbitary dates
-		#if event == None:
-		#	print "Attempting to parse %s as date" % eventSearch
-		#	try:
-		#		cmd = "'echo strtotime(\"%s\")\;'" % eventSearch
-		#		#print cmd
-		#		#sysres = subprocess.Popen(["/usr/bin/php",cmd ], stdout=subprocess.PIPE).communicate()
-		#		output = Popen(["/usr/bin/php", "-r", cmd], stdout=PIPE).communicate()[0]
-		#		print output
-		#		#sysres = os.system(cmd);
-		#		print "Sysres: %s " % sysres;
-		#		if not sysres == 0:
-		#			eventDate = datetime.datetime.fromtimestamp(sysres);
-		#			#epoch = time.mktime(eventDate.timetuple();
-		#			event = (eventDate, eventDate.isoformat(" "), "Time", None, epoch, None)
-		#	except ValueError:
-		#		pass
-		
 		print event
 		eventClass = event[2]
 	
