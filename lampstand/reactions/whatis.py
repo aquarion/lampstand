@@ -74,6 +74,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		cursor = self.dbconnection.cursor()
 
+		if len(key) > 254 or len(value) > 254:
+			connection.msg(channel, "Definitions, not essays please %s. Keep it under 255 characters and we'll get along fine." % user) 
+			return True
+
 		query = "Select * from define where lower(word) = %s and lower(definition) = %s"
 		cursor.execute(query, (key.lower(), value.lower()) )
 		if cursor.fetchone():
