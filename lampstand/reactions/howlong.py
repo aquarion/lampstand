@@ -73,10 +73,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 		if eventName.lower() == "downtime opens" or eventName.lower() == "downtime returns":
 			return "FOIP."
 
-		#aliases = { 'cunts do christmas' : 'Havocstan Midwinter Festival', "cdc" : 'Havocstan Midwinter Festival'}
-		#if aliases.has_key(eventName.lower()):
-		#	print "found alias"
-		#	eventSearch = aliases[eventName.lower()]
+		if eventName.lower() == "downtime closes" or eventName.lower() == "panic":
+			return "Shortly after your mum."
 
 
 		if (match[0][0] == "until"):
