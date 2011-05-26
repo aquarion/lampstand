@@ -17,7 +17,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			re.compile('quit (.*)', re.IGNORECASE),
 			re.compile('status', re.IGNORECASE),
 			re.compile('reload (.*)', re.IGNORECASE),
-			re.compile('kick (\w*?)( .*)?', re.IGNORECASE),
+			re.compile('kick (\#\w*?) (.*?) (.*)', re.IGNORECASE),
 			re.compile('join (\#\w*)', re.IGNORECASE),
 			re.compile('leave (\#\w*)( .*)?', re.IGNORECASE),
 			re.compile('unload (\w*)', re.IGNORECASE),
@@ -57,8 +57,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.msg(user, result)
 		elif matchindex == 5: # kick
 			print matches
-			print "Kicking %s from %s with the message %s" % (matches[0][0], channel, matches[0][1])
-			connection.kick('#maelfroth', matches[0][0], matches[0][1])
+			matches = matches[0]
+			print "Kicking %s from %s with the message %s" % (matches[0], channel, matches[0][1])
+			connection.kick(matches[0], matches[1], matches[2])
 		elif matchindex == 6: # join
 			print matches
 			print "Joining %s " % (matches[0])
