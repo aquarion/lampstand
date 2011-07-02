@@ -96,11 +96,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 				connection.me(channel, hug.hug(user))
 				return 
 
-			if item in connection.people:
+			if item.lower() in map(str.lower, connection.people):
 				connection.msg(channel, "I'm not a fucking transit system, either.")
 				return
 				
-			if item in self.items:
+			if item in map(str.lower, self.items):
 				connection.msg(channel, "I already have one, thanks")
 				return
 			
@@ -245,15 +245,18 @@ class Reaction(lampstand.reactions.base.Reaction):
 					self.save()
 				else:
 					connection.msg(channel, "I don't have to listen to you. So neh.")
-			elif item == "a lantern":
+			elif item.lower() == "a lantern":
 				connection.msg(channel, '%s: Nuh-uh. This is grue country.' % user)
-			elif item in self.items:
-				self.items.remove(item)
+			elif item.lower() in map(str.lower, self.items):
+				i = map(str.lower, self.items).index(item.lower())
+				del self.items[i]			
 				connection.msg(channel, '%s: Dropped "%s"' % (user, item))
 				self.save()
 				
 			else:
 				connection.msg(channel, '%s: I don\'t have one.' % user)
+				print item
+				print map(str.lower, self.items)
 
 		elif (matchIndex == 5): # franklin
                         cursor = self.dbconnection.cursor()
