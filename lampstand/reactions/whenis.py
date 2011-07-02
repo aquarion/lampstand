@@ -112,12 +112,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 		timeformat = "%A %d %B %Y at %H:%M";
 
 		if(event[5] == None or event[5] == 0):
-			start = datetime.datetime.fromtimestamp(event[4]).strftime(timeformat);
+			start = datetime.fromtimestamp(event[4]).strftime(timeformat);
 			message = "%s: %s %s %s" % (eventClass, eventName, tiswas, start);
 			print "Using is (No time out data)"
 		else:
-			start = datetime.datetime.fromtimestamp(event[4]).strftime(timeformat)
-			end   = datetime.datetime.fromtimestamp(event[5]).strftime(timeformat)
+			start = datetime.fromtimestamp(event[4]).strftime(timeformat)
+			end   = datetime.fromtimestamp(event[5]).strftime(timeformat)
 			message = "%s: %s %s from %s to %s" % (eventClass, eventName, tiswas, start, end);
 			print "Using time in (No time out data)"
 

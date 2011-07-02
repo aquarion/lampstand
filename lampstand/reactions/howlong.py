@@ -69,6 +69,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 		eventSearch = match[0][1]
 		eventName = match[0][1]
+		likematch = "%%%s%%" % eventSearch
 	
 		if eventName.lower() == "downtime opens" or eventName.lower() == "downtime returns":
 			return "FOIP."
@@ -91,7 +92,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		cursor = self.dbconnection.cursor()
 			
 		# First, try direct description matches. First in the future (past if it's since)...	
-		rawquery = 'SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch FROM events where (description LIKE %%s or aliases LIKE %%s) and datetime %s now() order by datetime %s'
+		rawquery = 'SELECT datetime, description, class, datetime_end, UNIX_TIMESTAMP(datetime) as datetime_epoch, UNIX_TIMESTAMP(datetime_end) as datetime_end_epoch FROM events where (description LIKE %%s or aliases LIKE %%s or class LIKE %%s) and datetime %s now() order by datetime %s'
 
 		try:
 			result = dateutil.parser.parse(eventSearch)
@@ -100,14 +101,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 			query = rawquery % (firstTry[0], firstTry[1])
 		
-			cursor.execute(query, (eventSearch, "%%%s%%" % eventSearch) )
+			cursor.execute(query, (eventSearch, likematch, likematch ) )
 			event = cursor.fetchone()
 	
-			print query % (eventSearch, "%%%s%%" % eventSearch)
+			print query % (eventSearch, likematch, likematch)
 		
 			# Second, try Description matches in the past (future if it's since)...
 			if event == None:
-				query = rawquery % (thenTry[0], thenTry[1])
+				query = rawquery % (thenTry[0], thenTry[1], thenTry[1])
 				cursor.execute(query, (eventSearch, "%%%s%%" % eventSearch) )
 				event = cursor.fetchone()
 				if tiswas == "was":
@@ -156,7 +157,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			return "No idea, sorry. There's a list of stuff I know about at http://www.maelfroth.org/events.php"
 			
 		print event
-		eventName  = event[1]
+		eventName  = event[2]+": "+event[1]
 
 		# 0 datetime, 1 description, 2 class, 3 date_end, 4 date_epoch, 5 date_end_epoch
 		
