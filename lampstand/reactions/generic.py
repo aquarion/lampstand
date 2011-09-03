@@ -32,7 +32,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			("make me a sandwich", "", "Yeah, right."),
 			("sudo make me a sandwich", "", "sudo go stick your head in a pig"),
 			("(go )?up$", "", "Gravity is harsh mistress."),
-			("fuck you", "No.", fuckyou)
+			("(fuck|screw) you", "No.", fuckyou)
 			]
 
 		self.channelMatch = []
@@ -46,8 +46,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 		self.reactions.append(('.*pokes %s' % connection.nickname, '', "Do I look like a facebook user? Fuck off."))
 		self.channelMatch.append(re.compile(".*pokes %s" % (connection.nickname), re.IGNORECASE))
 		
-		self.reactions.append(("Fuck you,? %s" % connection.nickname, 'No', fuckyou))
-		self.channelMatch.append(re.compile("Fuck you,? %s" % (connection.nickname), re.IGNORECASE))
+		self.reactions.append(("(Screw|Fuck) you,? %s" % connection.nickname, 'No', fuckyou))
+		self.channelMatch.append(re.compile("(Screw|Fuck) you.? %s" % (connection.nickname), re.IGNORECASE))
 		
 		self.reactions.append(('^\.\.\.$', '', ("%dots!", "%MORE DOTS!", "%[... Suddenly, everything goes quiet...]")))
 		self.channelMatch.append(re.compile("^\.\.\.$", re.IGNORECASE))
