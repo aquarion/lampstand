@@ -23,8 +23,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.msg(channel, "I'm out of boxes, new delivery shortly.")
 			return
 
-		connection.msg(channel, "Sorry, %s, the warehouse is on strike, and boxes aren't available" % user)
-		return
+		#connection.msg(channel, "Sorry, %s, the warehouse is on strike, and boxes aren't available" % user)
+		#return
 		
 		print "[Box] called "
 
@@ -36,7 +36,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		description = re.findall('<p>\n(.*)\n</p>', box, re.MULTILINE)[0];		
 
-		result = 'In a box on level %d, I found: %s ' % (level, description)
+		result = 'In a box on level %d there is %s ' % (level, description)
 
 		result = ' '.join(result.split('\n'))
 
