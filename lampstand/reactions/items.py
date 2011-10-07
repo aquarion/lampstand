@@ -63,6 +63,18 @@ class Reaction(lampstand.reactions.base.Reaction):
 		except:
 			self.items = self.defaultItems
 
+	def drop(self, item):
+		if item == "a lantern":
+			return False
+
+		if item.lower() in map(str.lower, self.items):
+			i = map(str.lower, self.items).index(item.lower())
+			del self.items[i]
+			return True
+		else:
+			return False
+
+
 	def channelAction(self, connection, user, channel, message, matchIndex = False):
 		
 		print 'Looking at <<%s>>' % message
@@ -232,8 +244,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 			#	dropi = self.items.index(drop);
 			#	del self.items[dropi]
 			#	result = "Dropped \"%s\" in order to take \"%s\"" % (drop, hugresponse)
-				
-			#self.items.append(hugresponse)
+			
+			self.drop(item)
+			self.drop(item2)
+			self.items.append(hugresponse)
 		
 		elif (matchIndex == 4): # drop
 			item = self.channelMatch[4].findall(message)[0];
@@ -248,9 +262,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 			elif item.lower() == "a lantern":
 				connection.msg(channel, '%s: Nuh-uh. This is grue country.' % user)
 			elif item.lower() in map(str.lower, self.items):
-				i = map(str.lower, self.items).index(item.lower())
-				del self.items[i]			
-				connection.msg(channel, '%s: Dropped "%s"' % (user, item))
+				result = self.drop(item)
+				if result:
+					connection.msg(channel, '%s: Dropped "%s"' % (user, item))
+				
 				self.save()
 				
 			else:
