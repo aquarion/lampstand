@@ -31,7 +31,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			re.compile('%s. what have I forgotten(| to pack)\??' % connection.nickname, re.IGNORECASE), #6
 			re.compile('%s. what has (\w*) forgotten(| to pack)\??' % connection.nickname, re.IGNORECASE), #7
 			re.compile('%s. are you pondering what I\'m pondering\?' % connection.nickname, re.IGNORECASE), #8
-			re.compile('%s. examine (.*?)\.?$' % connection.nickname, re.IGNORECASE) #9
+			re.compile('%s. examine (.*?)\W*$' % connection.nickname, re.IGNORECASE) #9
 			)
 		self.dbconnection = connection.dbconnection
 
@@ -97,7 +97,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 			if (channel == "#lampstand" and user.lower() != "aquarion"):
 				print "Not allowing %s on %s to do that" % (user, channel)
-				connection.msg(channel, "%s: no." % user)
+				connection.msg(channel, "%s: You can't give me things on #lampstand" % user)
 				return
 				
 
@@ -138,7 +138,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 			cursor = self.dbconnection.cursor()
 			cursor.execute('insert into item (item, author) values (%s, %s)', (item, user) )
 			self.dbconnection.commit()
-			
 			self.save()
 			connection.me(channel, result.encode('utf8'))
 			#connection.notice(channel, "I have %d items" % self.items.count(True))
@@ -218,7 +217,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 			attributes = ("neutron flow", "positrons", "third aspect", "cangrip", "buckelfier-subsystem", "pseudodancer", "electron river", "Danson", "neurotoxin flow", "contraits", "buckminster routine", "reverse cowgirl", "complexigon", "oxygen depriver", "elysia simulation routine", "splines")
 			
 			# Lampstand $actions the $attribute on $item and $actions $item to create $hugresponse
-			
+
+			if len(self.items) <= 2:
+				connection.msg(channel, "I don't have enough things on which to do SCIENCE!")
+				return			
+
 			item = random.choice(self.items)
 			item2 = item
 			while item2 == item:
@@ -248,6 +251,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 			self.drop(item)
 			self.drop(item2)
 			self.items.append(hugresponse)
+
+			creator = "%s's science experiment" % user
+			cursor = self.dbconnection.cursor()
+			cursor.execute('insert into item (item, author) values (%s, %s)', (hugresponse, creator) )
+			self.dbconnection.commit()
+			self.save()
 		
 		elif (matchIndex == 4): # drop
 			item = self.channelMatch[4].findall(message)[0];
@@ -345,10 +354,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		elif (matchIndex == 9): # examine
 	                cursor = self.dbconnection.cursor()
-			item = self.channelMatch[8].findall(message)[0];
+			item = self.channelMatch[9].findall(message)[0];
 			
 			if item == "a lantern":
 				connection.msg(channel, '%s: It is a battery powered brass lantern' % user)
+			elif item.lower() == user.lower():
+				connection.msg(channel, '%s: I see a meatsack with a propensity for stupid questions' % user)
 			elif item.lower() == connection.nickname.lower():
 				connection.msg(channel, '%s: I am he as you are he as you are me and we are all together.' % user)
 			elif item in self.items:
