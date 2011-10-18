@@ -157,7 +157,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 			return "No idea, sorry. There's a list of stuff I know about at http://www.maelfroth.org/events.php"
 			
 		print event
-		eventName  = event[2]+": "+event[1]
+		if event[2]:
+			eventName  = event[2]+": "+event[1]
+		else:
+			eventName  = event[1]
 
 		# 0 datetime, 1 description, 2 class, 3 date_end, 4 date_epoch, 5 date_end_epoch
 		
