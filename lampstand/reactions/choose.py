@@ -16,7 +16,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	uses = []
 
 	def __init__(self, connection):
-		self.channelMatch = re.compile('^%s. (.* or .*)' % connection.nickname, re.IGNORECASE)
+		self.channelMatch = re.compile('^%s. (choose|should I) (.* or .*)' % connection.nickname, re.IGNORECASE)
 		self.privateMatch = re.compile('(.* or .*)\??$', re.IGNORECASE)
 
 	def channelAction(self, connection, user, channel, message):
@@ -31,9 +31,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 		match = self.channelMatch.findall(message)
 
-		if match[0][0:7].lower() == "define ":
-			return False
-
 
                 if random.randint(0,100) == 69:
 			print "Yes";
@@ -45,7 +42,8 @@ class Reaction(lampstand.reactions.base.Reaction):
                         connection.msg(channel, "%s: edge" % user)
 			return True
 		
-		reaction = self.choose(match[0])
+		print match
+		reaction = self.choose(match[0][1])
 		if reaction.lower() == "death" and user.lower() != "aquarion":
 			connection.kick(channel,user, "Death.")
 		elif reaction.lower() == "boom" and user.lower():
@@ -76,13 +74,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 		if message[-1:] == "?":
 			message = message[:-1]
 
-		if message[0:7].lower() == "choose ":
-			message = message[7:]
-		else:
-			return "Sorry, You need to prefix that with \"choose\" now."
-			pass
-
-		print message[0:7]
 		print message
 
 		#new regex by ccooke - 2010-05-28
