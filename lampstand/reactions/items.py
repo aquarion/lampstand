@@ -106,6 +106,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 			if item.lower() == "a hug":
 				hug = lampstand.reactions.hug.Reaction(connection);
 				connection.me(channel, hug.hug(user))
+				return
+
+			if item.lower() == "a botsnack":
+				connection.msg(channel, "Nom")
 				return 
 
 			if item.lower() in map(str.lower, connection.people):
