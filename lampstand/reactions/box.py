@@ -23,8 +23,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.msg(channel, "I'm out of boxes, new delivery shortly.")
 			return
 
-		#connection.msg(channel, "Sorry, %s, the warehouse is on strike, and boxes aren't available" % user)
-		#return
+		connection.msg(channel, "Sorry, %s, the warehouse is on strike, and boxes aren't available" % user)
+		return
 		
 		print "[Box] called "
 
