@@ -108,8 +108,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 			# Second, try Description matches in the past (future if it's since)...
 			if event == None:
-				query = rawquery % (thenTry[0], thenTry[1], thenTry[1])
-				cursor.execute(query, (eventSearch, "%%%s%%" % eventSearch) )
+				query = rawquery % (thenTry[0], thenTry[1])
+				cursor.execute(query, (eventSearch, "%%%s%%" % eventSearch, likematch) )
 				event = cursor.fetchone()
 				if tiswas == "was":
 					tiswas = "is"
