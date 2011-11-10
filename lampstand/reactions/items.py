@@ -42,6 +42,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			"But it's *mine*",
 			"He that falls in love with himself will have no rivals.",
 			"The kitchen sink. Leave me alone.",
+			"The kitchen sink. Leave me alone.",
 			"No. LEAVE ME ALONE.",
 			"It looks like one of those things that it is. GO AWAY.")
 		
