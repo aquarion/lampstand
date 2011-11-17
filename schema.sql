@@ -2,7 +2,7 @@
 --
 -- Host: localhost    Database: maelfroth
 -- ------------------------------------------------------
--- Server version	5.0.51a-24+lenny4-log
+-- Server version	5.0.51a-24+lenny5-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -30,7 +30,7 @@ CREATE TABLE `define` (
   `timestamp` tinytext NOT NULL,
   PRIMARY KEY  (`id`),
   KEY `word` (`word`)
-) ENGINE=MyISAM AUTO_INCREMENT=847 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1389 DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -48,8 +48,23 @@ CREATE TABLE `events` (
   `class` varchar(64) default NULL,
   `datetime_end` datetime default NULL,
   `aliases` varchar(255) NOT NULL,
+  `url` varchar(255) NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=104 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=147 DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `gameaccounts`
+--
+
+DROP TABLE IF EXISTS `gameaccounts`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `gameaccounts` (
+  `username` varchar(255) NOT NULL,
+  `steamname` varchar(255) NOT NULL,
+  `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -82,7 +97,7 @@ CREATE TABLE `item` (
   PRIMARY KEY  (`id`),
   KEY `author` (`author`),
   KEY `item` (`item`)
-) ENGINE=MyISAM AUTO_INCREMENT=300 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=598 DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -133,6 +148,45 @@ CREATE TABLE `nickserv` (
 SET character_set_client = @saved_cs_client;
 
 --
+-- Table structure for table `part`
+--
+
+DROP TABLE IF EXISTS `part`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `part` (
+  `id` int(11) NOT NULL auto_increment,
+  `title` tinytext NOT NULL,
+  `author` int(10) unsigned default NULL,
+  `dateadded` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `content` mediumtext,
+  `coolness` int(11) default NULL,
+  `votes` mediumtext,
+  `restricted` bit(1) default NULL,
+  `story` int(10) unsigned default '0',
+  `backto` int(10) unsigned default NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `partlink`
+--
+
+DROP TABLE IF EXISTS `partlink`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `partlink` (
+  `id` int(11) NOT NULL auto_increment,
+  `linkto` int(11) NOT NULL,
+  `linkfrom` int(11) NOT NULL,
+  `linkname` tinytext NOT NULL,
+  `linklock` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
 -- Table structure for table `revision`
 --
 
@@ -147,7 +201,7 @@ CREATE TABLE `revision` (
   `creator` tinytext NOT NULL,
   `created` datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (`revision`)
-) ENGINE=MyISAM AUTO_INCREMENT=354 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=501 DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -184,7 +238,7 @@ CREATE TABLE `users` (
   `access_level` int(11) default '0',
   `creationsite` varchar(255) default NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=59 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=84 DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -222,7 +276,7 @@ CREATE TABLE `wikipage` (
   `origin` tinytext,
   `yalelock` tinytext,
   PRIMARY KEY  (`page`)
-) ENGINE=MyISAM AUTO_INCREMENT=113 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=131 DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -234,4 +288,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2010-07-17  1:41:56
+-- Dump completed on 2011-11-17 10:24:29
