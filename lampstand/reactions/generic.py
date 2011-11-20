@@ -34,7 +34,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			("(go )?up$", "", "Gravity is harsh mistress."),
 			("thank you", "", ('Your mortal thanks mean little to me', "You're welcome", "No problem")),
 			("shall we play a game?", "", ("How about a game of thermonuclear war?", "Not right now", "Portal 3 Co-op?", "XKCD says we've already won it.", "The only way to win is not to play.")),
-			("(fuck|screw) you", "No.", fuckyou)
+			("(fuck|screw) you", "No.", fuckyou),
+			("help", "I can't help you, you must help yourself.", "Try http://www.maelfroth.org/lampstand.php")
 			]
 
 		self.channelMatch = []
