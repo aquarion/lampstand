@@ -15,8 +15,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	def __init__(self, connection):
 
-		self.default = "chocolate";
-
 		self.channelMatch = (
 			re.compile('%s: what should I play\?' % connection.nickname, re.IGNORECASE),
 			re.compile('%s: my steam profile is (\S*)' % connection.nickname, re.IGNORECASE))
@@ -108,9 +106,17 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	def pickAGame(self, steam):
 		
-		games = steam.getElementsByTagName('game')
+		if random.randint(0,100) == 25:
+			return "Odyssey, obviously".
+		
 
-		game = random.choice(games)
+		if random.randint(0,2) == 1:
+			games = steam.getElementsByTagName('game')
+			game = random.choice(games)
+		else:
+			games = steam.getElementsByTagName('hoursLast2Weeks')
+			game = random.choice(games).parentNode
+			
 
 		gamename = game.getElementsByTagName('name')[0].childNodes[0].data
 
