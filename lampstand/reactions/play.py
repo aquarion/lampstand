@@ -107,7 +107,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	def pickAGame(self, steam):
 		
 		if random.randint(0,100) == 25:
-			return "Odyssey, obviously".
+			return "Odyssey, obviously"
 		
 
 		if random.randint(0,2) == 1:
