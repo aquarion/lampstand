@@ -19,7 +19,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		self.reactions = [
 			('Take the money', "Thank you, I shall.", "Already did."),
 			('How long \'?til .*\??', "Two hours.", "That's tomorrow, isn't it?"),
-			('Open the pod bay doors', "I think you have your AIs confused.", "I can't do that, Dave"),
+			('Open the pod bay doors', "I think you have your AIs confused.", ("I can't do that, Dave", "Not a chance.", "Do you see any pods?", "Go stick your head in bacon", "I can't do that, meatsack", "... Oh do sod off.")),
 			('Where do you get the boxes?', "", "The boxes come from SJGames' http://www.warehouse23.com/basement/ Level One"),
 			('Hello', '', 'Hi there'),
 			("Roll with it", '', "~takes his time"),
@@ -31,8 +31,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 			("(go )?down$", "", "Down? Down is the lesbian pit. Do you really want to go d... nevermind. No, No you can't."),
 			("make me a sandwich", "", "Yeah, right."),
 			("sudo make me a sandwich", "", "sudo go stick your head in a pig"),
+			("sudo (.*)", "", ("This incident will be reported", "Password> _", "sudo fuck right off")),
 			("(go )?up$", "", "Gravity is harsh mistress."),
-			("thank you", "", ('Your mortal thanks mean little to me', "You're welcome", "No problem")),
+			("thank( you|s)", "", ('Your mortal thanks mean little to me', "You're welcome, meatsack", "No problem, squishy mortal.", "Feel free to repay me in unswerving loyalty later.")),
 			("shall we play a game?", "", ("How about a game of thermonuclear war?", "Not right now", "Portal 3 Co-op?", "XKCD says we've already won it.", "The only way to win is not to play.")),
 			("(fuck|screw) you", "No.", fuckyou),
 			("help", "I can't help you, you must help yourself.", "Try http://www.maelfroth.org/lampstand.php")
