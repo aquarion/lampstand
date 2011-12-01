@@ -392,6 +392,8 @@ class LampstandLoop(irc.IRCClient):
 		self.channel.action(user, channel, msg)
 		self.logger.log("* %s %s" % (user, msg))
 
+	def message(self, user, message, length=200):
+		return self.msg(user,message,length)
 
 	# irc callbacks
 

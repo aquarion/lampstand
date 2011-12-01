@@ -35,26 +35,26 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		if matchindex == 0:
 			#print "[Say] %s %s" % (sys.argv[1], matches[0])
-			connection.msg("#%s" % matches[0][0], matches[0][1])
-			connection.msg(user, "%s" % matches)
+			connection.message("#%s" % matches[0][0], matches[0][1])
+			connection.message(user, "%s" % matches)
 		elif matchindex == 1:
 			#print "[Do] %s %s" % (sys.argv[1], matches[0])
 			connection.me("#%s" % matches[0][0], matches[0][1])
-			connection.msg(user, "%s" % matches)
+			connection.message(user, "%s" % matches)
 			#connection.me("#%s" % sys.argv[1], matches[0])
 		elif matchindex == 2:
 			print "[Quit] %s" % (matches[0])
 			connection.quit("For the sword outwears its sheath, and the soul wears out the breast. And the heart must pause to breathe, and love itself have rest.")
 		elif matchindex == 3: # status
-			connection.msg(user, 'State of the lampstand is awesome')
-			connection.msg(user, 'Channel: %s' % connection.channelModules)
-			connection.msg(user, 'Private: %s' % connection.privateModules)
-			connection.msg(user, 'Nick Change: %s' % connection.nickChangeModules)
-			connection.msg(user, 'Leave: %s' % connection.leaveModules)
-			connection.msg(user, 'Join: %s' % connection.joinModules)
+			connection.message(user, 'State of the lampstand is awesome')
+			connection.message(user, 'Channel: %s' % connection.channelModules)
+			connection.message(user, 'Private: %s' % connection.privateModules)
+			connection.message(user, 'Nick Change: %s' % connection.nickChangeModules)
+			connection.message(user, 'Leave: %s' % connection.leaveModules)
+			connection.message(user, 'Join: %s' % connection.joinModules)
 		elif matchindex == 4: # reload
 			result = connection.installModule(matches[0]);
-			connection.msg(user, result)
+			connection.message(user, result)
 		elif matchindex == 5: # kick
 			print matches
 			matches = matches[0]
@@ -73,20 +73,20 @@ class Reaction(lampstand.reactions.base.Reaction):
 				connection.part(matches[0][0])
 		elif matchindex == 8: # unload
 			result = connection.removeModuleActions(matches[0])
-			connection.msg(user, result)
+			connection.message(user, result)
 		elif matchindex == 9: # reload config
 			print "Reload Config"
 			result = connection.loadConfig()
 			for thingy in connection.config.items("modules"):
 				connection.installModule(thingy[0])
-			connection.msg(user, connection.config)
+			connection.message(user, connection.config)
 		elif matchindex == 10: # sysreload
 			module = matches[0];
 	                if (sys.modules.has_key(module)):
        	                	reload(sys.modules[module]);
                         	rtn = 'Reloaded %s' % module
-                        	connection.msg(user, rtn);
+                        	connection.message(user, rtn);
 			else:
-				connection.msg(user, "%s Not found" % matches[0])
+				connection.message(user, "%s Not found" % matches[0])
 
 		return True
