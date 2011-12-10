@@ -97,7 +97,7 @@ class ChannelActions:
 	def leave(self, reason, user, parameters):
 
 			if user == self.connection.original_nickname and self.connection.nickname != self.connection.original_nickname:
-					self.connection.register(self.original_nickname)
+					self.connection.register(self.connection.original_nickname)
 
 			for leaveModule in self.connection.leaveModules:
 				leaveModule.leaveAction(self.connection, user, reason, parameters)

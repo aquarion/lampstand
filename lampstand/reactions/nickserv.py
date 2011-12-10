@@ -8,7 +8,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	__name = 'Nickserv'
 
 	def __init__(self, connection):
-		self.privateMatch = (re.compile('Please identify via /msg NickServ identify \<password\>\.', re.IGNORECASE),re.compile('Ghost with your nickname has been killed', re.IGNORECASE), re.compile('Reidentify'))
+		self.privateMatch = (re.compile('^Please identify via', re.IGNORECASE),re.compile('Ghost with your nickname has been killed', re.IGNORECASE), re.compile('Reidentify', re.IGNORECASE))
 
 
 
