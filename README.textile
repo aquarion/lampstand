@@ -1,0 +1,182 @@
+h1. Lampstand
+
+Lampstand is a bot written for #maelfroth by Nicholas 'Aquarion' Avenell, who can be reached at nicholas at aquarionics dot com. It basically does stuff Aquarion thinks is cool, or that people have suggested. A synergy of both is more likely to happen than the latter, to be honest.
+
+These are (most of) the things it does:
+
+h2. Bible Reaction
+
+@Lampstand: Rev 2:5@
+
+21:52 [Lampstand] Aquarion, Revelation 2:5   [5]Remember therefore from where you have fallen; repent, and do the works you did at first. If not, I will come to you and remove your lampstand from its place, unless you repent. [ESV]
+
+Scripture taken from The Holy Bible, English Standard Version. Copyright Â©2001 by <a href="http://www.crosswaybibles.org">Crossway Bibles</a>, a publishing ministry of Good News Publishers. Used by permission. All rights reserved. Text provided by the <a href="http://www.gnpcb.org/esv/share/services/">Crossway Bibles Web Service</a>.
+
+h2. Boxes
+
+@Lampstand: Open the box@
+
+@[Lampstand] (describes what it finds)@
+
+(The boxes come from SJGames' "Warehouse 23 basement":http://www.warehouse23.com/basement/box/)
+
+h2. Choose
+
+@Lampstand: choose Toast, jam or sandwiches?@
+[Lampstand] Jam
+
+(You are advised not to ask Lampstand "Cake or death". Results may be unpredicatable).
+
+(This is now requires the "choose" in order that I can recognise choose requests as distinct from other times you might want to use the word "or")
+
+h2. Cutout
+
+Lampstand attempts to guess when over-long lines get cut out. This functionality is not complete yet.
+
+h2. Dice
+
+@Lampstand: Roll 4d6+12@
+
+11:00 [Aquarion] Lampstand: Roll 4d6+12
+11:00 [Lampstand] Aquarion, You rolled 4d6, you got [3, 1, 6, 4] +12 = 26
+
+@Lampstand: Roll lowest4 6d6+12@
+
+11:00 [Aquarion] Lampstand: Roll lowest4 6d6+12
+11:00 [Lampstand] Aquarion, You rolled [ 3, 4, 6, 4, 6, 5 ], kept [ 3, 4, 4, 5 ] Total 16 +12 = 28
+
+(the "lowest4" keyword there can be "lowest" and then any number to catch the bottom set, "best" and then a number to get the top set, and can also be prefixed with "open" to get open-ended dice rolls. Feel free to ask ((~ccooke)) what this means, as he wrote the code for it)
+
+h2. Dictionary 
+
+@Lampstand: look up tea@
+
+bq. 09:48 [Lampstand] Tea Tea (t[=e]), n. [Chin. tsh[=a], Prov. Chin. te: cf. F. th['e].] 1. The prepared leaves of a shrub, or small tree ({Thea Chinensis} or {Camellia Chinensis}). The shrub is a native of China, but has been introduced to some extent into some other countries. [1913 Webster]  Note: Teas are classed as green or black, according to their color or appearance, the kinds being distinguished also by various other characteristic differences,... <br/> 09:48 [Lampstand] ...  as of taste, odor, and the like. The color, flavor, and quality are dependent upon the treatment which the leaves receive after being gathered. The leaves for green tea are heated, or roasted slightly, in shallow pans over a wood fire, almost immediately after being gathered, after which they are rolled with the hands upon a table, to free them from a portion of their moisture, and to twist them, and are then quickly [Cut for length]
+
+
+h2. Eightball
+
+@Lampstand: Ask the 8-ball: Should I document Lampstand fully?@
+[Lampstand] All signs point to yes.
+
+(You can also refer to the 8-ball as "the oracle")
+
+
+h2. Generic
+
+There are a number of static responses under this umbrella. Try "Open the pod bay doors" or "make me a sandwich".  Collect them all!
+
+h2. Haiku
+
+Lampstand collects haiku-form phrases from channel. Currently these are broadcast to #lampstand.
+
+h2. How Long
+
+
+@Lampstand: How long until Event I?@
+[Lampstand] Event I is in 2 days, 2 hours, 9 minutes
+
+You can also ask Lampstand when something is:
+
+@Lampstand: When is until Event I?@
+[Lampstand] Event I starts Friday 21st March 2008 at 18:00
+
+Or for arbitrary dates:
+
+Lampstand: How long until 2010-07-12?
+[Lampstand] 2010-07-12 00:00 is in 14 days, 12 minutes, 31 seconds.
+
+(You can say "12th July" or "07/12/10". Note that it uses american style slash-syntax, so avoid that)
+
+This also works in /query, you don't need to prefix it with Lampstand: though. You can find a list of events Lampstand knows about at "Maelfroth.org/events.php":http://www.maelfroth.org/events.php, which includes a iCal export for your favourite calendar system. New events should be submitted to aquarion at maelfroth dot org
+
+h2. Hugs
+
+@/me hugs Lampstand@
+
+10:52 * Aquarion hugs Lampstand
+10:52 * Lampstand gives Aquarion chocolate
+
+@/msg Lampstand give me toast @
+@/me hugs Lampstand@
+
+10:54 * Lampstand gives Aquarion toast 
+
+
+h2. Insults
+
+@Lampstand: insult McWonerite@
+
+11:02 [Lampstand] McWonerite,  Thou clouted fool-born codpiece!
+
+h2. Items
+
+Lampstand has an inventory. You can give him things like this:
+
+@/me gives Lampstand pancakes@
+[Lampstand] Taken "pancakes"
+
+And get him to drop things like this:
+
+@Lampstand: Drop pancakes@
+[Lampstand] Dropped "pancakes"
+
+You could also try:
+
+* @Lampstand: Attack $personsname@
+* @Lampstand: Do science@
+* @Lampstand: What have I forgotten?@
+* @Lampstand: What has [Someone Else] forgotten?@
+* @Lampstand: are you pondering what I'm pondering?@
+* @Lampstand: examine item@
+* @Lampstand: misquote benjamin franklin@
+
+h2. Play Games
+
+Lampstand has some basic integration with "Steam":http://www.steampowered.com, once you tell it what your account details are. All of these can be used in query, in which case you should drop the Lampstand: prefix.
+
+@Lampstand: What should I play?@
+@Lampstand: What steam game should I play?@
+
+These are currently equivalent, and will reply with a game from your steam library, weighted towards games you've played in the last two weeks. You can say "Which" instead of "What" if it makes you happy. Note that these are Steam Library games, and do not count games which you've added manually to Steam.
+
+@Lampstand: Which of my recent steam games should I play?@
+
+Same as above, but will only select games played in the last two weeks.
+
+@Lampstand: My steam profile is [STEAM_URL_ID]@
+
+This is how you tell Lampstand what your Steam ID is. [STEAM_URL_ID]'s an annoyingly complicated thing to find. Log in to steamcommunity.com and it's the word after "/id/" or the numbers after "/profile/" in the URL of your home page.
+
+h2. Quote
+
+11:02 [Quarn] highly amusing one-liner!
+11:02 [Aquarion] Lampstand: Quote Quarn
+11:02 [Lampstand] Okay, quoting "Quarn: highly amusing one-liner!"
+
+These get added to the "Quotes file":http://www.maelfroth.org/quotes moderation queue.
+
+It will do one line, if you want to quote context, please use the "normal submit form":http://www.maelfroth.org/quotes/index.cgi?action=submit
+
+h2. Weblinks
+
+Lampstand watches for people mentioning links on channel, which then get archived at "Maelfroth.org/Links":http://www.maelfroth.org/links.php
+
+h2. What Is
+
+@Lampstand: Define the world as a place where we live@
+[Lampstand] If you say so.
+
+@Lampstand: What is the world?@
+@[Lampstand] A place where we live@
+
+
+h2. Who was / Last seen
+
+@Hello!@
+
+10:54 [Aquarion] Hello! 
+@Lampstand: Have you seen Aquarion?@
+
+10:54 [Aquarion] Lampstand: Have you seen Aquarion? 
+10:54 [Lampstand] I last saw Aquarion on Sat, 08 March 08 at 10:54 saying Hello! 
