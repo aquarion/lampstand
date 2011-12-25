@@ -17,14 +17,30 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		self.channelMatch = (
 			re.compile('%s: what should I play\?' % connection.nickname, re.IGNORECASE),
-			re.compile('%s: my steam profile is (\S*)' % connection.nickname, re.IGNORECASE))
+			re.compile('%s: my steam profile is (\S*)' % connection.nickname, re.IGNORECASE),
+			re.compile('%s: wh(at|ich) steam game should I play\?' % connection.nickname, re.IGNORECASE),
+			re.compile('%s: wh(at|ich) of my recent steam games should I play\?' % connection.nickname, re.IGNORECASE))
 
 		self.privateMatch = (
 			re.compile('what should I play\?', re.IGNORECASE),
-			re.compile('my steam profile is (\S*)', re.IGNORECASE))
+			re.compile('my steam profile is (\S*)', re.IGNORECASE),
+			re.compile('wh(at|ich) steam game should I play\?' , re.IGNORECASE),
+			re.compile('wh(at|ich) of my recent steam games should I play\?' , re.IGNORECASE))
 
 		self.dbconnection = connection.dbconnection
+
+
+	def respond(self,user,matchIndex):
 	
+		if matchIndex == 0 or matchIndex == 2:
+			output = self.playWhat(user)
+		elif matchIndex == 3:
+			output = self.playWhat(user, limitToRecent=True)
+		elif matchIndex == 1:
+			result = self.channelMatch[matchIndex].findall(message)
+			output = self.setSteam(user, result)
+
+		return output
 	
 	def channelAction(self, connection, user, channel, message, matchIndex = False):
 
@@ -39,27 +55,20 @@ class Reaction(lampstand.reactions.base.Reaction):
 				self.uses = self.uses[0:self.cooldown_number-1]
 		## Overuse Detectection ##
 
-		if matchIndex == 0:
-			output = self.playWhat(user)
-		elif matchIndex == 1:
-			result = self.channelMatch[matchIndex].findall(message)
-			output = self.setSteam(user, result)
-
+		output = self.respond(user,matchIndex)
 		output = "%s: %s" % (user, output)
 
 		connection.msg(channel, output.encode("utf-8"))
 
 
 	def privateAction(self, connection, user, channel, message, matchIndex = False):
+		
+		output = self.respond(user,matchIndex)
 
-		if matchIndex == 0:
-			connection.msg(user, self.playWhat(user).encode("utf-8"))
-		elif matchIndex == 1:
-			result = self.privateMatch[matchIndex].findall(message)
-			connection.msg(user, self.setSteam(user, result).encode("utf-8"))
+		connection.msg(user, output.encode("utf-8"))
 
 
-	def playWhat(self, username):
+	def playWhat(self, username, limitToRecent=False):
 
 		cursor = self.dbconnection.cursor()
 		cursor.execute('SELECT steamname from gameaccounts where username = %s', username)
@@ -75,7 +84,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		if hasattr(steam, '__getitem__'):
 			return steam[1]
 
-		return self.pickAGame(steam)
+		return self.pickAGame(steam, limitToRecent=limitToRecent)
 
 	def helptext(self):
 
@@ -104,13 +113,16 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 
 
-	def pickAGame(self, steam):
+	def pickAGame(self, steam, limitToRecent=False):
 		
 		if random.randint(0,100) == 25:
 			return "Odyssey, obviously"
 		
+		if not limitToRecent and random.randint(0,2) == 1:
+			limitToRecent = True
 
-		if random.randint(0,2) == 1:
+
+		if not limitToRecent:
 			games = steam.getElementsByTagName('game')
 			game = random.choice(games)
 		else:
