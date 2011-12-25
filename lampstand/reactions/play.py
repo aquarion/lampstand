@@ -30,14 +30,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 		self.dbconnection = connection.dbconnection
 
 
-	def respond(self,user,matchIndex):
+	def respond(self,user,matchIndex,matches):
 	
 		if matchIndex == 0 or matchIndex == 2:
 			output = self.playWhat(user)
 		elif matchIndex == 3:
 			output = self.playWhat(user, limitToRecent=True)
 		elif matchIndex == 1:
-			result = self.channelMatch[matchIndex].findall(message)
+			result = matches
 			output = self.setSteam(user, result)
 
 		return output
@@ -55,7 +55,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 				self.uses = self.uses[0:self.cooldown_number-1]
 		## Overuse Detectection ##
 
-		output = self.respond(user,matchIndex)
+		matches = self.channelMatch[matchIndex].findall(message)
+		output = self.respond(user,matchIndex, matches)
 		output = "%s: %s" % (user, output)
 
 		connection.msg(channel, output.encode("utf-8"))
@@ -63,7 +64,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	def privateAction(self, connection, user, channel, message, matchIndex = False):
 		
-		output = self.respond(user,matchIndex)
+		matches = self.privateMatch[matchIndex].findall(message)
+		output = self.respond(user,matchIndex, matches)
 
 		connection.msg(user, output.encode("utf-8"))
 
