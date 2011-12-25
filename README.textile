@@ -14,11 +14,16 @@ Scripture taken from The Holy Bible, English Standard Version. Copyright Â©200
 
 h2. Boxes
 
+Boxes are disabled, currently.
+<!-- 
+
 @Lampstand: Open the box@
 
 @[Lampstand] (describes what it finds)@
 
 (The boxes come from SJGames' "Warehouse 23 basement":http://www.warehouse23.com/basement/box/)
+-->
+
 
 h2. Choose
 
