@@ -155,9 +155,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		(fileopen, fileheaders) = urllib.urlretrieve(steamurl, cachename)
 
+		print "Examining %s" % cachename
+
 		stat = os.stat(fileopen)
 		delta = datetime.datetime.now() - datetime.datetime.fromtimestamp(stat.st_mtime)
 		if delta.seconds > 60*60*12:
+			print " ... Redownloading, cache expired %s" % (delta.seconds / 60*60 )
 			os.remove(fileopen)
 			(fileopen, fileheaders) = urllib.urlretrieve(steamurl, cachename)
 
