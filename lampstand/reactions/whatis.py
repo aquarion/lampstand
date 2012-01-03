@@ -127,7 +127,17 @@ class Reaction(lampstand.reactions.base.Reaction):
 			self.lastasked = key
 			self.answered = row[1]
 		else:
-			connection.msg(channel, "%s: No Clue" % user)
+			dictionary = lampstand.reactions.dict.Reaction(connection);
+			result, src = dictionary.getDefinition(key)
+			if result:
+				self.lastasked2 = self.lastasked
+				self.lastasked = key
+				self.answered = result
+				self.blame = src
+				connection.msg(channel, "%s: %s" % (user, result))
+
+			else:
+				connection.msg(channel, "%s: No Clue" % user)
 		
 		return True
 
