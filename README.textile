@@ -34,6 +34,8 @@ h2. Choose
 
 (This is now requires the "choose" in order that I can recognise choose requests as distinct from other times you might want to use the word "or")
 
+You can use "Should I" instead of "Choose" if it makes your narrative happy.
+
 h2. Cutout
 
 Lampstand attempts to guess when over-long lines get cut out. This functionality is not complete yet.
