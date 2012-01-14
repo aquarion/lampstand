@@ -82,11 +82,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 			return
 
 		self.updateOveruse()
-
-		result, src = self.getDefinition(matches[0])
-
-		if not result:
-			connection.msg(channel, "%s: There is no such word as '%s' in my dictionary. In fact, everything between 'herring' and 'marmalade' appears to be completely missing." % (user, query))
+		try:
+			result, src = self.getDefinition(matches[0])
+		except:
+			connection.msg(channel, "%s: There is no such word as '%s' in my dictionary. In fact, everything between 'herring' and 'marmalade' appears to be completely missing." % (user, matches[0]))
 			return True
 
 		print "[Define] %s" % result
@@ -112,9 +111,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 		matches = self.privateMatch.findall(message);
 
 		print "[Define] %s" % matches
-		result, src = self.getDefinition(matches[0])
+		try:
+			result, src = self.getDefinition(matches[0])
 
-		if not result:
+		except:	
 			connection.msg(user, "%s: There is no such word as '%s' in my dictionary. In fact, everything between 'herring' and 'marmalade' appears to be completely missing." % (user, matches[0]))
 			return True
 
