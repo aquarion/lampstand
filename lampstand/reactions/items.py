@@ -22,7 +22,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 	inventorysize = 10
 	
 	def __init__(self, connection):
-		self.channelMatch = (re.compile('(%s: take|gives %s) ([\w\s\d\'\-\(\)]*?\S)\s*\.?$' % (connection.nickname, connection.nickname), re.IGNORECASE), #0
+		self.channelMatch = (
+			re.compile('(%s: take|gives %s) ([\w\s\d\'\-\(\)]*?\S)\s*\.?$' % (connection.nickname, connection.nickname), re.IGNORECASE), #0
 			re.compile('%s. inventory' % connection.nickname, re.IGNORECASE), #1
 			re.compile('%s. (attack|smite) (\S*)' % connection.nickname, re.IGNORECASE), #2
 			re.compile('%s. do science\!?' % connection.nickname, re.IGNORECASE), #3
@@ -31,7 +32,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			re.compile('%s. what have I forgotten(| to pack)\??' % connection.nickname, re.IGNORECASE), #6
 			re.compile('%s. what has (\w*) forgotten(| to pack)\??' % connection.nickname, re.IGNORECASE), #7
 			re.compile('%s. are you pondering what I\'m pondering\?' % connection.nickname, re.IGNORECASE), #8
-			re.compile('%s. examine (.*?)\W*$' % connection.nickname, re.IGNORECASE) #9
+			re.compile('%s. examine (.*?)\W*$' % connection.nickname, re.IGNORECASE), #9
+			re.compile("(gives) ([\w\s\d\'\-\(\)]*?\S) to %s\.?" % connection.nickname, re.IGNORECASE) #10
 			)
 		self.dbconnection = connection.dbconnection
 
@@ -44,7 +46,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			"The kitchen sink. Leave me alone.",
 			"The kitchen sink. Leave me alone.",
 			"No. LEAVE ME ALONE.",
-			"It looks like one of those things that it is. GO AWAY.")
+			"It looks like one of those things that it is. GO AWAY.",
+			"I am not a bag of holding, leave me alone.")
 		
 		
 		self.load()
@@ -92,9 +95,8 @@ class Reaction(lampstand.reactions.base.Reaction):
                         self.uses = self.uses[0:self.cooldown_number-1]
                 ## Overuse Detectection ##
 
-			
 
-		if (matchIndex == 0):
+		if (matchIndex == 0 or matchIndex == 10):
 
 			if (channel == "#lampstand" and user.lower() != "aquarion"):
 				print "Not allowing %s on %s to do that" % (user, channel)
@@ -102,7 +104,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 				return
 				
 
-			item = self.channelMatch[0].findall(message)[0][1];
+			item = self.channelMatch[matchIndex].findall(message)[0][1];
 
 			if item.lower() == "a hug":
 				hug = lampstand.reactions.hug.Reaction(connection);
