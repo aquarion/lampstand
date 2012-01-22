@@ -96,11 +96,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 
 		print event
-		eventClass = event[2]
 	
 		# Then give up
 		if event == None:
 			return "No idea, sorry. There's a list of stuff I know about at http://www.maelfroth.org/events.php"
+		
+		eventClass = event[2]
 			
 		print event
 		eventName  = event[1]
