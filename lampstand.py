@@ -143,7 +143,7 @@ class PrivateActions:
 	def action(self, user, channel, message):
 			
 		if user in self.peopleToIgnore or user == self.connection.nickname:
-			print "(Ignoring)"
+			print "(Ignoring %s on principle)" % user 
 		else:
 
 			matched = 0
@@ -165,7 +165,7 @@ class PrivateActions:
 			if matched == 0:
 				peopleToIgnore = ('NickServ', 'MemoServ', 'ChanServ')
 				if user in peopleToIgnore:
-					print "(Ignoring)"
+					print "(Ignoring %s for not matching)" % user
 				else:
 					self.connection.msg(user, "I didn't understand that, sorry. Docs: http://www.maelfroth.org/lampstand.php")
 					print "Sending Sorry to %s" % user
