@@ -99,7 +99,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			else:
 				channelout = channel;
 				
-			connection.msg(channelout, "Hey, cool. A haiku on %s: %s " % (channel, " // ".join(haikus[0])))
+			connection.msg(channelout, "That looked like a haiku on %s: %s " % (channel, " // ".join(haikus[0])))
 			self.channels[channel] = []
 			return True
 		
