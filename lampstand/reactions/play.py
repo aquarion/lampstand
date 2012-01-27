@@ -123,13 +123,17 @@ class Reaction(lampstand.reactions.base.Reaction):
 		if not limitToRecent and random.randint(0,2) == 1:
 			limitToRecent = True
 
+		if limitToRecent:
+			recentGames = steam.getElementsByTagName('hoursLast2Weeks')
+			if not len(recentGames):
+				limitToRecent = False
+
 
 		if not limitToRecent:
 			games = steam.getElementsByTagName('game')
 			game = random.choice(games)
 		else:
-			games = steam.getElementsByTagName('hoursLast2Weeks')
-			game = random.choice(games).parentNode
+			game = random.choice(recentGames).parentNode
 			
 
 		gamename = game.getElementsByTagName('name')[0].childNodes[0].data
