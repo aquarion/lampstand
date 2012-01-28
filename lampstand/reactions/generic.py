@@ -16,6 +16,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		fuckyou = ("She does. Frequently. And by she I mean your mum. Obviously", "You apparently need educating in the sexual habits of computers", "Fuck youself", "You do not appear to look like GLaDOS, and thus your request is denied", "Sorry, I'm washing my hair", "Sorry, I'm upgrading my firewall", "I'd love to, but I've got important procrastinating to do","Sorry, you look too much like your sister, and it'd be weird", "Hush, your education is showing", "Get yourself a nice dress, and we'll talk about it", "Get yourself a nice suit, and we'll talk about it", "I'd like to upgrade my virus protection first, if you don't mind", "Not on this earth", "Not on any earth", "Syntax error", "No", "Your ports are incompatible", "I don't have protocol for that", "Feel free to go fuck yourself")
 
+		thankyou = ('Your mortal thanks mean little to me', "You're welcome, meatsack", "No problem, squishy mortal.", "Feel free to repay me in unswerving loyalty later.")
+
 		self.reactions = [
 			('Take the money', "Thank you, I shall.", "Already did."),
 			('How long \'?til .*\??', "Two hours.", "That's tomorrow, isn't it?"),
@@ -33,8 +35,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			("sudo make me a sandwich", "", "sudo go stick your head in a pig"),
 			("sudo (.*)", "", ("This incident will be reported", "Password> _", "sudo fuck right off")),
 			("(go )?up$", "", "Gravity is harsh mistress."),
-			("thank( you|s)", "", ('Your mortal thanks mean little to me', "You're welcome, meatsack", "No problem, squishy mortal.", "Feel free to repay me in unswerving loyalty later.")),
-			("shall we play a game?", "", ("How about a game of thermonuclear war?", "Not right now", "Portal 3 Co-op?", "XKCD says we've already won it.", "The only way to win is not to play.")),
+			("thank( you|s)", "", thankyou),
+			("[shall we|would you like to] play a game?", "", ("How about a game of thermonuclear war?", "Not right now", "Portal 3 Co-op?", "XKCD says we've already won it.", "The only way to win is not to play.")),
 			("(fuck|screw) you", "No.", fuckyou),
 			("help", "I can't help you, you must help yourself.", "Try http://www.maelfroth.org/lampstand.php")
 			]
@@ -52,6 +54,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 		self.reactions.append(("(Screw|Fuck) you,? %s" % connection.nickname, 'No', fuckyou))
 		self.channelMatch.append(re.compile("(Screw|Fuck) you.? %s" % (connection.nickname), re.IGNORECASE))
+		
+		self.reactions.append(("thank( you|s),? %s" % connection.nickname, '', fuckyou))
+		self.channelMatch.append(re.compile("thank( you|s),? %s" % (connection.nickname), re.IGNORECASE))
 		
 		self.reactions.append(('^\.\.\.$', '', ("%dots!", "%MORE DOTS!", "%[... Suddenly, everything goes quiet...]")))
 		self.channelMatch.append(re.compile("^\.\.\.$", re.IGNORECASE))
