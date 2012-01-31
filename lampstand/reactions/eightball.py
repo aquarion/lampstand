@@ -18,11 +18,16 @@ class Reaction(lampstand.reactions.base.Reaction):
 	uses = []
 
 	def __init__(self, connection):
-		self.channelMatch = re.compile('^%s.  ?ask the [oracle|8.ball]' % connection.nickname, re.IGNORECASE)
+		self.channelMatch = (re.compile('^%s.  ?ask the [oracle|8.ball]' % connection.nickname, re.IGNORECASE),
+			re.compile('^%s. should I .*' % connection.nickname, re.IGNORECASE))
 
 
-	def channelAction(self, connection, user, channel, message):
+	def channelAction(self, connection, user, channel, message, matchIndex):
 		print "[8Ball] called"
+
+		if not message.lower().find(" or ") == -1:
+			print "[8Ball] ... That looks like a choice to me"
+			return False
 
 
 		if self.overUsed(self.uses, self.cooldown_number, self.cooldown_time):
