@@ -26,7 +26,6 @@ class Reaction:
 	def getconfig(self, connection):
 		try:
 			config = connection.config.items(self.__name)
-			print "Haiku Config!"
 			self.config = {}
 			for item in config:
 				self.config[item[0]] = item[1]
