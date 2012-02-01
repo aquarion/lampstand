@@ -30,7 +30,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			return False
 
 
-		if self.overUsed(self.uses, self.cooldown_number, self.cooldown_time):
+		if self.overUsed():
 			connection.msg(user, "The 8-ball says: 'Find a new prophet, I quit.', I'd give it a while to cool down." )
 			return True
 
