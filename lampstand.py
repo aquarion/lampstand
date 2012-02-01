@@ -22,6 +22,9 @@ from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol, threads, defer
 from twisted.python import log
 
+from datetime import datetime
+from twisted.internet.task import LoopingCall
+
 # system imports
 import time, sys
 import re, os
@@ -133,6 +136,7 @@ class ChannelActions:
 			for nickChangeModule in self.connection.nickChangeModules:
 				nickChangeModule.nickChangeAction(self.connection, old_nick, new_nick)
 
+
 class PrivateActions:
 
 	peopleToIgnore = ('ChanServ')
@@ -189,10 +193,11 @@ class LampstandLoop(irc.IRCClient):
 
 
 	def scheduledTasks(self):
-		while True:
-			print "** HELLO!"
-			self.msg("#lampstand", "Hello!")
-			time.sleep(10)
+		for scheduledTaskModule in self.scheduledTaskModules:
+			try:
+				scheduledTaskModule.scheduleAction(self)
+			except:
+				pass
 
 	def connectionMade(self):
 
@@ -208,6 +213,11 @@ class LampstandLoop(irc.IRCClient):
 		self.nickname = self.config.get("irc","nickname")
 		self.original_nickname = self.nickname
 		self.alt_nickname = self.config.get("irc","altnickname")
+
+		self.realname = "Lampstand L. Lampstand."
+		self.userinfo = "I'm a bot! http://wiki.maelfroth.org/lampstandDocs"
+		
+		
 		
 
 		if (self.dbconnection):
@@ -241,6 +251,7 @@ class LampstandLoop(irc.IRCClient):
 		self.nickChangeModules = []
 		self.leaveModules = []
 		self.joinModules = []
+		self.scheduledTaskModules = []
 
 
 		for thingy in config.items("modules"):
@@ -248,6 +259,9 @@ class LampstandLoop(irc.IRCClient):
 
 		self.logger.log("[connected at %s]" %
 						time.asctime(time.localtime(time.time())))
+		
+		self.loopy = LoopingCall(self.scheduledTasks)
+		self.loopy.start(5)
 
 	def installModule(self, moduleName):
 
@@ -303,6 +317,10 @@ class LampstandLoop(irc.IRCClient):
 			if reaction.__module__ == module:
 				self.joinModules.remove(reaction)
 
+		for reaction in self.scheduledTaskModules:
+			if reaction.__module__ == module:
+				self.scheduledTaskModules.remove(reaction)
+
 	def addModuleActions(self, moduleName):
 
 		module = sys.modules['lampstand.reactions.%s' % moduleName]
@@ -328,9 +346,14 @@ class LampstandLoop(irc.IRCClient):
 		if hasattr(reaction, 'joinAction'):
 			print '[%s] Installing channel join reaction' % moduleName
 			self.joinModules.append(reaction)
+		
+		if hasattr(reaction, 'scheduleAction'):
+			print '[%s] Installing schedule reaction' % moduleName
+			self.scheduledTaskModules.append(reaction)
 
 
 	def connectionLost(self, reason):
+		print "Connection lost for reason %s" % reason
 		irc.IRCClient.connectionLost(self, reason)
 		self.logger.log("[disconnected at %s]" %
 						time.asctime(time.localtime(time.time())))
@@ -396,6 +419,7 @@ class LampstandLoop(irc.IRCClient):
 		return self.msg(user,message,length)
 
 	# irc callbacks
+
 
 	def irc_NICK(self, prefix, params):
 		"""Called when an IRC user changes their nickname."""
