@@ -134,20 +134,6 @@ CREATE TABLE `lastseen` (
 SET character_set_client = @saved_cs_client;
 
 --
--- Table structure for table `nickserv`
---
-
-DROP TABLE IF EXISTS `nickserv`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
-CREATE TABLE `nickserv` (
-  `server` varchar(255) NOT NULL,
-  `password` varchar(255) default NULL,
-  PRIMARY KEY  (`server`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-SET character_set_client = @saved_cs_client;
-
---
 -- Table structure for table `part`
 --
 
@@ -288,4 +274,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2011-11-17 10:24:29
+-- Dump completed on 2012-02-05 18:55:47

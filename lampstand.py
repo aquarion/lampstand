@@ -184,13 +184,10 @@ class LampstandLoop(irc.IRCClient):
 	#nickname = "Newstand"
 	#original_nickname = "Newstand"
 	alt_nickname = "Catbus"
-
-	chanserv_password = False
+	password = False
 
 	dbconnection = False
-	
 	config = False
-
 
 	def scheduledTasks(self):
 		for scheduledTaskModule in self.scheduledTaskModules:
@@ -211,30 +208,13 @@ class LampstandLoop(irc.IRCClient):
 		
 		
 		self.nickname = self.config.get("irc","nickname")
+		self.password = self.config.get("irc","password")
 		self.original_nickname = self.nickname
 		self.alt_nickname = self.config.get("irc","altnickname")
 
 		self.realname = "Lampstand L. Lampstand."
 		self.userinfo = "I'm a bot! http://wiki.maelfroth.org/lampstandDocs"
 		
-		
-		
-
-		if (self.dbconnection):
-			cursor = self.dbconnection.cursor()
-			cursor.execute('SELECT server, password FROM nickserv where server = %s', (self.config.get("connection","server"),) )
-			result = cursor.fetchone()
-
-			if result != None:
-				self.chanserv_password = result[1];
-				print "Chanserv Password is "+result[1];
-			else:
-				print "Couldn't find a chanserv password for "+self.config.get("connection","server")
-		else:
-				print "No database, not loading nickserv password"
-
-
-
 		logfile = self.config.get("logging", "logfile");
 
 		irc.IRCClient.connectionMade(self)
@@ -361,9 +341,9 @@ class LampstandLoop(irc.IRCClient):
 
 
 	def nickservGhost(self):
-		if self.chanserv_password != False:
+		if self.password != False:
 			print '[IDENTIFY] Recovering my nickname '
-			self.msg('nickserv', "Ghost %s %s" % (self.original_nickname, self.chanserv_password.encode('utf8') ) )
+			self.msg('nickserv', "Ghost %s %s" % (self.original_nickname, self.password.encode('utf8') ) )
 
 	# callbacks for events
 
@@ -380,8 +360,6 @@ class LampstandLoop(irc.IRCClient):
 	def joined(self, channel):
 		"""This will get called when the bot joins the channel."""
 		self.logger.log("[I have joined %s]" % channel)
-		#self.population[channel] = []
-		#sms.send('Lampstand: I have returned to %s' % channel)
 
 	def privmsg(self, user, channel, msg):
 		"""This will get called when the bot receives a message."""
@@ -625,15 +603,13 @@ if __name__ == '__main__':
 	basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
 	config = ConfigParser.ConfigParser()
 	config.read(["defaults.ini", basedir+'/config.ini'] )
-	
-	server = config.get("connection", "server");
-	port   = config.getint("connection", "port");
-
 
 	# create factory protocol and application
 	f = LampstandFactory(config)
 
 	# connect factory to this host and port
+	server = config.get("connection", "server");
+	port = config.getint("connection", "port");
 	reactor.connectTCP(server, port, f)
 
 
