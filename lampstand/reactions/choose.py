@@ -17,7 +17,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	def __init__(self, connection):
 		self.channelMatch = re.compile('^%s. (choose|should I) (.* or .*)' % connection.nickname, re.IGNORECASE)
-		self.privateMatch = re.compile('(.* or .*)\??$', re.IGNORECASE)
+		self.privateMatch = re.compile('(choose|should I) (.* or .*)\??$', re.IGNORECASE)
 
 	def channelAction(self, connection, user, channel, message):
 		print "[Choose] called"
@@ -67,7 +67,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		match = self.privateMatch.findall(message)
 		print "Match: %s" % match
 
-		reaction = self.choose(match[0])
+		reaction = self.choose(match[0][1])
 		connection.msg(user, "%s: %s" % (user, reaction))
 
 	def choose(self, message):
