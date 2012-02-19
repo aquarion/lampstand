@@ -2,7 +2,7 @@ from lampstand.tools import splitAt
 import lampstand.reactions.base
 from lampstand import tools
 import os.path
-import re, time
+import re, time, datetime
 
 def __init__ ():
 	pass
@@ -15,6 +15,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 	cooldown_number   = 5
 	cooldown_time     = 120
 	uses              = []
+
+	last_quote_seen	  = False
+	schedule_count    = 6
 	
 	
 	def __init__(self, connection):
@@ -26,20 +29,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 		print 'Looking at <<%s>>' % message
 
-
-                #if self.overUsed(self.uses):
-                #        connection.msg(channel, self.overuseReactions[matchIndex])
-                #        return True
-
-
-                ## Overuse Detectection ##
-                #self.uses.append(int(time.time()))
-                #if len(self.uses) > self.cooldown_number:
-                #        self.uses = self.uses[0:self.cooldown_number-1]
-                ## Overuse Detectection ##
-
 		matches = self.channelMatch[matchIndex].findall(message)[0]
-
 		
 		memory = False
 
@@ -47,9 +37,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 			if module.__name == "Memory":
 				memory = module;
 		
-
-
-		memory.dump(connection, user, False, False)
 
 		if matchIndex == 1:
 			result = memory.search(channel, matches);
@@ -80,3 +67,44 @@ class Reaction(lampstand.reactions.base.Reaction):
 	                self.dbconnection.commit()
 	
 		return True
+
+        def scheduleAction(self, connection):
+
+
+		self.schedule_count = self.schedule_count + 1
+
+		if self.schedule_count == 7:
+			self.schedule_count = 0
+
+		if not self.schedule_count == 0:
+			return
+
+		channel = "#maelfroth"
+
+		if not self.last_quote_seen:
+			q = "select submitted from chirpy.mf_quotes where approved = 1 order by submitted desc limit 1"
+			cursor = self.dbconnection.cursor()
+			cursor.execute(q)
+			result = cursor.fetchone()
+			self.last_quote_seen = result[0]
+			print "Defaulting last seen: %s" % self.last_quote_seen
+
+		print "[Quote] Looking for quotes submitted > %s" % self.last_quote_seen
+
+		q = "select submitted from chirpy.mf_quotes where submitted > %s and approved = 1 order by submitted desc"
+		cursor = self.dbconnection.cursor()
+		cursor.execute(q, self.last_quote_seen)
+
+		if cursor.rowcount > 0:
+			print "[Quote] Sending message"
+
+			url = "http://www.maelfroth.org/quotes/index.cgi?action=browse"
+			if cursor.rowcount == 1:
+				msg = "One new quote has been approved at %s" % url
+			else:
+				msg = "%d new quotes have been approved at %s" % (cursor.rowcount, url)
+
+			connection.msg(channel, msg)
+			quote = cursor.fetchone()
+			self.last_quote_seen = quote[0]
+
