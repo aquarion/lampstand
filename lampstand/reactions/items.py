@@ -115,6 +115,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 				connection.msg(channel, "Nom")
 				return 
 
+			if item.lower() == "a suspicious package" or item.lower() == "the suspicious package":
+				connection.msg(channel, "Aha. Ah ha ha ha. Ah ha ha *ha* ha ha ha ha. ... No.")
+				return
+
 			if item.lower() in map(str.lower, connection.people):
 				connection.msg(channel, "I'm not a fucking transit system, either.")
 				return
@@ -160,10 +164,15 @@ class Reaction(lampstand.reactions.base.Reaction):
 				return True
 				
 			last = self.items[-1:][0]
+
+			if ("," in "".join(self.items)):
+				seperator = "; "
+			else:
+				seperator = ", "
 			
-			message = ", ".join(self.items[:-1]);
+			message = seperator.join(self.items[:-1]);
 			
-			connection.msg(channel, "I currently have %s and %s" % (message, last))
+			connection.msg(channel, "I currently have %s%sand %s" % (message, seperator, last))
 		elif (matchIndex == 2): # attack
 
 			person = self.channelMatch[2].findall(message)[0][1];
@@ -268,6 +277,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 		elif (matchIndex == 4): # drop
 			item = self.channelMatch[4].findall(message)[0];
 			
+			if (channel == "#lampstand" and not user.lower() in self.admin):
+				print "Not allowing %s on %s to do that" % (user, channel)
+				connection.msg(channel, "%s: Shan't, and you can't make me. :-P " % user)
+				return
+
 			if item.lower() == "everything":
 				if user.lower() in self.admin:
 					connection.me(channel, 'drops everything except the lantern, then manifests a baseball bat and dashes all the items to their component atoms')
