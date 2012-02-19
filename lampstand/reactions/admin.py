@@ -22,7 +22,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			re.compile('leave (\#\w*)( .*)?', re.IGNORECASE),
 			re.compile('unload (\w*)', re.IGNORECASE),
 			re.compile('reconfigure', re.IGNORECASE),
-			re.compile('sysreload (.*)', re.IGNORECASE))
+			re.compile('sysreload (.*)', re.IGNORECASE),
+			re.compile('ipdb', re.IGNORECASE))
 
 
 	def privateAction(self, connection, user, channel, message, matchindex = 0):
@@ -88,5 +89,8 @@ class Reaction(lampstand.reactions.base.Reaction):
                         	connection.message(user, rtn);
 			else:
 				connection.message(user, "%s Not found" % matches[0])
+		elif matchindex == 11: # ipdb
+			import ipdb
+			ipdb.set_trace()
 
 		return True
