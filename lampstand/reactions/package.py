@@ -65,10 +65,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 		hands  = matchwork[0][0]
 		player = matchwork[0][1]
 
-		non_players = (connection.nickname.lower(),)
+		non_players = [connection.nickname.lower(),]
 
-		if self.package_in_play:
-			non_players.append(self.package_player.lower())
+		#if self.package_in_play:
+		#	non_players.append(self.package_player.lower())
 
 		if not self.package_in_play:
 			self.updateOveruse()
@@ -81,8 +81,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 				connection.message(channel, "%s: Who?" % user)
 				return False
 
-			connection.message(channel, "Hey look, a package for %s" % player)
-
 			self.package_in_play = True
 			self.package_owner   = user
 			self.package_player  = player
@@ -90,7 +88,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 			self.its_a_bomb      = (user.lower() == "aquarion" and hands == "hands")
 			self.sticky_bomb     = (user.lower() == "aquarion" and hands == "hands")
 			self.this_channel    = channel
-			
+		
+			sticky_txt = ""
+
+			if self.sticky_bomb:
+				sticky_txt = "slightly sticky "			
+
+			connection.message(channel, "Hey look, a %spackage for %s" % (sticky_txt, player))
 
 		elif user == self.package_player and not player in non_players and not self.sticky_bomb:
 			connection.message(channel, "%s: Noted" % user)
