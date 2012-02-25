@@ -56,7 +56,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		self.reactions.append(("(Screw|Fuck) you,? %s" % connection.nickname, 'No', fuckyou))
 		self.channelMatch.append(re.compile("(Screw|Fuck) you.? %s" % (connection.nickname), re.IGNORECASE))
 		
-		self.reactions.append(("thank( you|s),? %s" % connection.nickname, '', fuckyou))
+		self.reactions.append(("thank( you|s),? %s" % connection.nickname, '', thankyou))
 		self.channelMatch.append(re.compile("thank( you|s),? %s" % (connection.nickname), re.IGNORECASE))
 		
 		self.reactions.append(('^\.\.\.$', '', ("%dots!", "%MORE DOTS!", "%[... Suddenly, everything goes quiet...]")))
