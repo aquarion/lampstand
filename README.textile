@@ -34,7 +34,7 @@ h2. Choose
 
 (This is now requires the "choose" in order that I can recognise choose requests as distinct from other times you might want to use the word "or")
 
-You can use "Should I" instead of "Choose" if it makes your narrative happy.
+You can use "Should I" instead of "Choose" if it makes your narrative happy, and a single-option choice will react as a Magic 8-Ball (see below).
 
 h2. Cutout
 
@@ -60,6 +60,7 @@ h2. Dictionary
 
 bq. 09:48 [Lampstand] Tea Tea (t[=e]), n. [Chin. tsh[=a], Prov. Chin. te: cf. F. th['e].] 1. The prepared leaves of a shrub, or small tree ({Thea Chinensis} or {Camellia Chinensis}). The shrub is a native of China, but has been introduced to some extent into some other countries. [1913 Webster]  Note: Teas are classed as green or black, according to their color or appearance, the kinds being distinguished also by various other characteristic differences,... <br/> 09:48 [Lampstand] ...  as of taste, odor, and the like. The color, flavor, and quality are dependent upon the treatment which the leaves receive after being gathered. The leaves for green tea are heated, or roasted slightly, in shallow pans over a wood fire, almost immediately after being gathered, after which they are rolled with the hands upon a table, to free them from a portion of their moisture, and to twist them, and are then quickly [Cut for length]
 
+This will fall back to Wikipedia if it can't find anything in the dictionary
 
 h2. Eightball
 
@@ -177,6 +178,14 @@ h2. What Is
 @Lampstand: What is the world?@
 @[Lampstand] A place where we live@
 
+if "What Is" can't find a match, it will fall back to the dictionary, as documented above.
+
+@Lampstand: Who defined that?@
+[Lampstand] Bob did.
+
+"@Tell me something about X@" will search defintions for X and give you a random result.
+
+"@Give me a random definition@" will tell you something new and possibly even accurate.
 
 h2. Who was / Last seen
 
