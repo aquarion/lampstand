@@ -51,7 +51,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 		self.this_channel    = False
 
 	def channelAction(self, connection, user, channel, message, index):
-		
+
+		if not user.lower() == "aquarion":
+			print "Bomb disabled"
+			connection.msg(user, "The packages function has been disabled due to overuse beyond funny. Well done.")
+			return False	
+	
 		if self.overUsed():
 			connection.msg(user, "Overuse Triggered" )
 			return True
