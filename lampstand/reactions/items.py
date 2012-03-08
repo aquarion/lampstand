@@ -13,7 +13,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	admin = ("aquarion")
 
-	cooldown_number   = 10
+	cooldown_number   = 5
 	cooldown_time     = 300
 	uses              = []
 	
@@ -23,7 +23,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	
 	def __init__(self, connection):
 		self.channelMatch = (
-			re.compile('(%s: take|gives %s) ([\w\s\d\'\-\(\)]*?\S)\s*\.?$' % (connection.nickname, connection.nickname), re.IGNORECASE), #0
+			re.compile('(%s: take|gives %s) ([\w\s\d\'\-\(\),]*?\S)\s*\.?$' % (connection.nickname, connection.nickname), re.IGNORECASE), #0
 			re.compile('%s. inventory' % connection.nickname, re.IGNORECASE), #1
 			re.compile('%s. (attack|smite) (\S*)' % connection.nickname, re.IGNORECASE), #2
 			re.compile('%s. do science\!?' % connection.nickname, re.IGNORECASE), #3
@@ -68,11 +68,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 			self.items = self.defaultItems
 
 	def drop(self, item):
-		if item == "a lantern":
-			return False
-
 		if item.lower() in map(str.lower, self.items):
 			i = map(str.lower, self.items).index(item.lower())
+			print "Dropped %s" % self.items[i]
 			del self.items[i]
 			return True
 		else:
@@ -291,6 +289,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 					connection.msg(channel, "I don't have to listen to you. So neh.")
 			elif item.lower() == "a lantern":
 				connection.msg(channel, '%s: Nuh-uh. This is grue country.' % user)
+				return;
 			elif item.lower() in map(str.lower, self.items):
 				result = self.drop(item)
 				if result:
