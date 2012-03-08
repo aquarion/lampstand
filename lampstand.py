@@ -189,6 +189,8 @@ class LampstandLoop(irc.IRCClient):
 	dbconnection = False
 	config = False
 
+	date_started = False
+
 	def scheduledTasks(self):
 		for scheduledTaskModule in self.scheduledTaskModules:
 			try:
@@ -197,6 +199,8 @@ class LampstandLoop(irc.IRCClient):
 				pass
 
 	def connectionMade(self):
+
+		self.date_started = datetime.now()
 
 		self.config = self.factory.config
 		
