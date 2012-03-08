@@ -73,7 +73,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		self.schedule_count = self.schedule_count + 1
 
-		if self.schedule_count == 7:
+		if self.schedule_count == 20:
 			self.schedule_count = 0
 
 		if not self.schedule_count == 0:
