@@ -22,6 +22,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 	inventorysize = 10
 	
 	def __init__(self, connection):
+
+		random.seed()
+
 		self.channelMatch = (
 			re.compile('(%s: take|gives %s) ([\w\s\d\'\-\(\),]*?\S)\s*\.?$' % (connection.nickname, connection.nickname), re.IGNORECASE), #0
 			re.compile('%s. inventory' % connection.nickname, re.IGNORECASE), #1
