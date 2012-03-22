@@ -72,6 +72,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.msg(channel, "%s: Nope" % user)
 			return True
 
+		if key.lower() == user.lower():
+			connection.msg(channel, "%s: Narcissism is not an attractive trait." % user)
+
 		cursor = self.dbconnection.cursor()
 
 		if len(key) > 254 or len(value) > 254:
