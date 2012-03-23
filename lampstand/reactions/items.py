@@ -349,10 +349,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 			options = ("We'll never find %s at this hour" % itemone,
 				"I'm pretty sure you can't combine %s and %s safely" % (itemone, itemtwo),
-				"I don't think you could make out with %s realistically" % person,
+				#"I don't think you could make out with %s realistically" % person,
 				"I don't think you could mold a %s to look like %s" % (itemone, person),
 				"I don't think pants made out of %s would work" % itemone,
-				"you and %s? What would the children look like?" % person,
+				#"you and %s? What would the children look like?" % person,
 				"I'm pretty sure %s won't like it" % person,
 				"nothing good ever comes of eating %s" % itemone,
 				"%s isn't very good rocket fuel" % itemone,
@@ -361,6 +361,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 				"snort* no, no, it's too stupid!",
 				"why would %s do a musical?" % person,
 				"what if %s won't wear %s?" % (person, itemone),
+				"But we don't have %s!" % itemone,
+				"Sure, but that's nothing that %s hasn't done already" % person
 				"isn't that why they invented %s?" % itemone,
 				"if Jimmy cracks corn, and no one cares, why does he keep doing it?",
 				"are you sure we can trust %s?" % person,
