@@ -362,12 +362,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 				"why would %s do a musical?" % person,
 				"what if %s won't wear %s?" % (person, itemone),
 				"But we don't have %s!" % itemone,
-				"Sure, but that's nothing that %s hasn't done already" % person
+				"Sure, but that's nothing that %s hasn't done already" % person,
 				"isn't that why they invented %s?" % itemone,
 				"if Jimmy cracks corn, and no one cares, why does he keep doing it?",
 				"are you sure we can trust %s?" % person,
 				"%s is not a valid pie filling" % itemone,
-				"we'll never know."
+				"we'll never know.",
 				"... *poit* ... were we saying something?"
 			)
 
