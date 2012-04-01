@@ -56,8 +56,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 		## Overuse Detectection ##
 
 		matches = self.channelMatch[matchIndex].findall(message)
+
 		output = self.respond(user,matchIndex, matches)
-		output = "%s: %s" % (user, output)
+
+		if output:
+			output = "%s: %s" % (user, output)
+		else:
+			output = "%s: Settlers of Catan? Monopoly? Steam's not talking to me right now, sorry." % user
 
 		connection.msg(channel, output.encode("utf-8"))
 
@@ -79,7 +84,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 		if result == None:
 			return self.helptext()
 
-		steam = self.getSteamXML(result[0])
+		try:
+			steam = self.getSteamXML(result[0])
+		except:
+			return False
 		
 		print steam
 
@@ -97,7 +105,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 		steamname = result[0]
 
-		steam = self.getSteamXML(steamname)
+		try:
+			steam = self.getSteamXML(steamname)
+		except:
+			return False
 		
 		if hasattr(steam, '__getitem__'):
 			return steam[1]
