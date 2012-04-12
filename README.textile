@@ -170,6 +170,14 @@ h2. Weblinks
 
 Lampstand watches for people mentioning links on channel, which then get archived at "Maelfroth.org/Links":http://www.maelfroth.org/links.php
 
+You can request that lampstand create a http://foip.me link for any URL mentioned using these commands:
+
+@Lampstand: Shorten That Link@ (shortens the last URL mentioned)
+
+@Lampstand: Shorten Username's link@ (Shortens the last link Username mentioned)
+
+@Lampstand: Shorten this link: http://www.maelfroth.org@ (Makes a short link for http://maelfroth.org)
+
 h2. What Is
 
 @Lampstand: Define the world as a place where we live@
@@ -196,3 +204,4 @@ h2. Who was / Last seen
 
 10:54 [Aquarion] Lampstand: Have you seen Aquarion? 
 10:54 [Lampstand] I last saw Aquarion on Sat, 08 March 08 at 10:54 saying Hello! 
+

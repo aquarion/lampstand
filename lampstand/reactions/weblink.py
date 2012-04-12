@@ -1,6 +1,7 @@
 import re, time
 import lampstand.reactions.base
 import bitly_api
+import urlparse
 
 def __init__ ():
 	pass
@@ -9,14 +10,20 @@ class Reaction(lampstand.reactions.base.Reaction):
 	__name = 'Weblink'
 
 	def __init__(self, connection):
-		self.channelMatch = [re.compile('.*https?\:\/\/', re.IGNORECASE), re.compile('%s: Shorten that( URL)?' % connection.nickname, re.IGNORECASE)]
+		self.channelMatch = [
+			re.compile('%s: Shorten that( URL)?' % connection.nickname, re.IGNORECASE),            #0
+			re.compile('%s: Shorten (.*?)\'s? (link|url)' % connection.nickname, re.IGNORECASE),   #1
+			re.compile('%s: Shorten this (link|url): (.*)$' % connection.nickname, re.IGNORECASE), #2
+			re.compile('.*https?\:\/\/', re.IGNORECASE)]                                           #3
 		self.dbconnection = connection.dbconnection
 		self.bitly = bitly_api.Connection(connection.config.get("bitly","username"), connection.config.get("bitly","apikey"))
 		self.lastlink = {}
 
 	def channelAction(self, connection, user, channel, message, matchindex):
 
-		if matchindex == 0:
+		print "[WEBLINK] Activated, matchindex is %d" % matchindex
+
+		if matchindex == 3: # Weblink
 			print "[WEBLINK] That looks like a weblink : %s" % message
 
 			links = self.grabUrls(message)
@@ -30,21 +37,65 @@ class Reaction(lampstand.reactions.base.Reaction):
 			self.lastlink[channel] = {'id': cursor.lastrowid, 'url': links[0] }
 
 			self.dbconnection.commit()
-		elif matchindex == 1:
+
+		elif matchindex == 0: # Shorten That
 			print "[WEBLINK] Shortening URL"
 
 			print self.lastlink
 			surl = self.bitly.shorten(self.lastlink[channel]['url'])
 			
-			output = "%s: %s" % (user, surl['url'])
-
+			url_split = urlparse.urlparse(self.lastlink[channel]['url'])
+			output = "%s: %s link shortened to %s" % (user, url_split[1], surl['url'])
 			connection.msg(channel,output.encode("utf-8"))
 
 			cursor = self.dbconnection.cursor()
 			cursor.execute('update urllist set shorturl = %s where id = %s', ( surl['url'], self.lastlink[channel]['id'] ) )
 			self.dbconnection.commit()
 
+		elif matchindex == 1: # SHorten user's url
+	                for module in connection.channelModules:
+	                        if module.__name == "Memory":
+	                                memory = module;
 			
+			matches = self.channelMatch[matchindex].findall(message)[0]
+			print matches
+			result = memory.search(channel, matches[0], "http");
+			print result
+
+			if len(result) == 0:
+				output = "%s: I've no idea which link you mean" % user
+				connection.msg(channel,output.encode("utf-8"))
+			else:
+				links = self.grabUrls(result[-1]['message'])
+
+				for link in links:
+					surl = self.bitly.shorten(link)
+					url_split = urlparse.urlparse(link)
+					output = "%s: %s link shortened to %s" % (user, url_split[1], surl['url'])
+					connection.msg(channel,output.encode("utf-8"))
+				
+
+		elif matchindex == 2: # Shorten this URL
+			print "[WEBLINK] Shortening requested URL : %s" % message
+			links = self.grabUrls(message)
+
+			if len(links) == 0:
+				print "[WEBLINK] No links found"
+				connection.msg(channel, "%s: I see no links in that" % user)
+				return
+
+			print links
+
+			cursor = self.dbconnection.cursor()
+			for link in links:
+				print link
+				now = time.time()
+				surl = self.bitly.shorten(link)
+				cursor.execute('insert into urllist (time, username, message, channel, shorturl) values (%s, %s, %s, %s, %s)', (now, user, message, channel, surl['url']) )
+				url_split = urlparse.urlparse(link)
+				output = "%s: %s link shortened to %s" % (user, url_split[1], surl['url'])
+				connection.msg(channel,output.encode("utf-8"))
+				
 
 
 	def grabUrls(self, text):
