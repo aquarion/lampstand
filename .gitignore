@@ -1,0 +1,6 @@
+*.pyc
+inventory.pkl.db
+*.log
+config.ini
+venv
+*.err
