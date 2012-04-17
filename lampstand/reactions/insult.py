@@ -13,7 +13,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	uses = []
 
 	def __init__(self, connection):
-		self.channelMatch = re.compile('%s. insult (.*)(!?)' % connection.nickname, re.IGNORECASE)
+		self.channelMatch = re.compile('%s. insult (.*)(\W?)' % connection.nickname, re.IGNORECASE)
 
 
 	def channelAction(self, connection, user, channel, message):
@@ -31,6 +31,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 		if insultee.lower() == 'me':
 			insultee = user
+			orig_insultee = user
+
+		print "[INSULT] Insulting %s" % insultee
 
 		if insultee.lower() == 'glados':
 			print "Kicking %s for taking the name of my lady in vain" % user
