@@ -132,11 +132,17 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 		
 		if output == "absolute":
+
+			if direction == "past":
+				tiswas = "was"
+			else:
+				tiswas = "is"
+
 			timeformat = "%A %d %B %Y at %H:%M";
 			if (event_end):
-				message = "%s: %s is from %s to %s" % (event_class, event_desc, event_start.strftime(timeformat), event_end.strftime(timeformat))
+				message = "%s: %s %s from %s to %s" % (event_class, event_desc, tiswas, event_start.strftime(timeformat), event_end.strftime(timeformat))
 			else:
-				message = "%s: %s is on %s" % (event_class, event_desc, event_start.strftime(timeformat))
+				message = "%s: %s %s on %s" % (event_class, event_desc, tiswas, event_start.strftime(timeformat))
 				
 			if (event_url):
 				message += ", More info at %s" % event_url
