@@ -118,7 +118,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		event = cursor.fetchone()
 		
 		if event == None:
-			return "%s: I can't see any events tagged '%s' in the %s. Full list at http://www.maelfroth.org/events.php" % (user, desc, direction)
+			return "I can't see any events tagged '%s' in the %s. Full list at http://www.maelfroth.org/events.php" % (desc, direction)
 		
 		
 		event_start = event[0]
