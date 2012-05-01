@@ -1,7 +1,7 @@
 import lampstand.reactions.base
 
 
-from lampstand.tools import splitAt
+from lampstand import tools
 import re, time, random, sys
 from datetime import datetime, date, time
 
@@ -72,8 +72,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 		created = datetime(2008,3,7, 14, 00)
 		now     = datetime.now();
 
-		creatediff = now-created
-		launchdiff = now-connection.date_started
+		creatediff = tools.nicedelta(now-created)
+		launchdiff = tools.nicedelta(now-connection.date_started)
 
 		connection.msg(user, "I was created %s ago, and I've been up since %s, which was %s ago" % (creatediff, connection.date_started, launchdiff));
 
