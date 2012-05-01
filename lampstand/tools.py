@@ -163,3 +163,42 @@ def niceTimeDelta(timedelta, format="decimal"):
 			return "seconds"
 		else:
 			return string
+
+def nicedelta(delta):
+			
+	deltastring  = ""
+	dayseconds = 0
+
+	days = delta.days
+	
+
+	if days > 365:
+		years    = days / 365
+		days     = days % 365
+		suffix   = "" if years == 1 else "s"
+		deltastring += "%d year%s, "  % (years, suffix)		
+
+	if days > 35:
+		weeks   = days / 7
+		days    = days % 7
+		suffix  = "" if weeks == 1 else "s"
+		deltastring += "%d week%s, "  % (weeks, suffix)		
+		
+
+	if days > 4:
+		deltastring += "%d days, " % days
+	else:
+		dayseconds += days * (60*60*24)
+	
+	hours      = (delta.seconds + dayseconds) / (60*60)
+	remainder  = (delta.seconds + dayseconds) % (60*60)
+	minutes = remainder/60
+
+	hours_suffix   = "" if hours   == 1 else "s"
+	minutes_suffix = "" if minutes == 1 else "s"
+
+	deltastring +=  "%i hour%s, %i minute%s" % (hours, hours_suffix, minutes, minutes_suffix)
+
+	return deltastring
+	
+

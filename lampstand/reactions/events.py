@@ -170,46 +170,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 			delta = now - deltapoint;
 		else:
 			delta = deltapoint - now;
-			
-		# Until we're on 2.7 and get delta.total_seconds()...
-		# delta_seconds = delta.seconds + (delta.days * (60*68*24) )
-				
-		deltastring  = ""
-		dayseconds = 0
-
-		days = delta.days
 		
+		deltastring = tools.nicedelta(delta)
 
-		if days > 365:
-			years    = days / 365
-			days     = days % 365
-			if years == 1:
-				suffix = ""
-			else:
-				suffix = "s"
-			deltastring += "%d year%s, "  % (years, suffix)		
-
-		if days > 35:
-			weeks   = days / 7
-			days    = days % 7
-			if weeks == 1:
-				suffix = ""
-			else:
-				suffix = "s"
-			deltastring += "%d week%s, "  % (weeks, suffix)		
-			
-
-		if days > 4:
-			deltastring += "%d days, " % days
-		else:
-			dayseconds += days * (60*60*24)
-		
-		hours      = (delta.seconds + dayseconds) / (60*60)
-		remainder  = (delta.seconds + dayseconds) % (60*60)
-		minutes = remainder/60
-		
-		deltastring +=  "%i hours, %i minutes" % (hours, minutes)
-		
 		if direction == "past":
 			return "%s: %s was %s ago" % (event[2], event[1], deltastring )
 		else:
@@ -221,3 +184,4 @@ class Reaction(lampstand.reactions.base.Reaction):
 	#def nickChangeAction(self, connection, old_nick, new_nick)
 	#def privateAction(self, connection, user, channel, message, index)
 	#def scheduleAction(self, connection)
+
