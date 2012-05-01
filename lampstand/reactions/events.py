@@ -7,6 +7,7 @@ import re, random, sys
 from lampstand import tools
 
 from datetime import datetime
+import dateutil.parser
 
 def __init__ ():
 	pass
@@ -117,14 +118,19 @@ class Reaction(lampstand.reactions.base.Reaction):
 		cursor.execute(query, (likedesc, likedesc, desc) )
 		event = cursor.fetchone()
 		
+
 		if event == None:
-			return "I can't see any events tagged '%s' in the %s. Full list at http://www.maelfroth.org/events.php" % (desc, direction)
+			try:
+				result = dateutil.parser.parse(desc)
+				event = (result,desc,"The date",None,None)
+			except ValueError:
+				return "I can't see any events tagged '%s' in the %s, and it doesn't look like a date. Full list of events at http://www.maelfroth.org/events.php" % (desc, direction)
 		
 		
 		event_start = event[0]
-		event_end   = event[3]
-		event_class = event[2]
 		event_desc  = event[1]
+		event_class = event[2]
+		event_end   = event[3]
 		event_url   = event[4]
 		
 		#(datetime.datetime(2012, 6, 29, 18, 0), 'Crown of the Sphinx', 'Odyssey', datetime.datetime(2012, 7, 1,
@@ -166,15 +172,37 @@ class Reaction(lampstand.reactions.base.Reaction):
 			delta = deltapoint - now;
 			
 		# Until we're on 2.7 and get delta.total_seconds()...
-		delta_seconds = delta.seconds + (delta.days * (60*68*24) )
+		# delta_seconds = delta.seconds + (delta.days * (60*68*24) )
 				
 		deltastring  = ""
 		dayseconds = 0
+
+		days = delta.days
 		
-		if delta.days > 4:
-			deltastring += "%i days, " % delta.days 
+
+		if days > 365:
+			years    = days / 365
+			days     = days % 365
+			if years == 1:
+				suffix = ""
+			else:
+				suffix = "s"
+			deltastring += "%d year%s, "  % (years, suffix)		
+
+		if days > 35:
+			weeks   = days / 7
+			days    = days % 7
+			if weeks == 1:
+				suffix = ""
+			else:
+				suffix = "s"
+			deltastring += "%d week%s, "  % (weeks, suffix)		
+			
+
+		if days > 4:
+			deltastring += "%d days, " % days
 		else:
-			deltaseconds += delta.days * (60*60*24)
+			dayseconds += days * (60*60*24)
 		
 		hours      = (delta.seconds + dayseconds) / (60*60)
 		remainder  = (delta.seconds + dayseconds) % (60*60)
