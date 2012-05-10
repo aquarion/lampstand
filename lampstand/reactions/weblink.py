@@ -1,7 +1,11 @@
 import re, time
 import lampstand.reactions.base
+from lampstand import tools
 import bitly_api
 import urlparse
+
+import gdata.youtube
+import gdata.youtube.service
 
 def __init__ ():
 	pass
@@ -17,6 +21,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 			re.compile('.*https?\:\/\/', re.IGNORECASE)]                                           #3
 		self.dbconnection = connection.dbconnection
 		self.bitly = bitly_api.Connection(connection.config.get("bitly","username"), connection.config.get("bitly","apikey"))
+			
+		self.yt_service = gdata.youtube.service.YouTubeService()
+		self.yt_service.ssl = True
+		
 		self.lastlink = {}
 
 	def channelAction(self, connection, user, channel, message, matchindex):
@@ -30,6 +38,22 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 			print links
 			now = time.time()
+			
+			for url in links:
+				urlp = urlparse.urlparse(url)
+				print url
+				if "youtube" in urlp.netloc.split("."):
+					print "That's a Youtube Link"
+					query = urlparse.parse_qs(urlp.query)
+					if "v" in query.keys():
+						print "That's a Youtube Link with a v! %s " % query['v'][0]
+						entry = self.yt_service.GetYouTubeVideoEntry(video_id=query['v'][0])
+						print entry
+						deltastring = tools.niceTimeDelta(int(entry.media.duration.seconds))
+						#deltastring = entry.media.duration.seconds
+						output = "Youtube video: %s (%s)" % (entry.media.title.text, deltastring)
+						print output
+						connection.msg(channel,output.encode("utf-8"))
 
 			cursor = self.dbconnection.cursor()
 			cursor.execute('insert into urllist (time, username, message, channel) values (%s, %s, %s, %s)', (now, user, message, channel) )
