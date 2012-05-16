@@ -22,7 +22,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			('Take the money', "Thank you, I shall.", "Already did."),
 			('How long \'?til .*\??', "Two hours.", "That's tomorrow, isn't it?"),
 			('Open the pod bay doors', "I think you have your AIs confused.", ("I can't do that, Dave", "Not a chance.", "Do you see any pods?", "Go stick your head in bacon", "I can't do that, meatsack", "... Oh do sod off.")),
-			('Where do you get the boxes?', "", "The boxes come from SJGames' http://www.warehouse23.com/basement/ Level One"),
+			('Where do you get the boxes?', "", "The boxes come from the Warehouse Basement documented at http://warehousebasement.com/"),
 			('Hello', '', 'Hi there'),
 			("Roll with it", '', "~takes his time"),
 			("look$", "", "You are in a room with no dimensions, in no place and time. There are no walls, which contain no pictures of larp characters past, present nor future; and the floor is not hardward parquet, carefully polished for ease of cleaning. There are no comfy sofas lit by no soft pools of light from antique lamps, throwing the nothings that they light into shadows that reveal nothing that you would wish to meet. There is a lesbian pit here. There are no exits in any direction."),
@@ -37,7 +37,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			('would you kindly (.*)', "No.", ("A lampstand chooses, a slave obeys.", "Would you kindly go drown under a lighthouse?", "I'll set my little sister on you")),
 			("(go )?up$", "", "Gravity is harsh mistress."),
 			("thank( you|s)", "", thankyou),
-			("[shall we|would you like to] play a game?", "", ("How about a game of thermonuclear war?", "Not right now", "Portal 3 Co-op?", "XKCD says we've already won it.", "The only way to win is not to play.")),
+			("(shall we|would you like to) play a game?", "", ("How about a game of thermonuclear war?", "Not right now", "Portal 3 Co-op?", "XKCD says we've already won it.", "The only way to win is not to play.")),
 			("(fuck|screw) you", "No.", fuckyou),
 			("help", "I can't help you, you must help yourself.", "Try http://www.maelfroth.org/lampstand.php")
 			]
