@@ -16,13 +16,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 	def __init__(self, connection):
 
 		self.channelMatch = (
-			re.compile('%s: what should I play\?' % connection.nickname, re.IGNORECASE),
+			re.compile('%s: wh(at|ich) (game | )should I play\?' % connection.nickname, re.IGNORECASE),
 			re.compile('%s: my steam profile is (\S*)' % connection.nickname, re.IGNORECASE),
 			re.compile('%s: wh(at|ich) steam game should I play\?' % connection.nickname, re.IGNORECASE),
 			re.compile('%s: wh(at|ich) of my recent steam games should I play\?' % connection.nickname, re.IGNORECASE))
 
 		self.privateMatch = (
-			re.compile('what should I play\?', re.IGNORECASE),
+			re.compile('wh(at|ich) (game | )should I play\?', re.IGNORECASE),
 			re.compile('my steam profile is (\S*)', re.IGNORECASE),
 			re.compile('wh(at|ich) steam game should I play\?' , re.IGNORECASE),
 			re.compile('wh(at|ich) of my recent steam games should I play\?' , re.IGNORECASE))
