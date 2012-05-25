@@ -35,9 +35,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 		matches = self.privateMatch[matchindex].findall(message)
 
 		if matchindex == 0:
-			#print "[Say] %s %s" % (sys.argv[1], matches[0])
-			connection.message("#%s" % matches[0][0], matches[0][1])
-			connection.message(user, "%s" % matches)
+			print "[Say] %s %s" % (matches[0][0], matches[0][1].encode('utf8'))
+			connection.msg(matches[0][0], matches[0][1].encode('utf8'))
 		elif matchindex == 1:
 			#print "[Do] %s %s" % (sys.argv[1], matches[0])
 			connection.me("#%s" % matches[0][0], matches[0][1])
