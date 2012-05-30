@@ -138,6 +138,7 @@ You could also try:
 * @Lampstand: are you pondering what I'm pondering?@
 * @Lampstand: examine item@
 * @Lampstand: misquote benjamin franklin@
+* @Lampstand: lost and found@
 
 h2. Play Games
 

@@ -36,7 +36,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			re.compile('%s. what has (\w*) forgotten(| to pack)\??' % connection.nickname, re.IGNORECASE), #7
 			re.compile('%s. are you pondering what I\'m pondering\?' % connection.nickname, re.IGNORECASE), #8
 			re.compile('%s. examine (.*?)\W*$' % connection.nickname, re.IGNORECASE), #9
-			re.compile("(gives) ([\w\s\d\'\-\(\)]*?\S) to %s\.?" % connection.nickname, re.IGNORECASE) #10
+			re.compile("(gives) ([\w\s\d\'\-\(\)]*?\S) to %s\.?" % connection.nickname, re.IGNORECASE), #10
+			re.compile("%s. lost (and|&) found" % connection.nickname, re.IGNORECASE) #11
 			)
 		self.dbconnection = connection.dbconnection
 
@@ -406,4 +407,18 @@ class Reaction(lampstand.reactions.base.Reaction):
 				
 			else:
 				connection.msg(channel, '%s: I don\'t have one.' % user)
+		elif (matchIndex == 11): # Lost and Found
+			if (channel == "#lampstand" and not user.lower() in self.admin):
+				print "Not allowing %s on %s to do that" % (user, channel)
+				connection.msg(channel, "%s: Not here. " % user)
+				return
 
+			cursor = self.dbconnection.cursor()
+			cursor.execute('select item from item ORDER BY RAND() limit 5');
+			found = cursor.fetchone()[0];
+			
+			lost = random.choice(self.items)
+			self.items.append(found)
+			self.drop(lost)
+			
+			connection.msg(channel, '%s: Lost %s, but found %s' % (user, lost, found) )
