@@ -36,6 +36,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			("sudo (.*)", "", ("This incident will be reported", "Password> _", "sudo fuck right off")),
 			('would you kindly (.*)', "No.", ("A lampstand chooses, a slave obeys.", "Would you kindly go drown under a lighthouse?", "I'll set my little sister on you")),
 			("(go )?up$", "", "Gravity is harsh mistress."),
+			("What have I actually forgotten\?", "Your ability to leave me the hell alone.", "There's a list at http://wiki.maelfroth.org/CommonlyForgottenItemsforLARPtrips"),
 			("thank( you|s)", "", thankyou),
 			("(shall we|would you like to) play a game?", "", ("How about a game of thermonuclear war?", "Not right now", "Portal 3 Co-op?", "XKCD says we've already won it.", "The only way to win is not to play.")),
 			("(fuck|screw) you", "No.", fuckyou),
