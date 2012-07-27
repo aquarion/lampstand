@@ -117,6 +117,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 				connection.msg(channel, "Nom")
 				return 
 
+			if item.lower() == "everything":
+				connection.msg(channel, "It's already mine, I don't need to hold it too.")
+				return
+
 			if item.lower() == "a suspicious package" or item.lower() == "the suspicious package":
 				connection.msg(channel, "Aha. Ah ha ha ha. Ah ha ha *ha* ha ha ha ha. ... No.")
 				return
