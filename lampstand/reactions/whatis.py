@@ -88,7 +88,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			return True
 
 
-		affermative = ("If you say so.", "Yeath Marthter", "It's done, but I didn't enjoy it", "... Fine", "Your worthless opinion has been recorded for eternity", "Filed under %s" % value[0], "Noted.", "Done", "That doesn't look right, but okay.", "Recorded.", "Carefully crafted consignment collated.", "Fine, done.", "Are you sure you've spelt that right?", "Saved.")
+		affermative = ("If you say so.", "Yeath Marthter", "It's done, but I didn't enjoy it", "... Fine", "Your worthless opinion has been recorded for eternity", "Filed under %s" % key[0], "Noted.", "Done", "That doesn't look right, but okay.", "Recorded.", "Carefully crafted consignment collated.", "Fine, done.", "Are you sure you've spelt that right?", "Saved.")
 
 		response = random.choice(affermative)
 
