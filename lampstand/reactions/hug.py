@@ -18,7 +18,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		self.banned = {}#{'entimix': 'rickroller'}
 
 		self.channelMatch = re.compile('.*hugs %s' % connection.nickname, re.IGNORECASE)
-		self.privateMatch = re.compile('give me (.*)', re.IGNORECASE)
+		self.privateMatch = re.compile('give me (.*)\.?', re.IGNORECASE)
 
 		self.dbconnection = connection.dbconnection
 
