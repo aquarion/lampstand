@@ -16,7 +16,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	def __init__(self, connection):
 
 		self.channelMatch = (
-			re.compile('%s: wh(at|ich) (game | )should I play\?' % connection.nickname, re.IGNORECASE),
+			re.compile('%s: wh(at|ich) (game |)should I play\?' % connection.nickname, re.IGNORECASE),
 			re.compile('%s: my steam profile is (\S*)' % connection.nickname, re.IGNORECASE),
 			re.compile('%s: wh(at|ich) steam game should I play\?' % connection.nickname, re.IGNORECASE),
 			re.compile('%s: wh(at|ich) of my recent steam games should I play\?' % connection.nickname, re.IGNORECASE))
@@ -31,7 +31,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 
 	def respond(self,user,matchIndex,matches):
-	
 		if matchIndex == 0 or matchIndex == 2:
 			output = self.playWhat(user)
 		elif matchIndex == 3:
@@ -43,7 +42,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		return output
 	
 	def channelAction(self, connection, user, channel, message, matchIndex = False):
-
+		print "[PLAY] Reacting..."
 		if self.overUsed(self.uses):
 				connection.msg(channel, self.overuseReactions[matchIndex])
 				return True
@@ -76,7 +75,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 
 	def playWhat(self, username, limitToRecent=False):
-
+		
+		print "[PLAY] Looking up games for %s" % username
 		cursor = self.dbconnection.cursor()
 		cursor.execute('SELECT steamname from gameaccounts where username = %s', username)
 		result = cursor.fetchone()
