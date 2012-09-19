@@ -54,7 +54,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		if not user.lower() == "aquarion":
 			print "Bomb disabled"
-			connection.msg(user, "The packages function has been disabled due to overuse beyond funny. Well done.")
+			connection.msg(user, "The packages function has been disabled.")
 			return False	
 	
 		if self.overUsed():
