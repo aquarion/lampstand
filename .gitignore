@@ -1,5 +1,5 @@
 *.pyc
-inventory.pkl.db
+*.pkl.db
 *.log
 config.ini
 venv
