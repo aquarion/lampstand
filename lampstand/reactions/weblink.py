@@ -48,12 +48,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 					if "v" in query.keys():
 						print "That's a Youtube Link with a v! %s " % query['v'][0]
 						entry = self.yt_service.GetYouTubeVideoEntry(video_id=query['v'][0])
-						print entry
+						#print entry
 						deltastring = tools.niceTimeDelta(int(entry.media.duration.seconds))
 						#deltastring = entry.media.duration.seconds
 						output = "Youtube video: %s (%s)" % (entry.media.title.text, deltastring)
-						print output
-						connection.msg(channel,output.encode("utf-8"))
+						#print output
+						connection.message(channel,output)
 
 			cursor = self.dbconnection.cursor()
 			cursor.execute('insert into urllist (time, username, message, channel) values (%s, %s, %s, %s)', (now, user, message, channel) )
@@ -70,7 +70,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			
 			url_split = urlparse.urlparse(self.lastlink[channel]['url'])
 			output = "%s: %s link shortened to %s" % (user, url_split[1], surl['url'])
-			connection.msg(channel,output.encode("utf-8"))
+			connection.message(channel,output)
 
 			cursor = self.dbconnection.cursor()
 			cursor.execute('update urllist set shorturl = %s where id = %s', ( surl['url'], self.lastlink[channel]['id'] ) )
@@ -88,7 +88,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 			if len(result) == 0:
 				output = "%s: I've no idea which link you mean" % user
-				connection.msg(channel,output.encode("utf-8"))
+				connection.message(channel,output)
 			else:
 				links = self.grabUrls(result[-1]['message'])
 
@@ -96,7 +96,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 					surl = self.bitly.shorten(link)
 					url_split = urlparse.urlparse(link)
 					output = "%s: %s link shortened to %s" % (user, url_split[1], surl['url'])
-					connection.msg(channel,output.encode("utf-8"))
+					connection.message(channel,output.encode("utf-8"))
 				
 
 		elif matchindex == 2: # Shorten this URL
@@ -105,7 +105,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 			if len(links) == 0:
 				print "[WEBLINK] No links found"
-				connection.msg(channel, "%s: I see no links in that" % user)
+				connection.message(channel, "%s: I see no links in that" % user)
 				return
 
 			print links
@@ -118,7 +118,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 				cursor.execute('insert into urllist (time, username, message, channel, shorturl) values (%s, %s, %s, %s, %s)', (now, user, message, channel, surl['url']) )
 				url_split = urlparse.urlparse(link)
 				output = "%s: %s link shortened to %s" % (user, url_split[1], surl['url'])
-				connection.msg(channel,output.encode("utf-8"))
+				connection.message(channel,output)
 				
 
 

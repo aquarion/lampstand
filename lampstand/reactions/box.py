@@ -21,7 +21,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 
 		if self.overUsed():
-			connection.msg(channel, "I'm out of boxes, new delivery shortly.")
+			connection.message(channel, "I'm out of boxes, new delivery shortly.")
 			return
 
 		print "[Box] called "

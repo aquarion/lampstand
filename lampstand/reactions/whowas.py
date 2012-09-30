@@ -30,13 +30,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 			searchingfor = searchingfor[0:-1]
 		space = re.compile(".*\s.*")
 		if searchingfor.lower() == "your mum":
-			connection.msg(channel, "%s: Not since she took on one piece of crumpet too many" % user)
+			connection.message(channel, "%s: Not since she took on one piece of crumpet too many" % user)
 		elif space.match(searchingfor):
-			connection.msg(channel, "No idea, %s. Have you looked under the sofa?" % user)
+			connection.message(channel, "No idea, %s. Have you looked under the sofa?" % user)
 		elif searchingfor.lower() == user.lower():
-			connection.msg(channel, "Yes. You're over there. Hello %s. Did you want a cookie or something?" % user)
+			connection.message(channel, "Yes. You're over there. Hello %s. Did you want a cookie or something?" % user)
 		elif searchingfor.lower() == connection.nickname.lower():
-			connection.msg(channel, "I'm right here.")
+			connection.message(channel, "I'm right here.")
 		else:
 			result = self.lastseen(searchingfor);
 			if searchingfor in connection.people:
@@ -46,10 +46,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 				stringOne = result[0:whereToSplit]
 				stringTwo = result[whereToSplit:]
 	
-				connection.msg(channel, "%s... " % stringOne.encode('utf8'))
-				connection.msg(channel, "... %s" % stringTwo.encode('utf8'))
+				connection.message(channel, "%s... " % stringOne)
+				connection.message(channel, "... %s" % stringTwo)
 			else:
-				connection.msg(channel, result.encode('utf8'))
+				connection.message(channel, result)
 		return True
 		
 	def everyLine(self, connection, user, channel, message):
@@ -80,13 +80,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 				searchingfor = searchingfor[0:-1]
 			space = re.compile(".*\s.*")
 			if searchingfor.lower() == "your mum":
-				connection.msg(user, "%s: Not since she took on one piece of crumpet too many" % user)
+				connection.message(user, "%s: Not since she took on one piece of crumpet too many" % user)
 			elif space.match(searchingfor):
-				connection.msg(user, "No idea, %s. Have you looked under the sofa?" % user)
+				connection.message(user, "No idea, %s. Have you looked under the sofa?" % user)
 			elif searchingfor.lower() == user.lower():
-				connection.msg(user, "Yes. You're over there. Hello %s. Did you want a cookie or something?" % user)
+				connection.message(user, "Yes. You're over there. Hello %s. Did you want a cookie or something?" % user)
 			elif searchingfor.lower() == connection.nickname.lower():
-				connection.msg(user, "I'm right here.")
+				connection.message(user, "I'm right here.")
 			else:
 				result = self.lastseen(searchingfor);
 				if searchingfor in connection.people:
@@ -97,14 +97,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 					stringOne = result[0:whereToSplit]
 					stringTwo = result[whereToSplit:]
 		
-					connection.msg(user, "%s... " % stringOne.encode('utf8'))
-					connection.msg(user, "... %s" % stringTwo.encode('utf8'))
+					connection.message(user, "%s... " % stringOne)
+					connection.message(user, "... %s" % stringTwo)
 				else:
-					connection.msg(user, result.encode('utf8'))
+					connection.message(user, result)
 					
 			#returnMessage = self.lastseen(searchingfor)
 			#print "[WHOWAS] %s " % returnMessage
-			#connection.msg(user, returnMessage.encode('utf8'))
+			#connection.message(user, returnMessage.encode('utf8'))
 
 
 	def nickChangeAction(self, connection, old_nick, new_nick):

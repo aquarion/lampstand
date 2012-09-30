@@ -22,7 +22,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 
 		if self.overUsed():
-			connection.msg(user, "Enough with the religion for now. (Overuse triggered)")
+			connection.message(user, "Enough with the religion for now. (Overuse triggered)")
 			return
 
 		print "[Bible] %s" % matches
@@ -44,10 +44,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 			stringOne = result[0:whereToSplit]
 			stringTwo = result[whereToSplit:]
 
-			connection.msg(channel, "%s... " % stringOne)
-			connection.msg(channel, "... %s [ESV]" % stringTwo)
+			connection.message(channel, "%s... " % stringOne)
+			connection.message(channel, "... %s [ESV]" % stringTwo)
 		else:
-			connection.msg(channel, "%s [ESV]" % result)
+			connection.message(channel, "%s [ESV]" % result)
 
 		return True
 	
@@ -72,9 +72,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 			stringOne = result[0:whereToSplit]
 			stringTwo = result[whereToSplit:]
 
-			connection.msg(user, "%s... " % stringOne)
-			connection.msg(user, "... %s [ESV]" % stringTwo)
+			connection.message(user, "%s... " % stringOne)
+			connection.message(user, "... %s [ESV]" % stringTwo)
 		else:
-			connection.msg(user, "%s [ESV]" % result)
+			connection.message(user, "%s [ESV]" % result)
 
 		return True

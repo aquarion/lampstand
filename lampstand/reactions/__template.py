@@ -24,7 +24,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	def channelAction(self, connection, user, channel, message, index):
 		
 		if self.overUsed():
-			connection.msg(user, "Overuse Triggered" )
+			connection.message(user, "Overuse Triggered" )
 			return True
 
 

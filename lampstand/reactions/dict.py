@@ -49,7 +49,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			src = "Dictionary"
 		except socket.error:
 			print "[Define] Argh. Dictionary server's offline"
-			connection.msg(channel, "Sorry, but my dictionary server's not working.")
+			connection.message(channel, "Sorry, but my dictionary server's not working.")
 			dfn = None
 
 		if not dfn:
@@ -78,14 +78,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 
 		if self.overUsed():
-			connection.msg(user, "The dictionary is on fire. Leave it alone. (Overuse triggered)")
+			connection.message(user, "The dictionary is on fire. Leave it alone. (Overuse triggered)")
 			return
 
 		self.updateOveruse()
 		try:
 			result, src = self.getDefinition(matches[0])
 		except:
-			connection.msg(channel, "%s: There is no such word as '%s' in my dictionary. In fact, everything between 'herring' and 'marmalade' appears to be completely missing." % (user, matches[0]))
+			connection.message(channel, "%s: There is no such word as '%s' in my dictionary. In fact, everything between 'herring' and 'marmalade' appears to be completely missing." % (user, matches[0]))
 			return True
 
 		print "[Define] %s" % result
@@ -100,10 +100,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 			stringOne = result[0:whereToSplit]
 			stringTwo = result[whereToSplit:]
 
-			connection.msg(channel, "%s... " % stringOne)
-			connection.msg(channel, "... %s" % stringTwo)
+			connection.message(channel, "%s... " % stringOne)
+			connection.message(channel, "... %s" % stringTwo)
 		else:
-			connection.msg(channel, "%s" % result)
+			connection.message(channel, "%s" % result)
 
 		return True
 
@@ -115,7 +115,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			result, src = self.getDefinition(matches[0])
 
 		except:	
-			connection.msg(user, "%s: There is no such word as '%s' in my dictionary. In fact, everything between 'herring' and 'marmalade' appears to be completely missing." % (user, matches[0]))
+			connection.message(user, "%s: There is no such word as '%s' in my dictionary. In fact, everything between 'herring' and 'marmalade' appears to be completely missing." % (user, matches[0]))
 			return True
 
 		print "[Define] %s" % result
@@ -130,9 +130,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 			stringOne = result[0:whereToSplit]
 			stringTwo = result[whereToSplit:]
 
-			connection.msg(user, "%s... " % stringOne)
-			connection.msg(user, "... %s" % stringTwo)
+			connection.message(user, "%s... " % stringOne)
+			connection.message(user, "... %s" % stringTwo)
 		else:
-			connection.msg(user, "%s" % result)
+			connection.message(user, "%s" % result)
 
 		return True

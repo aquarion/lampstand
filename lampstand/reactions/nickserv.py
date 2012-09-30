@@ -19,7 +19,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 				if connection.chanserv_password != False:
 					print '[IDENTIFY] Identifying myself to %s ' % user
 					response = "Identify %s" % connection.chanserv_password.encode('ascii')
-					connection.msg('NickServ', response )
+					connection.message('NickServ', response )
 					print response
 				else:
 					print '[IDENTIFY] Couldn\'t Identify myself to %s, no password ' % user

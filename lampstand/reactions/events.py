@@ -69,7 +69,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 	def channelAction(self, connection, user, channel, message, matchIndex):
 		if self.overUsed():
-			connection.msg(user, "Overuse Triggered" )
+			connection.message(user, "Overuse Triggered" )
 			return True
 
 		matches = self.channelMatch[matchIndex].findall(message)[0]

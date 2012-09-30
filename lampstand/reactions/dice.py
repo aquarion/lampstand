@@ -23,13 +23,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		item = self.channelMatch.findall(message);
 		result = self.rollDice(item)
-		connection.msg(channel, "%s: %s" % (user, result))
+		connection.message(channel, "%s: %s" % (user, result))
 		return True
 		
 	def privateAction(self, connection, user, channel, message, matchindex = 0):
 		item = self.privateMatch.findall(message);
 		result = self.rollDice(item)
-		connection.msg(user, result)
+		connection.message(user, result)
 	
 	def rollDice(self, item):
 
@@ -191,8 +191,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 				print "Changed"
 				changed = True
 		
-		if not changed:
-			print "No change!"
-			original = []
+		#if not changed:
+		#	print "No change!"
+		#	original = []
 		
+			
 		return [results, str(howmany)+'d'+str(type), original]

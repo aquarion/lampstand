@@ -32,6 +32,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 			cutout = message[index:]
 
 			if len(cutout) > 0:
-				connection.msg(channel, "%s: I think that cut out at \"%s\"" % (user, cutout));
+				connection.message(channel, "%s: I think that cut out at \"%s\"" % (user, cutout));
 
 			return True

@@ -24,7 +24,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 
 		if self.overUsed(self.uses, self.cooldown_number, self.cooldown_time):
-			connection.msg(channel, "I'm not running your life for you, go away." )
+			connection.message(channel, "I'm not running your life for you, go away." )
 			return True
 		
 		self.updateOveruse()
@@ -34,12 +34,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 
                 if random.randint(0,100) == 69:
 			print "Yes";
-                        connection.msg(channel, "%s: Yes" % user)
+                        connection.message(channel, "%s: Yes" % user)
 			return True
                 
 		if random.randint(0,100) == 67:
 			print "Edge";
-                        connection.msg(channel, "%s: edge" % user)
+                        connection.message(channel, "%s: edge" % user)
 			return True
 		
 		print match
@@ -49,7 +49,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		elif reaction.lower() == "boom" and user.lower():
 			connection.kick(channel,user, "BOOM")
 		else:
-			connection.msg(channel, "%s: %s" % (user, reaction))
+			connection.message(channel, "%s: %s" % (user, reaction))
 
 		return True
 
@@ -59,7 +59,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 
 		if self.overUsed(self.uses, self.cooldown_number, self.cooldown_time):
-			connection.msg(user, "I'm not running your life for you, go away." )
+			connection.message(user, "I'm not running your life for you, go away." )
 			return
 		
 		self.updateOveruse()
@@ -68,7 +68,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		print "Match: %s" % match
 
 		reaction = self.choose(match[0][1])
-		connection.msg(user, "%s: %s" % (user, reaction))
+		connection.message(user, "%s: %s" % (user, reaction))
 
 	def choose(self, message):
 		if message[-1:] == "?":

@@ -26,20 +26,20 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		if self.overUsed():
 			print "[HUG REACTION] OVERUSED %s" % user;
-			connection.msg(channel, "%s: I am not a vending machine :(" % user)
+			connection.message(channel, "%s: I am not a vending machine :(" % user)
 			return
 
 		if (self.banned.has_key(user.lower())):
 			print "[HUG REACTION] BANNED %s" % user;
 			insult = shakeinsult.shakeinsult(1);
-			connection.msg(channel, "%s the %s, %s" % (user, self.banned[user.lower()], insult )  )
+			connection.message(channel, "%s the %s, %s" % (user, self.banned[user.lower()], insult )  )
 			return
 
 
 		self.updateOveruse()
 
 		print "[HUG REACTION] GET %s" % user;
-		connection.me(channel, self.hug(user))
+		connection.describe(channel, self.hug(user).decode("utf-8").encode("utf-8"))
 		return True
 
 	def privateAction(self, connection, user, channel, message):
@@ -47,7 +47,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		item = self.privateMatch.findall(message);
 
 		print "[HUG REACTION] SET %s %s" % (user, item[0]);
-		connection.msg(user, self.set(user, item[0]))
+		connection.message(user, self.set(user, item[0]))
 
 
 	def set(self, username, item):
@@ -67,7 +67,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		if result != None:
 			print "I have a replacement for %s: %s" % (username, result[1]);
-			return "gives %s %s " % (username, result[1].encode('utf8'))
+			return "gives %s %s " % (username, result[1])
 
 		else:
 			print "I have no replacement for %s" % username;

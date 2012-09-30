@@ -53,7 +53,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			
 
                 #if self.overUsed(self.uses):
-                #        connection.msg(channel, self.overuseReactions[matchIndex])
+                #        connection.message(channel, self.overuseReactions[matchIndex])
                 #        return True
 
 
@@ -69,22 +69,22 @@ class Reaction(lampstand.reactions.base.Reaction):
 		value = matches[2]
 
 		if key.lower() == "glados":
-			connection.msg(channel, "%s: Nope" % user)
+			connection.message(channel, "%s: Nope" % user)
 			return True
 
 		if key.lower() == user.lower():
-			connection.msg(channel, "%s: Narcissism is not an attractive trait." % user)
+			connection.message(channel, "%s: Narcissism is not an attractive trait." % user)
 
 		cursor = self.dbconnection.cursor()
 
 		if len(key) > 254 or len(value) > 254:
-			connection.msg(channel, "Definitions, not essays please %s. Keep it under 255 characters and we'll get along fine." % user) 
+			connection.message(channel, "Definitions, not essays please %s. Keep it under 255 characters and we'll get along fine." % user) 
 			return True
 
 		query = "Select * from define where lower(word) = %s and lower(definition) = %s"
 		cursor.execute(query, (key.lower(), value.lower()) )
 		if cursor.fetchone():
-			connection.msg(channel, "%s: I already had it that way" % user)
+			connection.message(channel, "%s: I already had it that way" % user)
 			return True
 
 
@@ -94,7 +94,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		query = "insert into define values (0, %s, %s, %s, NOW())";
 		cursor.execute(query, (key, value, user) )
-		connection.msg(channel, "%s: %s" % (user, response))
+		connection.message(channel, "%s: %s" % (user, response))
 		return True
 
 
@@ -110,21 +110,21 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		if key == self.lastasked:
 			print "A repeat"
-			connection.msg(channel, "%s: I just said, %s" % (user, self.answered))
+			connection.message(channel, "%s: I just said, %s" % (user, self.answered))
 			return True
 
 		if key.lower() == "glados":
 			print "a Glados"
-			connection.msg(channel, "%s: The AI of my dreams" % user)
+			connection.message(channel, "%s: The AI of my dreams" % user)
 			return True
 
 		row = self.define(key, like)
 
 		if row:
 			if like:
-				connection.msg(channel, '%s: "%s" is "%s"' % (user, row[0], row[1]))
+				connection.message(channel, '%s: "%s" is "%s"' % (user, row[0], row[1]))
 			else:
-				connection.msg(channel, "%s: %s" % (user, row[1]))
+				connection.message(channel, "%s: %s" % (user, row[1]))
 			self.blame = row[2]
 			self.lastasked2 = self.lastasked
 			self.lastasked = key
@@ -137,10 +137,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 				self.lastasked = key
 				self.answered = result
 				self.blame = src
-				connection.msg(channel, "%s: %s" % (user, result))
+				connection.message(channel, "%s: %s" % (user, result))
 
 			except:
-				connection.msg(channel, "%s: No Clue" % user)
+				connection.message(channel, "%s: No Clue" % user)
 		
 		return True
 
@@ -164,9 +164,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 	def getBlame(self, connection, user, channel, message, matches):
 
 		if self.blame.lower() == user.lower():
-			connection.msg(channel, "%s: You did." % (user, ))
+			connection.message(channel, "%s: You did." % (user, ))
 		else:
-			connection.msg(channel, "%s: %s" % (user, self.blame))
+			connection.message(channel, "%s: %s" % (user, self.blame))
 
 		return True
 
@@ -184,7 +184,7 @@ class Reaction(lampstand.reactions.base.Reaction):
                 	row = cursor.fetchone()
 
 
-                connection.msg(channel, "%s: %s is %s" % (user, row[0], row[1]))
+                connection.message(channel, "%s: %s is %s" % (user, row[0], row[1]))
                 self.blame = row[2]
 
                 return True
@@ -198,14 +198,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 		if not user.lower() in self.admin:
 			row = self.define(key)
 			if row:
-				connection.msg(channel, "%s: %s is *literally* \"%s\"" % (user, row[0], row[1]))
+				connection.message(channel, "%s: %s is *literally* \"%s\"" % (user, row[0], row[1]))
 				self.blame = row[2]
 				self.lastasked2 = self.lastasked
 				self.lastasked = key
 				self.answered = row[1]
 				return True
 			else:
-				connection.msg(channel, "%s: Literally No Clue" % user)
+				connection.message(channel, "%s: Literally No Clue" % user)
 				return True
 			
 
@@ -242,9 +242,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 			stringOne = result[0:whereToSplit]
 			stringTwo = result[whereToSplit:]
 
-			connection.msg(channel, "%s... " % stringOne)
-			connection.msg(channel, "... %s" % stringTwo)
+			connection.message(channel, "%s... " % stringOne)
+			connection.message(channel, "... %s" % stringTwo)
 		else:
-			connection.msg(channel, "%s" % result)
+			connection.message(channel, "%s" % result)
 		return True
 

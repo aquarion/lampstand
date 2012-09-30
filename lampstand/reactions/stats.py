@@ -27,7 +27,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	def channelAction(self, connection, user, channel, message):
 		
 		if self.overUsed():
-			connection.msg(user, "Overuse Triggered" )
+			connection.message(user, "Overuse Triggered" )
 			return True
 
 		self.stats(connection, channel)
@@ -51,7 +51,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		topuser[1] = cursor.fetchone()[1];		
 		topuser[2] = cursor.fetchone()[1];		
 
-		connection.msg(user, "I have been given questionable definitions of %s things, mostly by %s, %s & %s" % (total[0], topuser[0], topuser[1], topuser[2]));
+		connection.message(user, "I have been given questionable definitions of %s things, mostly by %s, %s & %s" % (total[0], topuser[0], topuser[1], topuser[2]));
 
 		for module in connection.channelModules:
 			if module.__name == "Items & Inventory":
@@ -63,7 +63,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		itemone = cursor.fetchone();		
 
 
-		connection.msg(user, "I am holding %s things, and know about %s items in total" % (inventory, itemone[0]));
+		connection.message(user, "I am holding %s things, and know about %s items in total" % (inventory, itemone[0]));
 
 		# There are X events in the future (X in the past), totaling X hours of things happening.
 
@@ -75,7 +75,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		creatediff = tools.nicedelta(now-created)
 		launchdiff = tools.nicedelta(now-connection.date_started)
 
-		connection.msg(user, "I was created %s ago, and I've been up since %s, which was %s ago" % (creatediff, connection.date_started, launchdiff));
+		connection.message(user, "I was created %s ago, and I've been up since %s, which was %s ago" % (creatediff, connection.date_started, launchdiff));
 
 		# I'm listening out for X different public channel responses, X private
 
@@ -96,7 +96,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 				else:
 					privatetriggers += 1
 
-		connection.msg(user, "I'm listening out for %d different public channel phrases, %d in query" % (channeltriggers, privatetriggers))
+		connection.message(user, "I'm listening out for %d different public channel phrases, %d in query" % (channeltriggers, privatetriggers))
 
 		# I am 77% of the way to world domination. 
 

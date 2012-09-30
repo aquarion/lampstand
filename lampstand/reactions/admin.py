@@ -12,8 +12,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 	
 	def __init__(self, connection):
 		self.privateMatch = (
-			re.compile('say \#(\w*) (.*)', re.IGNORECASE),
-			re.compile('do \#(\w*) (.*)', re.IGNORECASE),
+			re.compile('say (\#\w*) (.*)', re.IGNORECASE),
+			re.compile('do (\#\w*) (.*)', re.IGNORECASE),
 			re.compile('quit (.*)', re.IGNORECASE),
 			re.compile('status', re.IGNORECASE),
 			re.compile('reload (.*)', re.IGNORECASE),
@@ -35,12 +35,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 		matches = self.privateMatch[matchindex].findall(message)
 
 		if matchindex == 0:
-			print "[Say] %s %s" % (matches[0][0], matches[0][1].encode('utf8'))
-			connection.msg(matches[0][0], matches[0][1].encode('utf8'))
+			print "[Say] %s %s" % (matches[0][0], matches[0][1])
+			connection.message(matches[0][0], matches[0][1])
 		elif matchindex == 1:
 			#print "[Do] %s %s" % (sys.argv[1], matches[0])
-			connection.me("#%s" % matches[0][0], matches[0][1])
-			connection.message(user, "%s" % matches)
+			connection.me(matches[0][0], matches[0][1])
+			#connection.message(user, "%s" % matches)
 			#connection.me("#%s" % sys.argv[1], matches[0])
 		elif matchindex == 2:
 			print "[Quit] %s" % (matches[0])

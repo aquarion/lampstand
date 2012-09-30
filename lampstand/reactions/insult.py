@@ -21,7 +21,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		print "[INSULT] called"
 
 		if self.overUsed():
-			connection.msg(user, "I'm bored of this, insult them yourself. (Overuse triggered)" )
+			connection.message(user, "I'm bored of this, insult them yourself. (Overuse triggered)" )
 			return
 
 		item = self.channelMatch.findall(message);
@@ -41,24 +41,24 @@ class Reaction(lampstand.reactions.base.Reaction):
 			return
 
 		if insultee.lower() == connection.nickname.lower():
-			connection.msg(channel, "%s: No." % user )
+			connection.message(channel, "%s: No." % user )
 			return
 
 		if insultee.lower() == 'aquarion':
-			connection.msg(channel, "%s: Do I look suicidal? No." % user )
+			connection.message(channel, "%s: Do I look suicidal? No." % user )
 			return
 
 		
 		ownerMatch = re.compile('.*aquarion.*', re.IGNORECASE)
 		myNameMatch = re.compile('.*%s.*' % connection.nickname, re.IGNORECASE)
 		if ownerMatch.match(item[0][0]) or myNameMatch.match(insultee):
-			connection.msg(channel, "%s: Hah. Very clever. Still no." % user )
+			connection.message(channel, "%s: Hah. Very clever. Still no." % user )
 			return
 			
 		ownerMatch = re.compile('.*your m.m.*', re.IGNORECASE)
 		myNameMatch = re.compile('.*%s.*' % connection.nickname, re.IGNORECASE)
 		if ownerMatch.match(item[0][0]) or myNameMatch.match(insultee):
-			connection.msg(channel, "%s: She was a saint. And a toaster." % user )
+			connection.message(channel, "%s: She was a saint. And a toaster." % user )
 			return
 
 		print "%s" % item
@@ -67,5 +67,5 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		self.updateOveruse()
 
-		connection.msg(channel, "%s, %s" % (orig_insultee, insult )  )
+		connection.message(channel, "%s, %s" % (orig_insultee, insult )  )
 		return True

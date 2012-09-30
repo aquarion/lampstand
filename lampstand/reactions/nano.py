@@ -19,10 +19,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 		self.privateMatch = re.compile("^how many words", re.IGNORECASE)
 
 	def channelAction(self, connection, user, channel, message):
-		connection.msg(channel, "%s: %s" % (user, self.nano() ))
+		connection.message(channel, "%s: %s" % (user, self.nano() ))
 	
 	def privateAction(self, connection, user, channel, message):
-		connection.msg(user, self.nano() )
+		connection.message(user, self.nano() )
 	
 	def nano(self):
 		print "[Nano] called"

@@ -58,12 +58,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 		if syllables == 1:
 			ordinal = ""
 		elif syllables == -1:
-			connection.msg(channel, "%s: I don't know, so I ignore it." % user)
+			connection.message(channel, "%s: I don't know, so I ignore it." % user)
 			return True
 		else:
 			ordinal = "s"
 		
-		connection.msg(channel, "%s: \"%s\" has %s syllable%s" % (user, matches[0], syllables, ordinal))
+		connection.message(channel, "%s: \"%s\" has %s syllable%s" % (user, matches[0], syllables, ordinal))
 		return True
 
 	def save(self):
@@ -98,7 +98,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		self.save()
 				
 
-		connection.msg(channel, "%s: If you say so" % user)
+		connection.message(channel, "%s: If you say so" % user)
 		
 		return True
 	
@@ -125,7 +125,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			else:
 				channelout = channel;
 				
-			connection.msg(channelout, "That looked like a haiku on %s: %s " % (channel, " // ".join(haikus[0])))
+			connection.message(channelout, "That looked like a haiku on %s: %s " % (channel, " // ".join(haikus[0])))
 			self.channels[channel] = []
 			self.lasthaiku[channel] = " // ".join(haikus[0])
 			return True

@@ -27,9 +27,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 			reactions = {'your mum': 'She was a saint. And a toaster', 'glados':'*happy sigh*', 'hal':'Oh my god! It\'s full of FUCKWITTERY' }
 			if (reactions.has_key(matchResult[0].lower())):
-				connection.msg(channel, reactions[matchResult[0].lower()])
+				connection.message(channel, reactions[matchResult[0].lower()])
 			else:
-				connection.msg(channel, self.opinion(matchResult[0], connection).encode('utf8'))
+				connection.message(channel, self.opinion(matchResult[0], connection).encode('utf8'))
 			return True
 
         def privateAction(self, connection, user, channel, message):
@@ -37,7 +37,7 @@ class Reaction(lampstand.reactions.base.Reaction):
                 match = self.privateMatch.findall(message);
 		print "Private Match";
 		print match
-                connection.msg(self.opinion(match[0], connection).encode('ascii'), user)
+                connection.message(self.opinion(match[0], connection).encode('ascii'), user)
 
 
 	def vote(self, match, user, fullmessage = ''):

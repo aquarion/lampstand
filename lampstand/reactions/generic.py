@@ -72,7 +72,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		if self.overUsed(self.uses):
 			if self.reactions[matchindex][1] != '':
-				connection.msg(channel, self.reactions[matchindex][1])
+				connection.message(channel, self.reactions[matchindex][1])
 				return True
 
 
@@ -92,23 +92,23 @@ class Reaction(lampstand.reactions.base.Reaction):
 			elif reaction[0] == "%":
 				roll = random.randint(0,50)
 				if roll == 45:
-					connection.msg(channel, reaction[1:])
+					connection.message(channel, reaction[1:])
 				else:
 					print "Rolled %d" % roll;
 			else:
-				connection.msg(channel, reaction)
+				connection.message(channel, reaction)
 			return True
 
 	def privateAction(self, connection, user, channel, message, matchindex):
 		#match = self.privateMatch.findall(message);
-		#connection.msg(user, self.howLong(match).encode('ascii'))
+		#connection.message(user, self.howLong(match).encode('ascii'))
 
 		print "[Generic Reaction] called"
 
 
 		if self.overUsed(self.uses, self.cooldown_number, self.cooldown_time):
 			if self.reactions[matchindex][1] != '':
-				connection.msg(user, self.reactions[matchindex][1])
+				connection.message(user, self.reactions[matchindex][1])
 				return
 
 
@@ -130,6 +130,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 				print "ACtion %s : %s" % (user, reaction)
 				connection.me(user, reaction)
 			else:
-				connection.msg(user, reaction)
+				connection.message(user, reaction)
 			return
 

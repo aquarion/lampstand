@@ -44,7 +44,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	def channelAction(self, connection, user, channel, message, matchIndex = False):
 		print "[PLAY] Reacting..."
 		if self.overUsed(self.uses):
-				connection.msg(channel, self.overuseReactions[matchIndex])
+				connection.message(channel, self.overuseReactions[matchIndex])
 				return True
 
 
@@ -63,7 +63,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		else:
 			output = "%s: Settlers of Catan? Monopoly? Steam's not talking to me right now, sorry." % user
 
-		connection.msg(channel, output.encode("utf-8"))
+		connection.message(channel, output)
 
 
 	def privateAction(self, connection, user, channel, message, matchIndex = False):
@@ -71,7 +71,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		matches = self.privateMatch[matchIndex].findall(message)
 		output = self.respond(user,matchIndex, matches)
 
-		connection.msg(user, output.encode("utf-8"))
+		connection.message(user, output)
 
 
 	def playWhat(self, username, limitToRecent=False):

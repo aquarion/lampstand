@@ -46,18 +46,18 @@ class Reaction(lampstand.reactions.base.Reaction):
 			quotedUser = matches[0]
 
 		if quotedUser.lower() == user.lower():
-			connection.msg(channel, "%s: Don't do that, you'll go blind" % user);
+			connection.message(channel, "%s: Don't do that, you'll go blind" % user);
 			return True
 
 
 		if len(result) == 0:
-			connection.msg(channel, "%s: Sorry, I've no idea what you're talking about" % user)
+			connection.message(channel, "%s: Sorry, I've no idea what you're talking about" % user)
 			return True
 
 		else:
 			print result
 			line = result[-1]
-			connection.msg(channel, "%s: Okay, quoting \"%s: %s\"" % (user, line['user'], line['message']))
+			connection.message(channel, "%s: Okay, quoting \"%s: %s\"" % (user, line['user'], line['message']))
 			# Full Texts  	id 	body 	notes 	rating 	votes 	submitted 	approved 	flagged 	score
 			quote = "%s: %s" % (line['user'], line['message'])
 			sub = "Submitted by %s" % user
@@ -100,11 +100,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 			url = "http://www.maelfroth.org/quotes/index.cgi?action=browse"
 			if cursor.rowcount == 1:
-				msg = "One new quote has been approved at %s" % url
+				message = "One new quote has been approved at %s" % url
 			else:
-				msg = "%d new quotes have been approved at %s" % (cursor.rowcount, url)
+				message = "%d new quotes have been approved at %s" % (cursor.rowcount, url)
 
-			connection.msg(channel, msg)
+			connection.message(channel, message)
 			quote = cursor.fetchone()
 			self.last_quote_seen = quote[0]
 

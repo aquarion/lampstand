@@ -54,11 +54,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		if not user.lower() == "aquarion":
 			print "Bomb disabled"
-			connection.msg(user, "The packages function has been disabled.")
+			connection.message(user, "The packages function has been disabled.")
 			return False	
 	
 		if self.overUsed():
-			connection.msg(user, "Overuse Triggered" )
+			connection.message(user, "Overuse Triggered" )
 			return True
 		
 		print "[PACKAGE]"
@@ -130,8 +130,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 				print self.message_number, self.messages[self.message_number]
 
 				if self.messages[self.message_number]:
-					msg = self.messages[self.message_number] % self.package_player
-					connection.message(channel, msg)
+					message = self.messages[self.message_number] % self.package_player
+					connection.message(channel, message)
 				self.message_number += 1
 			else:
 				print "Go Boom";

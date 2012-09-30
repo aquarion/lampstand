@@ -30,7 +30,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		if word in connection.people and number == 7:
 			thanks = self.thanks(word);
 			print "[THANKS] Thanks, %s: %s" % (word, thanks)
-			connection.msg(channel, thanks)
+			connection.message(channel, thanks)
 			return True
 		elif word in connection.people:
 			print "Found, but not random"

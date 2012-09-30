@@ -31,12 +31,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 
 		if self.overUsed():
-			connection.msg(user, "The 8-ball says: 'Find a new prophet, I quit.', I'd give it a while to cool down." )
+			connection.message(user, "The 8-ball says: 'Find a new prophet, I quit.', I'd give it a while to cool down." )
 			return True
 
 
 		self.updateOveruse()
 		
-		connection.msg(channel, "%s: %s" % (user, eightball.question()) )
+		connection.message(channel, "%s: %s" % (user, eightball.question()) )
 
 		return True
