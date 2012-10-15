@@ -26,7 +26,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		random.seed()
 
 		self.channelMatch = (
-			re.compile('(%s: take|gives %s) (.*?\S)\s*\.?$' % (connection.nickname, connection.nickname), re.IGNORECASE|re.UNICODE), #0
+			re.compile('(%s. take|gives %s) (.*?\S)\s*\.?$' % (connection.nickname, connection.nickname), re.IGNORECASE|re.UNICODE), #0
 			re.compile('%s. inventory' % connection.nickname, re.IGNORECASE), #1
 			re.compile('%s. (attack|smite) (\S*)' % connection.nickname, re.IGNORECASE), #2
 			re.compile('%s. do science\!?' % connection.nickname, re.IGNORECASE), #3
@@ -178,7 +178,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			
 			message = seperator.join(self.items[:-1]);
 			
-			connection.message(channel, "I currently have %s%sand %s" % (message, seperator, last))
+			connection.message(channel, "I currently have %s%sand %s." % (message, seperator, last))
 		elif (matchIndex == 2): # attack
 
 			person = self.channelMatch[2].findall(message)[0][1];
@@ -295,10 +295,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 					self.save()
 				else:
 					connection.message(channel, "I don't have to listen to you. So neh.")
-			elif item.lower() == "a lantern":
-				connection.message(channel, '%s: Nuh-uh. This is grue country.' % user)
-				return;
 			elif item.lower() in map(str.lower, self.items):
+				if item.lower() == "a lantern":
+					connection.message(channel, '%s: Nuh-uh. This is grue country.' % user)
+					return;
 				result = self.drop(item)
 				if result:
 					connection.message(channel, '%s: Dropped "%s"' % (user, item))
@@ -386,13 +386,15 @@ class Reaction(lampstand.reactions.base.Reaction):
 	                cursor = self.dbconnection.cursor()
 			item = self.channelMatch[9].findall(message)[0];
 			
-			if item == "a lantern":
-				connection.message(channel, '%s: It is a battery powered brass lantern' % user)
-			elif item.lower() == user.lower():
+
+			if item.lower() == user.lower():
 				connection.message(channel, '%s: I see a meatsack with a propensity for stupid questions' % user)
 			elif item.lower() == connection.nickname.lower():
 				connection.message(channel, '%s: I am he as you are he as you are me and we are all together.' % user)
 			elif item in self.items:
+				if item == "a lantern":
+					connection.message(channel, '%s: It is a battery powered brass lantern' % user)
+					return
 				define = lampstand.reactions.whatis.Reaction(connection);
 				definition = define.define(item)
 
