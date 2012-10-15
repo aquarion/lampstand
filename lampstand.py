@@ -397,7 +397,7 @@ class LampstandLoop(irc.IRCClient):
 		self.channel.action(user, channel, msg)
 		self.logger.log("* %s %s" % (user, msg))
 
-	def message(self, user, message, length=200):
+	def message(self, user, message, length=380):
 		message = message.decode("utf-8").encode("utf-8")
 		return self.msg(user,message,length)
 
