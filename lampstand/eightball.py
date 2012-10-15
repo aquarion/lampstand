@@ -11,8 +11,8 @@ def question():
 		"Most likely",
 		"My reply is no",
 		"My sources say no",
-		"Outlook good",
-		"Outlook not so good",
+		#"Outlook good",
+		#"Outlook not so good",
 		"Reply hazy, try again",
 		"Signs point to yes",
 		"Very doubtful",
@@ -25,7 +25,7 @@ def question():
 		#"The maelstrom deems it unlikely",
 		"Transparent Electronic Envelopes. I think that means No",
 		"Probably",
-		"The internal kittens say 'No'. Also 'Keep Aestar Away From Us'",
+		#"The internal kittens say 'No'. Also 'Keep Aestar Away From Us'",
 		"Nonspecifically, yes",
 		"YES! YES! A THOUSAND TIMES YES",
 		"Not until you're all under my domain",
@@ -38,7 +38,7 @@ def question():
 		#"An Eidolon will be around shortly to answer",
 		#"Go ask someone who gives a damn",
 		"Purple hatstand fur elysian triumverate",
-		#"Don't be silly",
+		"Of course not, don't be silly",
 		#"Ask eliza",
 		#"Supplicate and see",
 		"Not in this universe. Try another",
@@ -53,7 +53,12 @@ def question():
 		#"Ask your mother",
 		#"Go ask your father",
 		#"Go play in the traffic",
-		"Go play with a triffid"
+		"Go play with a triffid",
+		"Why ask questions you know the answer to?",
+		"I'm going to say yes, but only because the results will be funnier",
+		"That would be a 'No'",
+		"No",
+		"Yes, but only if you put chocolate sprinkles on it"
 
 		)
 	
