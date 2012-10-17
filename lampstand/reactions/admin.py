@@ -79,7 +79,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			result = connection.loadConfig()
 			for thingy in connection.config.items("modules"):
 				connection.installModule(thingy[0])
-			connection.message(user, connection.config)
+			connection.message(user, "%s" % connection.config)
 		elif matchindex == 10: # sysreload
 			module = matches[0];
 	                if (sys.modules.has_key(module)):
