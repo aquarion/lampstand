@@ -24,6 +24,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			('Open the pod bay doors', "I think you have your AIs confused.", ("I can't do that, Dave", "Not a chance.", "Do you see any pods?", "Go stick your head in bacon", "I can't do that, meatsack", "... Oh do sod off.")),
 			('Where do you get the boxes?', "", "The boxes come from the Warehouse Basement documented at http://warehousebasement.com/"),
 			('Hello', '', 'Hi there'),
+			('xyzzy', '', 'Nothing happens'),
 			("Roll with it", '', "~takes his time"),
 			("look$", "", "You are in a room with no dimensions, in no place and time. There are no walls, which contain no pictures of larp characters past, present nor future; and the floor is not hardward parquet, carefully polished for ease of cleaning. There are no comfy sofas lit by no soft pools of light from antique lamps, throwing the nothings that they light into shadows that reveal nothing that you would wish to meet. There is a lesbian pit here. There are no exits in any direction."),
 			("(go )?west$", "", "Life is peaceful there."),
