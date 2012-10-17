@@ -202,3 +202,11 @@ h2. Who was / Last seen
 10:54 [Aquarion] Lampstand: Have you seen Aquarion? 
 10:54 [Lampstand] I last saw Aquarion on Sat, 08 March 08 at 10:54 saying Hello! 
 
+h2. Wolfram Alpha
+
+_submits a query to Wolfram Alpha_
+
+@Lampstand: Lampstand: ask wolfram who wrote jude the obscure@
+[Lampstand] Thomas Hardy
+
+"Ask Wolfram" can be "wolfram", "ask wolfram" or "calculate"
