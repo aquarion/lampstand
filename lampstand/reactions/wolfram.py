@@ -56,7 +56,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 			answer = self.find_node(root, possible_answers)
 			
 			if answer == None:
-				return "You're going to need to be more specific"
+				node = root.xpath("/queryresult/pod/subpod/plaintext")
+				if node:
+					print node
+					return "(As %s): %s" % (node[0].text, node[1].text)
+				else:
+					return "You're going to need to be more specific"
 
 			return answer
 		else:
