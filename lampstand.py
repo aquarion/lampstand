@@ -35,11 +35,15 @@ import random
 
 random.seed()
 
+# Other Imports:
+
 import MySQLdb
 
 import lampstand.reactions;
 
 import ConfigParser
+
+from BeautifulSoup import UnicodeDammit
 
 from lampstand import sms
 
@@ -398,8 +402,8 @@ class LampstandLoop(irc.IRCClient):
 		self.logger.log("* %s %s" % (user, msg))
 
 	def message(self, user, message, length=380):
-		message = message.decode("utf-8").encode("utf-8")
-		return self.msg(user,message,length)
+		message = UnicodeDammit(message)
+		return self.msg(user,message.unicode.encode("utf-8"),length)
 
 	# irc callbacks
 
