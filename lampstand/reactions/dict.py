@@ -71,6 +71,21 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		return (result, src)
 
+	def splitDefinition(self, result):
+
+		string = []
+
+		if len(result) > 880:
+			whereToSplit = splitAt(result, 860)
+			result = "%s [Cut for length]" % result[0:whereToSplit]
+
+		string.append("%s" % result)
+
+		print string
+
+		return string
+
+
 	def channelAction(self, connection, user, channel, message):
 		matches = self.channelMatch.findall(message);
 
@@ -90,20 +105,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		print "[Define] %s" % result
 
-		if len(result) > 880:
-
-			whereToSplit = splitAt(result, 860)
-			result = "%s [Cut for length]" % result[0:whereToSplit]
-
-		if len(result) > 440:
-			whereToSplit = splitAt(result, 440)
-			stringOne = result[0:whereToSplit]
-			stringTwo = result[whereToSplit:]
-
-			connection.message(channel, "%s... " % stringOne)
-			connection.message(channel, "... %s" % stringTwo)
-		else:
-			connection.message(channel, "%s" % result)
+		messages = self.splitDefinition(result)
+		for message in messages:
+			connection.message(channel, "%s: %s" % (user, message))
 
 		return True
 

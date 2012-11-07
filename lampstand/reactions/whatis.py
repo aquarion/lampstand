@@ -133,11 +133,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 			dictionary = lampstand.reactions.dict.Reaction(connection);
 			try:
 				result, src = dictionary.getDefinition(key)
+				messages = dictionary.splitDefinition(result)
 				self.lastasked2 = self.lastasked
 				self.lastasked = key
 				self.answered = result
 				self.blame = src
-				connection.message(channel, "%s: %s" % (user, result))
+				print messages
+				for message in messages:
+					connection.message(channel, message)
 
 			except:
 				connection.message(channel, "%s: No Clue" % user)
