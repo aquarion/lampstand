@@ -101,7 +101,7 @@ class urlCheck():
 			return 502 # Bad Gateway
 		except requests.exceptions.TooManyRedirects:
 			return 508 # Loop Detected
-		except (requests.exceptions.RequestException, AttributeError):
+		except (requests.exceptions.RequestException, AttributeError, UnicodeError):
 			return 418 # I'm a teapot
 
 if __name__ == '__main__':
