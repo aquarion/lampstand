@@ -15,8 +15,6 @@ Todo:
 	* All the cool shit in your head
 """
 
-
-
 # twisted imports
 from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol, threads, defer
@@ -202,14 +200,21 @@ class LampstandLoop(irc.IRCClient):
 			except:
 				pass
 
+	def mysqlConnection(self):
+		user = self.config.get("database","user")
+		passwd = self.config.get("database","password")
+		db = self.config.get("database","database")
+		
+		self.dbconnection = MySQLdb.connect(user=user, passwd=passwd, db=db, charset='utf8')
+		
+				
 	def connectionMade(self):
 
 		self.date_started = datetime.now()
 
 		self.config = self.factory.config
 		
-		
-		self.dbconnection = MySQLdb.connect(user = self.config.get("database","user"), passwd = self.config.get("database","password"), db = self.config.get("database","database"))
+		self.mysqlConnection()
 			
 		#threads.deferToThread(self.scheduledTasks)
 		#reactor.callInThread(self.scheduledTask);
@@ -402,6 +407,7 @@ class LampstandLoop(irc.IRCClient):
 		self.logger.log("* %s %s" % (user, msg))
 
 	def message(self, user, message, length=380):
+		message = message.replace('\n', '').replace('\r', '')
 		message = UnicodeDammit(message)
 		return self.msg(user,message.unicode.encode("utf-8"),length)
 
