@@ -67,8 +67,11 @@ class urlCheck():
 		for link in links:
 			urls = self.grabUrls(link[1])
 			print link
-			print urls
+			#print urls
 			if len(urls) == 0:
+				params = (400, 1, link[0])
+				cursor.execute(update_query, params)
+				self.dbconnection.commit()
 				continue
 
 			url = urls[0]
@@ -80,7 +83,7 @@ class urlCheck():
 			else:
 				repeat_code = 1
 			params = (status_code, repeat_code, link[0])
-			print params
+			print "[%s] %s" (status_code, link[0])
 			cursor.execute(update_query, params)
 			print " -"
 			n = n + 1
