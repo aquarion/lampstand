@@ -7,6 +7,14 @@ import urlparse
 import gdata.youtube
 import gdata.youtube.service
 
+import requests
+import BeautifulSoup
+
+import StringIO
+import Image
+
+from lampstand import most_colour
+
 def __init__ ():
 	pass
 
@@ -39,24 +47,16 @@ class Reaction(lampstand.reactions.base.Reaction):
 			print links
 			now = time.time()
 			
+			
 			for url in links:
-				urlp = urlparse.urlparse(url)
-				print url
-				if "youtube" in urlp.netloc.split("."):
-					print "That's a Youtube Link"
-					query = urlparse.parse_qs(urlp.query)
-					if "v" in query.keys():
-						print "That's a Youtube Link with a v! %s " % query['v'][0]
-						entry = self.yt_service.GetYouTubeVideoEntry(video_id=query['v'][0])
-						#print entry
-						deltastring = tools.niceTimeDelta(int(entry.media.duration.seconds))
-						#deltastring = entry.media.duration.seconds
-						output = "Youtube video: %s (%s)" % (entry.media.title.text, deltastring)
-						#print output
-						connection.message(channel,output)
+				title = self.getTitle(url)
+							
+				if(title):
+					connection.message(channel,title)
+						
 
-			cursor = self.dbconnection.cursor()
-			cursor.execute('insert into urllist (time, username, message, channel) values (%s, %s, %s, %s)', (now, user, message, channel) )
+				cursor = self.dbconnection.cursor()
+				cursor.execute('insert into urllist (time, username, message, channel, url, title) values (%s, %s, %s, %s, %s, %s)', (now, user, message, channel, url, title) )
 
 			self.lastlink[channel] = {'id': cursor.lastrowid, 'url': links[0] }
 
@@ -156,3 +156,41 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		return url_re.findall(text)
 
+	def getTitle(self, url):
+		title = False
+	
+		urlp = urlparse.urlparse(url)
+		print url
+		if "youtube" in urlp.netloc.split("."):
+			print "That's a Youtube Link"
+			query = urlparse.parse_qs(urlp.query)
+			if "v" in query.keys():
+				print "That's a Youtube Link with a v! %s " % query['v'][0]
+				entry = self.yt_service.GetYouTubeVideoEntry(video_id=query['v'][0])
+				#print entry
+				deltastring = tools.niceTimeDelta(int(entry.media.duration.seconds))
+				#deltastring = entry.media.duration.seconds
+				title = "Youtube video: %s (%s)" % (entry.media.title.text, deltastring)
+				#print output
+				#connection.message(channel,title)
+		else:
+			req = requests.get(url)
+			k = len(req.content) / 1024
+			if req.status_code != 200:
+				title = "%s: That link returned an error %s" % (user, r.status_code)
+			elif req.headers['content-type'].find("text/html") != -1:
+				soup = BeautifulSoup.BeautifulSoup(req.text, convertEntities=BeautifulSoup.BeautifulSoup.HTML_ENTITIES)
+				title = '[Page Title: "%s"]' % soup.title.string
+			else:
+				if req.headers['content-type'].find("image/") == 0:
+					image_file = StringIO.StringIO(req.content)
+					color = most_colour.most_colour(image_file)
+					
+					image_file.seek(0)
+					im = Image.open(image_file)
+					
+					title = "A mostly %s image, %dx%d (%dk)" % (color, im.size[0], im.size[1], k)
+				else:
+					title = "A %s file, %dx%d (%dk)" % (r.headers['content-type'], k)
+			
+			return title
