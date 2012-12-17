@@ -52,7 +52,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 				title = self.getTitle(url)
 							
 				if(title):
-					connection.message(channel,title)
+					connection.message(channel, "[ %s ]" % title)
 						
 
 				cursor = self.dbconnection.cursor()
@@ -129,7 +129,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		urls = '(?: %s)' % '|'.join("""http https telnet gopher file wais ftp""".split())
 		ltrs = r'\w'
 		gunk = r'/#~:.?+=&%@!\-'
-		punc = r'.:?\-'
+		punc = r'.:?\-,'
 		any = "%(ltrs)s%(gunk)s%(punc)s" % { 	'ltrs' : ltrs,
 							'gunk' : gunk,
 							'punc' : punc }
@@ -167,11 +167,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 			if "v" in query.keys():
 				print "That's a Youtube Link with a v! %s " % query['v'][0]
 				entry = self.yt_service.GetYouTubeVideoEntry(video_id=query['v'][0])
-				#print entry
+				print entry
 				deltastring = tools.niceTimeDelta(int(entry.media.duration.seconds))
 				#deltastring = entry.media.duration.seconds
 				title = "Youtube video: %s (%s)" % (entry.media.title.text, deltastring)
-				#print output
+				print title
 				#connection.message(channel,title)
 		else:
 			req = requests.get(url)
@@ -180,17 +180,21 @@ class Reaction(lampstand.reactions.base.Reaction):
 				title = "%s: That link returned an error %s" % (user, r.status_code)
 			elif req.headers['content-type'].find("text/html") != -1:
 				soup = BeautifulSoup.BeautifulSoup(req.text, convertEntities=BeautifulSoup.BeautifulSoup.HTML_ENTITIES)
-				title = '[Page Title: "%s"]' % soup.title.string
+				title = soup.title.string
 			else:
-				if req.headers['content-type'].find("image/") == 0:
-					image_file = StringIO.StringIO(req.content)
-					color = most_colour.most_colour(image_file)
-					
-					image_file.seek(0)
-					im = Image.open(image_file)
-					
-					title = "A mostly %s image, %dx%d (%dk)" % (color, im.size[0], im.size[1], k)
-				else:
-					title = "A %s file, %dx%d (%dk)" % (r.headers['content-type'], k)
+				pass
+				#if req.headers['content-type'].find("image/") == 0:
+				#	image_file = StringIO.StringIO(req.content)
+				#	color = most_colour.most_colour(image_file)
+				#	
+				#	image_file.seek(0)
+				#	im = Image.open(image_file)
+				#	try:
+				#		im.seek(1)
+				#		title = "A mostly %s animation, %dx%d (%dk)" % (color, im.size[0], im.size[1], k)
+				#	except:
+				#		title = "A mostly %s image, %dx%d (%dk)" % (color, im.size[0], im.size[1], k)
+				#else:
+				#	title = "A %s file (%dk)" % (req.headers['content-type'], k)
 			
-			return title
+		return title.strip()
