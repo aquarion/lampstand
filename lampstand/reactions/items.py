@@ -35,8 +35,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			re.compile('%s. what have I forgotten(| to pack)\??' % connection.nickname, re.IGNORECASE), #6
 			re.compile('%s. what has (\w*) forgotten(| to pack)\??' % connection.nickname, re.IGNORECASE), #7
 			re.compile('%s. are you pondering what I\'m pondering\?' % connection.nickname, re.IGNORECASE), #8
-			re.compile('%s. examine (.*?)\W*$' % connection.nickname, re.IGNORECASE), #9
-			re.compile("(gives) ([\w\s\d\'\-\(\)]*?\S) to %s\.?" % connection.nickname, re.IGNORECASE), #10
+			re.compile('%s. examine (.*?\S)\s*\.?$' % connection.nickname, re.IGNORECASE), #9
+			re.compile("(gives) (.*?\S)\s* to %s\.?" % connection.nickname, re.IGNORECASE), #10
 			re.compile("%s. lost (and|&) found" % connection.nickname, re.IGNORECASE) #11
 			)
 		self.dbconnection = connection.dbconnection
@@ -72,8 +72,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			self.items = self.defaultItems
 
 	def drop(self, item):
-		if item.lower() in map(str.lower, self.items):
-			i = map(str.lower, self.items).index(item.lower())
+		if item in map(str, self.items):
+			i = map(str, self.items).index(item)
 			print "Dropped %s" % self.items[i]
 			del self.items[i]
 			return True
@@ -125,11 +125,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 				connection.message(channel, "Aha. Ah ha ha ha. Ah ha ha *ha* ha ha ha ha. ... No.")
 				return
 
-			if item.lower() in map(str.lower, connection.people):
+			if item.lower() in map(str, connection.people):
 				connection.message(channel, "I'm not a fucking transit system, either.")
 				return
 				
-			if item in map(str.lower, self.items):
+			if item in map(str, self.items):
 				connection.message(channel, "I already have one, thanks")
 				return
 			
@@ -262,7 +262,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			
 			hugresponse = result[0]
 			
-			connection.me(channel, "%s the %s on %s and %s %s to create %s" % (action, attribute, item, action2, item2, hugresponse))
+			connection.message(channel, "%s the %s on %s and %s %s to create %s" % (action, attribute, item, action2, item2, hugresponse))
 			
 			#if len(self.items) >= self.inventorysize:
 			#	drop = random.choice(self.items)
