@@ -18,7 +18,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	def __init__(self, connection):
 		self.channelMatch = re.compile('^%s. (Ask Wolfram|Calculate|Wolfram) (.*)' % connection.nickname, re.IGNORECASE)
-		self.privateMatch = re.compile('^(Ask| )(Ste(ph|v)en| )Wolfram (.*)', re.IGNORECASE)
+		self.privateMatch = re.compile('^(Ask Wolfram|Calculate|Wolfram) (.*)', re.IGNORECASE)
 
 		self.apikey = connection.config.get("wolfram","apikey")
 
@@ -34,6 +34,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		connection.message(channel, "%s: %s" % (user, self.wolfram(matches[0][1])))
 		
+		return True
+
+
+	def privateAction(self, connection, user, channel, message, index=0):
+		print "[Wolfram] Hello privately"
+		matches = self.privateMatch.findall(message);
+		connection.message(user, self.wolfram(matches[0][1]))
 		return True
 
 		
@@ -79,5 +86,4 @@ class Reaction(lampstand.reactions.base.Reaction):
 	#def everyLine(self, connection, user, channel, message)
 	#def leaveAction(self, connection, user, reason, parameters)
 	#def nickChangeAction(self, connection, old_nick, new_nick)
-	#def privateAction(self, connection, user, channel, message, index)
 	#def scheduleAction(self, connection)

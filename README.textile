@@ -210,3 +210,5 @@ _submits a query to Wolfram Alpha_
 [Lampstand] Thomas Hardy
 
 "Ask Wolfram" can be "wolfram", "ask wolfram" or "calculate"
+
+(This command also works in private message, just remove the "Lampstand: " prefix)
