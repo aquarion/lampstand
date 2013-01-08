@@ -31,9 +31,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		print box
 
-		description = ' '.join(box['description'].splitlines())
-
-		result = 'In a box on level %d there is %s ' % (1, description)
+		result = 'In a box on level %s you find %s' % (box['level'], box['description'])
 
 		connection.message(channel, "%s" % result)
 
