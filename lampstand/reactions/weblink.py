@@ -174,10 +174,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 				print title
 				#connection.message(channel,title)
 		else:
-			req = requests.get(url)
+			headers = {'User-agent': 'Lampstand IRC Bot (contact aquarion@maelfroth.org)'}
+			req = requests.get(url, headers=headers)
 			k = len(req.content) / 1024
 			if req.status_code != 200:
-				title = "%s: That link returned an error %s" % (user, r.status_code)
+				title = "That link returned an error %s" % (req.status_code)
 			elif req.headers['content-type'].find("text/html") != -1:
 				soup = BeautifulSoup.BeautifulSoup(req.text, convertEntities=BeautifulSoup.BeautifulSoup.HTML_ENTITIES)
 				title = soup.title.string
