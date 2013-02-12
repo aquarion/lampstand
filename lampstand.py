@@ -316,6 +316,8 @@ class LampstandLoop(irc.IRCClient):
 
 	def addModuleActions(self, moduleName):
 
+		print sys.modules;
+	
 		module = sys.modules['lampstand.reactions.%s' % moduleName]
 
 		reaction = module.Reaction(self)
