@@ -295,7 +295,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 					self.save()
 				else:
 					connection.message(channel, "I don't have to listen to you. So neh.")
-			elif item.lower() in map(str.lower, self.items):
+			elif item in map(str, self.items):
 				if item.lower() == "a lantern":
 					connection.message(channel, '%s: Nuh-uh. This is grue country.' % user)
 					return;
