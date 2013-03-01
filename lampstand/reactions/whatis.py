@@ -136,7 +136,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 				messages = dictionary.splitDefinition(result)
 				self.lastasked2 = self.lastasked
 				self.lastasked = key
-				self.answered = result
+				self.answered = " ".join(messages)
 				self.blame = src
 				print messages
 				for message in messages:
