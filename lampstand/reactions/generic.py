@@ -21,7 +21,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		self.reactions = [
 			('Take the money', "Thank you, I shall.", "Already did."),
 			('How long \'?til .*\??', "Two hours.", "That's tomorrow, isn't it?"),
-			('Open the pod bay doors', "I think you have your AIs confused.", ("I can't do that, Dave", "Not a chance.", "Do you see any pods?", "Go stick your head in bacon", "I can't do that, meatsack", "... Oh do sod off.")),
+			('Open the (pod|cargo) bay doors', "I think you have your AIs confused.", ("I can't do that, Dave", "Not a chance.", "Do you see any pods?", "Go stick your head in bacon", "I can't do that, meatsack", "... Oh do sod off.")),
 			('Where do you get the boxes?', "", "The boxes come from the Warehouse Basement documented at http://warehousebasement.com/"),
 			('Hello', '', 'Hi there'),
 			('xyzzy', '', 'Nothing happens'),

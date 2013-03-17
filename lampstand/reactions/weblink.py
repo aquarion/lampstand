@@ -175,7 +175,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 				#connection.message(channel,title)
 		else:
 			headers = {'User-agent': 'Lampstand IRC Bot (contact aquarion@maelfroth.org)'}
-			req = requests.get(url, headers=headers)
+			try:
+				req = requests.get(url, headers=headers, timeout=30)
+			except requests.exceptions.Timeout:
+				return "That link timed out"
 			k = len(req.content) / 1024
 			if req.status_code != 200:
 				title = "That link returned an error %s" % (req.status_code)

@@ -540,8 +540,8 @@ class LampstandLoop(irc.IRCClient):
 					self.people.append(nickname)
 				self.population[channel].append(nickname)
 
-		print 'People: %s' % self.people
-		print 'Population: %s' % self.population
+		#print 'People: %s' % self.people
+		#print 'Population: %s' % self.population
 
 		#self.people = people
 
