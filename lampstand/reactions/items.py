@@ -234,6 +234,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 			
 		elif (matchIndex == 3): # science
 			
+			if (channel == "#lampstand"):
+				print "Not allowing %s on %s to do that" % (user, channel)
+				connection.message(channel, "%s: Science does not work in #lampstand" % user)
+				return
+
 			actions = ("reverses", "enhances", "cross-references", "standardizes", "capitalises", "extends", "embiggens", "ensmallificates", "transmogrifies", "deliquesces", "discombobulates", "reticulates")
 			
 			attributes = ("neutron flow", "positrons", "third aspect", "cangrip", "buckelfier-subsystem", "pseudodancer", "electron river", "Danson", "neurotoxin flow", "contraits", "buckminster routine", "reverse cowgirl", "complexigon", "oxygen depriver", "elysia simulation routine", "splines")
