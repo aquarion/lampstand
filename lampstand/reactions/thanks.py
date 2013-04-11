@@ -18,24 +18,24 @@ class Reaction(lampstand.reactions.base.Reaction):
 		self.privateMatch = []
 
 	def channelAction(self, connection, user, channel, message):
-		print "[Generic Reaction] called"
+		print "[Thanks] called"
 
 		word = self.channelMatch.findall(message)[0];
 
 		if not word:
 			return False;
 
-		number = random.randint(0,10)
+		number = random.randint(0,5)
 
-		if word in connection.people and number == 7:
+		if number == 3:
 			thanks = self.thanks(word);
 			print "[THANKS] Thanks, %s: %s" % (word, thanks)
 			connection.message(channel, thanks)
 			return True
-		elif word in connection.people:
-			print "Found, but not random"
+		#elif word in connection.people:
+		#	print "[Thanks] Found, but not random"
 		else:
-			print "Random was %d" % number
+			print "[thanks] Random was %d" % number
 
 		return False
 
