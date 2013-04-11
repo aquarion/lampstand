@@ -17,7 +17,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	cooldown_time     = 300
 	uses              = []
 	
-	items = []
+	items = {}
 	defaultItems = ["a lantern", "a baseball bat"]
 	inventorysize = 10
 	
@@ -66,16 +66,20 @@ class Reaction(lampstand.reactions.base.Reaction):
 		print "[ITEMS] Loading database..."
 		try:
 			input = open("inventory.pkl.db", 'rb')
-			self.items = pickle.load(input)
+			items = pickle.load(input)
+			if isinstance(items, list):
+				self.items = {'#maelfroth': items}
+			else:
+				self.items = items
 			input.close()
 		except:
 			self.items = self.defaultItems
 
-	def drop(self, item):
-		if item in map(str, self.items):
-			i = map(str, self.items).index(item)
-			print "Dropped %s" % self.items[i]
-			del self.items[i]
+	def drop(self, item, channel):
+		if item in map(str, self.items[channel]):
+			i = map(str, self.items[channel]).index(item)
+			print "Dropped %s" % self.items[channel][i]
+			del self.items[channel][i]
 			return True
 		else:
 			return False
@@ -86,25 +90,21 @@ class Reaction(lampstand.reactions.base.Reaction):
 		print 'Looking at <<%s>>' % message
 
 
-                if self.overUsed(self.uses):
-                        connection.message(channel, self.overuseReactions[matchIndex])
-                        return True
+		if self.overUsed(self.uses):
+				connection.message(channel, self.overuseReactions[matchIndex])
+				return True
 
 
-                ## Overuse Detectection ##
-                self.uses.append(int(time.time()))
-                if len(self.uses) > self.cooldown_number:
-                        self.uses = self.uses[0:self.cooldown_number-1]
-                ## Overuse Detectection ##
-
+		## Overuse Detectection ##
+		self.uses.append(int(time.time()))
+		if len(self.uses) > self.cooldown_number:
+				self.uses = self.uses[0:self.cooldown_number-1]
+		## Overuse Detectection ##
+		
+		if not channel in self.items:
+			self.items[channel] = ['a lantern']
 
 		if (matchIndex == 0 or matchIndex == 10):
-
-			if (channel == "#lampstand" and user.lower() != "aquarion"):
-				print "Not allowing %s on %s to do that" % (user, channel)
-				connection.message(channel, "%s: You can't give me things on #lampstand" % user)
-				return
-				
 
 			item = self.channelMatch[matchIndex].findall(message)[0][1];
 
@@ -129,27 +129,27 @@ class Reaction(lampstand.reactions.base.Reaction):
 				connection.message(channel, "I'm not a fucking transit system, either.")
 				return
 				
-			if item in map(str, self.items):
+			if item in map(str, self.items[channel]):
 				connection.message(channel, "I already have one, thanks")
 				return
 			
-			if len(self.items) >= self.inventorysize:
+			if len(self.items[channel]) >= self.inventorysize:
 				drop = "a lantern"
 				while drop == "a lantern":
-					drop = random.choice(self.items)
-				#drop = random.choice(self.items)
-				dropi = self.items.index(drop);
+					drop = random.choice(self.items[channel])
+				#drop = random.choice(self.items[channel])
+				dropi = self.items[channel].index(drop);
 				## Drop the lantern over my cold, dead, grue bitten corpse
-				#if self.items[dropi] == "a lantern":
+				#if self.items[channel][dropi] == "a lantern":
 				#	dropi += 1
-				#	if dropi > (len(self.items)-1):
+				#	if dropi > (len(self.items[channel])-1):
 				#		dropi = dropi - 2
-				del self.items[dropi]
-				self.items.append(item)
+				del self.items[channel][dropi]
+				self.items[channel].append(item)
 				result = "gives %s %s in return for %s" % (user, drop, item)
 			else:
 				result = "takes \"%s\"" % item;
-				self.items.append(item)
+				self.items[channel].append(item)
 			
 			
 			cursor = self.dbconnection.cursor()
@@ -157,26 +157,24 @@ class Reaction(lampstand.reactions.base.Reaction):
 			self.dbconnection.commit()
 			self.save()
 			connection.describe(channel, result)
-			#connection.notice(channel, "I have %d items" % self.items.count(True))
+			#connection.notice(channel, "I have %d items" % self.items[channel].count(True))
 		elif (matchIndex == 1):
-			
-			print self.items;
-			
-			if len(self.items) == 0:
+						
+			if len(self.items[channel]) == 0:
 				connection.message(channel, "I have nothing.")
 				return True
-			elif len(self.items) == 1:
-				connection.message(channel, "I currently have %s" % self.items[0])
+			elif len(self.items[channel]) == 1:
+				connection.message(channel, "I currently have %s" % self.items[channel][0])
 				return True
 				
-			last = self.items[-1:][0]
+			last = self.items[channel][-1:][0]
 
-			if ("," in "".join(self.items)):
+			if ("," in "".join(self.items[channel])):
 				seperator = "; "
 			else:
 				seperator = ", "
 			
-			message = seperator.join(self.items[:-1]);
+			message = seperator.join(self.items[channel][:-1]);
 			
 			connection.message(channel, "I currently have %s%sand %s." % (message, seperator, last))
 		elif (matchIndex == 2): # attack
@@ -215,11 +213,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 				return
 			
 			
-			if len(self.items) == 0:
+			if len(self.items[channel]) == 0:
 				connection.message(channel, "%s: With what, dear liza? I have nothing to attack them with." % user)
 				return True
 			
-			item = random.choice(self.items)
+			item = random.choice(self.items[channel])
 
 			attacks = ("smites", "beats", "wallops", "gently taps", "murderises", "waps")
 			attack = random.choice(attacks)
@@ -245,14 +243,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 			
 			# Lampstand $actions the $attribute on $item and $actions $item to create $hugresponse
 
-			if len(self.items) <= 2:
+			if len(self.items[channel]) <= 2:
 				connection.message(channel, "I don't have enough things on which to do SCIENCE!")
 				return			
 
-			item = random.choice(self.items)
+			item = random.choice(self.items[channel])
 			item2 = item
 			while item2 == item:
-				item2 = random.choice(self.items)
+				item2 = random.choice(self.items[channel])
 
 			action = random.choice(actions)
 			action2 = action
@@ -269,15 +267,15 @@ class Reaction(lampstand.reactions.base.Reaction):
 			
 			connection.message(channel, "%s the %s on %s and %s %s to create %s" % (action, attribute, item, action2, item2, hugresponse))
 			
-			#if len(self.items) >= self.inventorysize:
-			#	drop = random.choice(self.items)
-			#	dropi = self.items.index(drop);
-			#	del self.items[dropi]
+			#if len(self.items[channel]) >= self.inventorysize:
+			#	drop = random.choice(self.items[channel])
+			#	dropi = self.items[channel].index(drop);
+			#	del self.items[channel][dropi]
 			#	result = "Dropped \"%s\" in order to take \"%s\"" % (drop, hugresponse)
 			
-			self.drop(item)
-			self.drop(item2)
-			self.items.append(hugresponse)
+			self.drop(item, channel)
+			self.drop(item2, channel)
+			self.items[channel].append(hugresponse)
 
 			creator = "%s's science experiment" % user
 			cursor = self.dbconnection.cursor()
@@ -296,15 +294,15 @@ class Reaction(lampstand.reactions.base.Reaction):
 			if item.lower() == "everything":
 				if user.lower() in self.admin:
 					connection.me(channel, 'drops everything except the lantern, then manifests a baseball bat and dashes all the items to their component atoms')
-					self.items = self.defaultItems
+					self.items[channel] = self.defaultItems
 					self.save()
 				else:
 					connection.message(channel, "I don't have to listen to you. So neh.")
-			elif item in map(str, self.items):
+			elif item in map(str, self.items[channel]):
 				if item.lower() == "a lantern":
 					connection.message(channel, '%s: Nuh-uh. This is grue country.' % user)
 					return;
-				result = self.drop(item)
+				result = self.drop(item, channel)
 				if result:
 					connection.message(channel, '%s: Dropped "%s"' % (user, item))
 				
@@ -313,7 +311,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			else:
 				connection.message(channel, '%s: I don\'t have one.' % user)
 				print item
-				print map(str.lower, self.items)
+				print map(str.lower, self.items[channel])
 
 		elif (matchIndex == 5): # franklin
                         cursor = self.dbconnection.cursor()
@@ -396,7 +394,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 				connection.message(channel, '%s: I see a meatsack with a propensity for stupid questions' % user)
 			elif item.lower() == connection.nickname.lower():
 				connection.message(channel, '%s: I am he as you are he as you are me and we are all together.' % user)
-			elif item in self.items:
+			elif item in self.items[channel]:
 				if item == "a lantern":
 					connection.message(channel, '%s: It is a battery powered brass lantern' % user)
 					return
@@ -428,8 +426,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			cursor.execute('select item from item ORDER BY RAND() limit 5');
 			found = cursor.fetchone()[0];
 			
-			lost = random.choice(self.items)
-			self.items.append(found)
-			self.drop(lost)
+			lost = random.choice(self.items[channel])
+			self.items[channel].append(found)
+			self.drop(lost, channel)
 			
 			connection.message(channel, '%s: Lost %s, but found %s' % (user, lost, found) )
