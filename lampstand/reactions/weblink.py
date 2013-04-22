@@ -13,8 +13,6 @@ import BeautifulSoup
 import StringIO
 import Image
 
-from lampstand import most_colour
-
 def __init__ ():
 	pass
 
@@ -186,19 +184,18 @@ class Reaction(lampstand.reactions.base.Reaction):
 				soup = BeautifulSoup.BeautifulSoup(req.text, convertEntities=BeautifulSoup.BeautifulSoup.HTML_ENTITIES)
 				title = soup.title.string
 			else:
-				pass
-				#if req.headers['content-type'].find("image/") == 0:
-				#	image_file = StringIO.StringIO(req.content)
-				#	color = most_colour.most_colour(image_file)
-				#	
-				#	image_file.seek(0)
-				#	im = Image.open(image_file)
-				#	try:
-				#		im.seek(1)
-				#		title = "A mostly %s animation, %dx%d (%dk)" % (color, im.size[0], im.size[1], k)
-				#	except:
-				#		title = "A mostly %s image, %dx%d (%dk)" % (color, im.size[0], im.size[1], k)
-				#else:
-				#	title = "A %s file (%dk)" % (req.headers['content-type'], k)
+				if req.headers['content-type'].find("image/") == 0:
+					image_file = StringIO.StringIO(req.content)
+					#color = most_colour.most_colour(image_file)
+					
+					image_file.seek(0)
+					im = Image.open(image_file)
+					try:
+						im.seek(1)
+						title = "An animation, %dx%d (%dk)" % (im.size[0], im.size[1], k)
+					except:
+						title = "An image, %dx%d (%dk)" % (im.size[0], im.size[1], k)
+				else:
+					title = "A %s file (%dk)" % (req.headers['content-type'], k)
 			
 		return title.strip()
