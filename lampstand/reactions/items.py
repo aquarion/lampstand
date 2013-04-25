@@ -30,7 +30,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			re.compile('%s. inventory' % connection.nickname, re.IGNORECASE), #1
 			re.compile('%s. (attack|smite) (\S*)' % connection.nickname, re.IGNORECASE), #2
 			re.compile('%s. do science\!?' % connection.nickname, re.IGNORECASE), #3
-			re.compile('%s. drop (.*).?' % connection.nickname, re.IGNORECASE), #4
+			re.compile('%s. (drop|destroy) (.*).?' % connection.nickname, re.IGNORECASE), #4
 			re.compile('%s. (mis|)quote ben(|jamin) franklin' % connection.nickname, re.IGNORECASE), #5
 			re.compile('%s. what have I forgotten(| to pack)\??' % connection.nickname, re.IGNORECASE), #6
 			re.compile('%s. what has (\w*) forgotten(| to pack)\??' % connection.nickname, re.IGNORECASE), #7
@@ -279,13 +279,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 			self.save()
 		
 		elif (matchIndex == 4): # drop
-			item = self.channelMatch[4].findall(message)[0];
+			result = self.channelMatch[4].findall(message)
+			print result
+			mesg = self.channelMatch[4].findall(message)[0][0];
+			item = self.channelMatch[4].findall(message)[0][1];
 			
-			if (channel == "#lampstand" and not user.lower() in self.admin):
-				print "Not allowing %s on %s to do that" % (user, channel)
-				connection.message(channel, "%s: Sharn't, and you can't make me. :-P " % user)
-				return
-
 			if item.lower() == "everything":
 				if user.lower() in self.admin:
 					connection.me(channel, 'drops everything except the lantern, then manifests a baseball bat and dashes all the items to their component atoms')
@@ -299,7 +297,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 					return;
 				result = self.drop(item, channel)
 				if result:
-					connection.message(channel, '%s: Dropped "%s"' % (user, item))
+					if mesg.lower() == "destroy":
+						connection.me(channel, 'shatters %s into component atoms' % item)
+					else:
+						connection.message(channel, '%s: Dropped "%s"' % (user, item))
 				
 				self.save()
 				
