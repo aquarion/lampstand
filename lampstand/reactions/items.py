@@ -125,11 +125,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 				connection.message(channel, "Aha. Ah ha ha ha. Ah ha ha *ha* ha ha ha ha. ... No.")
 				return
 
-			if item.lower() in map(str, connection.people):
-				connection.message(channel, "I'm not a fucking transit system, either.")
+			if item in connection.people:
+				connection.message(channel, "Choo choo! I'm a train!... no, wait, the other thing. No.")
 				return
 				
-			if item in map(str, self.items[channel]):
+			if item in self.items[channel]:
 				connection.message(channel, "I already have one, thanks")
 				return
 			
