@@ -23,6 +23,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			re.compile('unload (\w*)', re.IGNORECASE),
 			re.compile('reconfigure', re.IGNORECASE),
 			re.compile('sysreload (.*)', re.IGNORECASE),
+			re.compile('nick (.*)', re.IGNORECASE),
 			re.compile('ipdb', re.IGNORECASE))
 
 
@@ -88,7 +89,11 @@ class Reaction(lampstand.reactions.base.Reaction):
                         	connection.message(user, rtn);
 			else:
 				connection.message(user, "%s Not found" % matches[0])
-		elif matchindex == 11: # ipdb
+		elif matchindex == 11: # nick
+			name = matches[0]
+			print "Renaming to %s" % name
+			connection.setNick(name)
+		elif matchindex == 12: # ipdb
 			import ipdb
 			ipdb.set_trace()
 
