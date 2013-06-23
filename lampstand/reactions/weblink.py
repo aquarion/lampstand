@@ -180,7 +180,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			k = len(req.content) / 1024
 			if req.status_code != 200:
 				title = "That link returned an error %s" % (req.status_code)
-			elif req.headers['content-type'].find("text/html") != -1:
+			elif req.headers['content-type'].find("text/html") != -1 or req.headers['content-type'].find("application/xhtml+xml") != -1:
 				soup = BeautifulSoup.BeautifulSoup(req.text, convertEntities=BeautifulSoup.BeautifulSoup.HTML_ENTITIES)
 				title = soup.title.string
 			else:
