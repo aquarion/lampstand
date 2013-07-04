@@ -66,7 +66,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 				node = root.xpath("/queryresult/pod/subpod/plaintext")
 				if node:
 					print node
-					return "(As %s): %s" % (node[0].text, node[1].text)
+					return "(As %s): %s" % (node[0].text, node[1].text.replace('\n', ' // '))
 				else:
 					return "You're going to need to be more specific"
 
