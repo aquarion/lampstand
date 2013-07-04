@@ -1,4 +1,4 @@
-import re, time
+import re, time, os
 import lampstand.reactions.base
 from lampstand import tools
 import bitly_api
@@ -12,6 +12,12 @@ import BeautifulSoup
 
 import StringIO
 import Image
+
+from twitter import Twitter
+
+from twitter.oauth import OAuth, write_token_file, read_token_file
+from twitter.oauth_dance import oauth_dance
+
 
 def __init__ ():
 	pass
@@ -32,6 +38,23 @@ class Reaction(lampstand.reactions.base.Reaction):
 		self.yt_service.ssl = True
 		
 		self.lastlink = {}
+
+		OAUTH_FILENAME  = os.environ.get('HOME', '') + os.sep + '.lampstand_oauth'
+		CONSUMER_KEY    = connection.config.get("twitter", "consumer_key")
+		CONSUMER_SECRET = connection.config.get("twitter", "consumer_secret")		
+
+		if not os.path.exists(OAUTH_FILENAME):
+			oauth_dance(
+				"Lampstand", CONSUMER_KEY, CONSUMER_SECRET,
+				OAUTH_FILENAME)
+		
+		self.oauth_token, self.oauth_token_secret = read_token_file(OAUTH_FILENAME)
+		
+		self.twitter = Twitter(
+			auth=OAuth(
+				self.oauth_token, self.oauth_token_secret, CONSUMER_KEY, CONSUMER_SECRET),
+				secure=True,
+				domain='api.twitter.com')
 
 	def channelAction(self, connection, user, channel, message, matchindex):
 
@@ -159,7 +182,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 	
 		urlp = urlparse.urlparse(url)
 		print url
-		if "youtube" in urlp.netloc.split("."):
+
+		if "twitter" in urlp.netloc.split("."):
+			path = urlp.path.split("/");
+			id = path[-1]
+			tweet = self.twitter.statuses.show(id=id)
+			print tweet
+			title = "@%s (%s): %s" % (tweet['user']['name'], tweet['user']['screen_name'], tweet['text'])
+		elif "youtube" in urlp.netloc.split("."):
 			print "That's a Youtube Link"
 			query = urlparse.parse_qs(urlp.query)
 			if "v" in query.keys():
