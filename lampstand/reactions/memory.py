@@ -15,7 +15,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		self.memory = {}
 		self.channelMatch = ()
 		
-		self.memorysize = 100
+		self.memorysize = 1000
 	
 	def everyLine(self, connection, user, channel, message):
 		if not self.memory.has_key(channel):
