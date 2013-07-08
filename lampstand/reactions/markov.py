@@ -1,4 +1,3 @@
-from lampstand import eightball
 import lampstand.reactions.base
 
 import lampstand.markov as markov

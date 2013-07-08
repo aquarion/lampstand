@@ -35,7 +35,7 @@ random.seed()
 
 # Other Imports:
 
-import MySQLdb
+import cymysql
 
 import lampstand.reactions;
 
@@ -205,7 +205,7 @@ class LampstandLoop(irc.IRCClient):
 		passwd = self.config.get("database","password")
 		db = self.config.get("database","database")
 		
-		self.dbconnection = MySQLdb.connect(user=user, passwd=passwd, db=db, charset='utf8')
+		self.dbconnection = cymysql.connect(user=user, passwd=passwd, db=db, charset='utf8')
 		
 				
 	def connectionMade(self):
