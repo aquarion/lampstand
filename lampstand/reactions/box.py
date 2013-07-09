@@ -15,7 +15,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	uses              = []
 
 	def __init__(self, connection):
-		self.channelMatch = re.compile('%s. Open [the|a] box' % connection.nickname, re.IGNORECASE)
+		self.channelMatch = re.compile('%s. Open (the|a) box' % connection.nickname, re.IGNORECASE)
 
 	def channelAction(self, connection, user, channel, message):
 
