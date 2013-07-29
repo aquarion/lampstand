@@ -226,7 +226,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			
 			part = random.choice(bodypart)
 			
-			connection.me(channel, "%s %s around the %s with %s" % (attack, person, part, item))
+			connection.describe(channel, "%s %s around the %s with %s" % (attack, person, part, item))
 			
 			return True
 			
@@ -286,7 +286,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			
 			if item.lower() == "everything":
 				if user.lower() in self.admin:
-					connection.me(channel, 'drops everything except the lantern, then manifests a baseball bat and dashes all the items to their component atoms')
+					connection.describe(channel, 'drops everything except the lantern, then manifests a baseball bat and dashes all the items to their component atoms')
 					self.items[channel] = self.defaultItems
 					self.save()
 				else:
@@ -298,7 +298,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 				result = self.drop(item, channel)
 				if result:
 					if mesg.lower() == "destroy":
-						connection.me(channel, 'shatters %s into component atoms' % item)
+						connection.describe(channel, 'shatters %s into component atoms' % item)
 					else:
 						connection.message(channel, '%s: Dropped "%s"' % (user, item))
 				
