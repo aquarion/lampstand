@@ -202,6 +202,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 				print title
 				#connection.message(channel,title)
 		else:
+			if urlp.netloc == "www.bbc.co.uk":
+				url = "http://altru.istic.net/thingsnstuff/proxy.php?f="+url
+			else:
+				print "Netloc: %s" % urlp.netloc
 			headers = {'User-agent': 'Lampstand IRC Bot (contact aquarion@maelfroth.org)'}
 			try:
 				req = requests.get(url, headers=headers, timeout=30)
