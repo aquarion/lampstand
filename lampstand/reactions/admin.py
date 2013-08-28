@@ -40,7 +40,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.message(matches[0][0], matches[0][1])
 		elif matchindex == 1:
 			#print "[Do] %s %s" % (sys.argv[1], matches[0])
-			connection.me(matches[0][0], matches[0][1])
+			connection.describe(matches[0][0], matches[0][1])
 			#connection.message(user, "%s" % matches)
 			#connection.me("#%s" % sys.argv[1], matches[0])
 		elif matchindex == 2:
