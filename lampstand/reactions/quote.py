@@ -23,6 +23,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 	def __init__(self, connection):
 		self.channelMatch = (re.compile('%s: quote (.*?) (.*)\s*$' % connection.nickname, re.IGNORECASE),
 					re.compile('%s: quote (.*?)$' % connection.nickname, re.IGNORECASE))
+
+		self.privateMatch = (re.compile('check quotes', re.IGNORECASE), re.compile('set last to (.*)$', re.IGNORECASE))
+
 		self.dbconnection = connection.dbconnection
 
 	def channelAction(self, connection, user, channel, message, matchIndex = False):
@@ -68,6 +71,16 @@ class Reaction(lampstand.reactions.base.Reaction):
 	
 		return True
 
+        def privateAction(self, connection, user, channel, message, matchIndex=False):
+
+		if matchIndex == 0:
+			msg = self.checkQuotes(connection)
+			connection.message(user, msg)
+		else:
+			matches = self.privateMatch[1].findall(message)
+			self.last_quote_seen = matches[0]
+			connection.message(user, "Set last quote seen to %s" % matches[0])
+
         def scheduleAction(self, connection):
 
 
@@ -79,6 +92,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 		if not self.schedule_count == 0:
 			return
 
+		self.checkQuotes(connection)
+
+	def checkQuotes(self, connection):
 		channel = "#maelfroth"
 
 		if not self.last_quote_seen:
@@ -95,16 +111,25 @@ class Reaction(lampstand.reactions.base.Reaction):
 		cursor = self.dbconnection.cursor()
 		cursor.execute(q, self.last_quote_seen)
 
-		if cursor.rowcount > 0:
+		quotes = cursor.fetchall()
+
+		countquotes = len(quotes)
+
+		if countquotes > 0:
 			print "[Quote] Sending message"
 
 			url = "http://www.maelfroth.org/quotes/index.cgi?action=browse"
-			if cursor.rowcount == 1:
+			if countquotes == 1:
 				message = "One new quote has been approved at %s" % url
 			else:
-				message = "%d new quotes have been approved at %s" % (cursor.rowcount, url)
+				message = "%d new quotes have been approved at %s" % (countquotes, url)
 
 			connection.message(channel, message)
-			quote = cursor.fetchone()
+			quote = quotes[0]
 			self.last_quote_seen = quote[0]
-
+		else:
+			print "[QUOTE] Found %s since %s " % (countquotes, self.last_quote_seen)
+			print cursor._last_executed
+		
+		return "[QUOTE] Found %s since %s " % (countquotes, self.last_quote_seen)
+		return "Found %s" % countquotes
