@@ -66,8 +66,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 			
 		cursor.execute('replace into lastquit (username, last_quit, reason, method, channel) values (%s, %s, %s, %s, %s)', (user, int(time.time()), params[-1], reason, channel) )
 		
-		print int(time.time())
-
 	def privateAction(self, connection, user, channel, message):
 
 		self.channel = "PM";
@@ -115,7 +113,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	def lastseen(self, searchingfor, after_timestamp = 0, depth = 0):
 	
-		print "Looking for %s after %s" % (searchingfor, after_timestamp)
+		print "[WHOWAS] Looking for %s after %s" % (searchingfor, after_timestamp)
 		
 		if depth > 4:
 			return ' ... and at that point I gave up';
@@ -124,12 +122,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 		cursor.execute('SELECT username, last_seen, last_words, channel FROM lastseen where username LIKE %s and last_seen > %s order by last_seen desc', (searchingfor, int(after_timestamp)) )
 		
 		
-		print 'SELECT username, last_seen, last_words, channel FROM lastseen where username LIKE %s and last_seen > %s order by last_seen desc limit 1' % ( searchingfor, after_timestamp) 
-				
 		result = cursor.fetchone()
 		if result == None:
 			message = "I haven't seen %s say anything" % searchingfor
-			print "Looking for a quit for %s after %s" % (searchingfor, after_timestamp)
+			print "[WHOWAS] Looking for a quit for %s after %s" % (searchingfor, after_timestamp)
 			return "%s%s" % (message, self.lastquit(after_timestamp, searchingfor))
 		elif (result[2][0] == ">"): 
 			# Last action is a rename
@@ -137,17 +133,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 			deltadesc = "ago"
 			
 			if (after_timestamp == 0):
-				print "No after timestamp"
-				print result[1]
-				print "Now"
-				print time.localtime()
-				print "Lastseen"
-				print time.localtime(result[1])
+				print "[WHOWAS] No after timestamp for %s, Now %s, Lastseen %s" % (result[1], time.locatime(), time.localtime(result[1]))
 				now = time.mktime(time.localtime())
 				deltadiff = now - result[1]
 			else:
-				print "After timestamp %s" % after_timestamp
-				print time.localtime()
+				print "[WHOWAS After timestamp %s" % after_timestamp
 				now = after_timestamp
 				deltadesc = "later"
 				deltadiff = result[1] - after_timestamp
@@ -166,30 +156,17 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 		else:
 			# Last action is a phrase
-			print "Found a last phrase:"
-			print result
+			print "[WHOWAS] Found a last phrase:"
 			deltadesc = "ago"
 			
 			if (after_timestamp == 0):
-				print "No after timestamp"
-				print result[1]
-				print "Now is %s" % time.localtime()
-				print "Localtime of %s is %s" % (result[1], time.localtime(result[1]))
 				now = time.mktime(time.localtime())
 				deltastring = tools.niceTimeDelta(now - result[1])
 			else:
-				#print "After timestamp %s" % after_timestamp
-				#print time.localtime()
-				#print "Localtime of %s is %s" % (result[1], time.localtime(result[1]))
-				#now = after_timestamp
-				
 				now = time.mktime(time.localtime(result[1]))
 				
 				deltadesc = "later"
 				deltastring = tools.niceTimeDelta(result[1] - after_timestamp)
-				print "Happening after %s" % after_timestamp
-				print "Event happened  %s" % result[1]
-
 			
 
 			if ((now - result[1]) > 86400):
@@ -214,21 +191,16 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		quitresult = cursor.fetchone();
 		if quitresult == None:
-			print "No quit for %s after %s" % (searchingfor, lasttime)
+			print "[WHOWAS] No quit for %s after %s" % (searchingfor, lasttime)
 
 			return "";
 		else:
-			print "Quit result"
-			
-			print quitresult
 			
 			quittime = time.localtime(quitresult[0])
 			timedelta = time.mktime(quittime) - lasttime;
 
-			print quittime
+			print "[WHOWAS] Quit result: %s @ %s" % (quitresult, quittime)
 			
-			print "Localtime of %s is %s" % (quitresult[0], time.localtime(quitresult[0]))
-
 			if(timedelta < 60):
 				deltastring = "seconds"
 			else:
@@ -240,7 +212,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 				timefmt = "%H:%M";			
 
 			quittime = datetime.datetime.fromtimestamp(quitresult[0]).strftime(timefmt)
-			#quittime = datetime.datetime.fromtimestamp(quitresult[0]).strftime("%H:%M")			
 
 			return ", they quit %s later (%s) with the message '%s'" % (deltastring, quittime, quitresult[1])
 

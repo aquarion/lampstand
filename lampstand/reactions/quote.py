@@ -30,8 +30,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	def channelAction(self, connection, user, channel, message, matchIndex = False):
 		
-		print 'Looking at <<%s>>' % message
-
 		matches = self.channelMatch[matchIndex].findall(message)[0]
 		
 		memory = False
@@ -58,7 +56,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 			return True
 
 		else:
-			print result
 			line = result[-1]
 			connection.message(channel, "%s: Okay, quoting \"%s: %s\"" % (user, line['user'], line['message']))
 			# Full Texts  	id 	body 	notes 	rating 	votes 	submitted 	approved 	flagged 	score
@@ -103,9 +100,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 			cursor.execute(q)
 			result = cursor.fetchone()
 			self.last_quote_seen = result[0]
-			print "Defaulting last seen: %s" % self.last_quote_seen
+			print "[QUOTE] Defaulting last seen: %s" % self.last_quote_seen
 
-		print "[Quote] Looking for quotes submitted > %s" % self.last_quote_seen
+		print "[QUOTE] Looking for quotes submitted > %s" % self.last_quote_seen
 
 		q = "select submitted from chirpy.mf_quotes where submitted > %s and approved = 1 order by submitted desc"
 		cursor = self.dbconnection.cursor()
@@ -116,8 +113,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 		countquotes = len(quotes)
 
 		if countquotes > 0:
-			print "[Quote] Sending message"
-
 			url = "http://www.maelfroth.org/quotes/index.cgi?action=browse"
 			if countquotes == 1:
 				message = "One new quote has been approved at %s" % url
@@ -127,9 +122,6 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.message(channel, message)
 			quote = quotes[0]
 			self.last_quote_seen = quote[0]
-		else:
 			print "[QUOTE] Found %s since %s " % (countquotes, self.last_quote_seen)
-			print cursor._last_executed
 		
-		return "[QUOTE] Found %s since %s " % (countquotes, self.last_quote_seen)
-		return "Found %s" % countquotes
+		return "Found %s since %s " % (countquotes, self.last_quote_seen)
