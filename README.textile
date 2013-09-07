@@ -50,6 +50,13 @@ h2. Dice
 
 (the "lowest4" keyword there can be "lowest" and then any number to catch the bottom set, "best" and then a number to get the top set, and can also be prefixed with "open" to get open-ended dice rolls. Feel free to ask ((~ccooke)) what this means, as he wrote the code for it)
 
+Roll "Fate" or "Fudge" for a FATE-style +/- roll
+
+@Lampstand: Roll fate@ or @Lampstand: Roll fudge@
+
+20:14:50 [Aquarion] Lampstand: Roll fate
+20:14:50 [Lampstand] Aquarion: You rolled [-] [ ] [+] [-], totalling -1
+
 h2. Dictionary 
 
 @Lampstand: look up tea@
@@ -135,6 +142,8 @@ You could also try:
 * @Lampstand: examine item@
 * @Lampstand: misquote benjamin franklin@
 * @Lampstand: lost and found@
+
+Inventories are per-channel.
 
 h2. Play Games
 

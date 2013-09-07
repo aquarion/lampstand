@@ -15,13 +15,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 	cooldown_time   = 120
 
 	def __init__(self, connection):
-		self.channelMatch = re.compile('%s. roll +((?:\w+ +)*)(\d*d\d*)(.*)' % connection.nickname, re.IGNORECASE)
+		self.channelMatch = (re.compile('%s. roll +((?:\w+ +)*)(\d*d\d*)(.*)' % connection.nickname, re.IGNORECASE), re.compile('%s. roll (.*)' % connection.nickname, re.IGNORECASE))
 		self.privateMatch = re.compile('roll +((?:\w+ +)*)(\d*d\d*)(.*)', re.IGNORECASE)
 
 
-	def channelAction(self, connection, user, channel, message):
+	def channelAction(self, connection, user, channel, message, index):
 
-		item = self.channelMatch.findall(message);
+		item = self.channelMatch[index].findall(message);
 		result = self.rollDice(item)
 		connection.message(channel, "%s: %s" % (user, result))
 		return True
@@ -47,6 +47,22 @@ class Reaction(lampstand.reactions.base.Reaction):
 			'bestN': False,
 			'lowestN': False
 		}
+
+		if item[0] == "fate" || item[0] == "fudge":
+			fate = [0,0,0,0]
+			total = 0
+			for n in (0,1,2,3):
+				roll = random.randint(-1, 1)
+				print roll
+				if roll == -1:
+					fate[n] = "-"
+				elif roll == 1:
+					fate[n] = "+"
+				else:
+					fate[n] = ' '
+				total = total + roll
+			return "You rolled [%s] [%s] [%s] [%s], totalling %s" % (fate[0], fate[1], fate[2], fate[3], total)
+
 
 		if item[0][0]:
 			# We have some keywords.
