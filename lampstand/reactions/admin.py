@@ -45,7 +45,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			#connection.me("#%s" % sys.argv[1], matches[0])
 		elif matchindex == 2:
 			print "[Quit] %s" % (matches[0])
-			connection.quit("For the sword outwears its sheath, and the soul wears out the breast. And the heart must pause to breathe, and love itself have rest.")
+			connection.quit("I don't believe you, I don't really need to, I won't let Victoria fall")
 		elif matchindex == 3: # status
 			connection.message(user, 'State of the lampstand is awesome')
 			connection.message(user, 'Channel: %s' % connection.channelModules)
