@@ -48,7 +48,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			'lowestN': False
 		}
 
-		if item[0] == "fate" || item[0] == "fudge":
+		if item[0] == "fate" or item[0] == "fudge":
 			fate = [0,0,0,0]
 			total = 0
 			for n in (0,1,2,3):
