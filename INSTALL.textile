@@ -1,0 +1,19 @@
+h1. How to drive a Lampstand
+
+Lampstand is written in Python on top of Twisted.
+
+It currently requires MySQL and Python >= 2.8
+
+First, catch your python, then install some kind of virtual environment system for it,
+I use virtualenv & virtualenvwrapper.
+
+Once inside your PVM, install all the required modules. In theory this is just
+@pip install -f requirements.pip@ unless I've forgotten to add something.
+
+schema.sql contains the MySQL schema for everything Lampstand desires, use it to
+create a database.
+
+defaults.ini is loaded by default, any value in config.ini overrides defaults.ini,
+and is ignored from git, so put your password values there. At minimum, you'll need
+to change the nickname & database auth details.
+
