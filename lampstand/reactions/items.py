@@ -243,8 +243,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 				return			
 
 			item = random.choice(self.items[channel])
+			while "a lantern" == item:
+				item2 = random.choice(self.items[channel])
 			item2 = item
-			while item2 == item:
+			while item2 == item or item2 == "a lantern":
 				item2 = random.choice(self.items[channel])
 
 			action = random.choice(actions)
