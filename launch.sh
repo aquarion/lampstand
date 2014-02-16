@@ -2,6 +2,7 @@
 
 cd `dirname $0`
 
-source ./venv/bin/activate
-
+#source ./venv/bin/activate
+source /usr/local/bin/virtualenvwrapper.sh
+workon lampstand
 python ./lampstand.py >> lampstand.stdout.log 2>> lampstand.stderr.log &
