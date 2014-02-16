@@ -106,11 +106,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 		if len(result) == 3 and len(result[2]) > 0:
 			original = map( lambda x: "%.6g" % x, result[2] )
-			message = "you rolled [ %s ], We kept [ %s ] Total %.6g"  % (
-				", ".join( original ), 
-				", ".join( roll ), 
-				total
-			)
+			if original == roll:
+				message = "you rolled [ %s ], Total: %.6g" % (", ".join(original), total)
+			else:
+				message = "you rolled [ %s ], We kept [ %s ] Total %.6g"  % (
+					", ".join( original ), 
+					", ".join( roll ), 
+					total
+				)
 		elif len(roll) == 1:
 			message = "you rolled [ %s ]" % roll[0]
 			
