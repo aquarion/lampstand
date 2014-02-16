@@ -8,6 +8,7 @@ from lampstand import tools
 
 from datetime import datetime
 import dateutil.parser
+import requests
 
 def __init__ ():
 	pass
@@ -101,37 +102,24 @@ class Reaction(lampstand.reactions.base.Reaction):
 	
 	def howlong(self, desc, output, direction):
 	
-		cursor = self.dbconnection.cursor()
-		
-		if direction == "future":
-			gtlt  = ">"
-			order = "asc"
-		else:
-			gtlt  = "<"
-			order = "desc"
-			
-		# First, try direct description matches. First in the future (past if it's since)...	
-		query = 'SELECT datetime, description, class, datetime_end, url FROM events WHERE (description LIKE %s or aliases LIKE %s or class like %s) and datetime '+gtlt+' now() ORDER BY datetime '+order
+		request = requests.get('http://api.larp.me/events?direction=%s&q=%s&count=1' % (direction, desc))
+		response = request.json();
 
-		likedesc = "%%%s%%" % desc
-		
-		cursor.execute(query, (likedesc, likedesc, desc) )
-		event = cursor.fetchone()
-		
 
-		if event == None:
+		if not len(response['events']):
 			try:
 				result = dateutil.parser.parse(desc)
 				event = (result,desc,"The date",None,None)
 			except ValueError:
-				return "I can't see any events tagged '%s' in the %s, and it doesn't look like a date. Full list of events at http://www.maelfroth.org/events.php" % (desc, direction)
+				return "I can't see any events tagged '%s' in the %s, and it doesn't look like a date. Full list of events at http://larp.me/events" % (desc, direction)
 		
-		
-		event_start = event[0]
-		event_desc  = event[1]
-		event_class = event[2]
-		event_end   = event[3]
-		event_url   = event[4]
+		event = response['events'][response['events'].keys()[0]]
+
+		event_start = dateutil.parser.parse(event['starts'])
+		event_desc  = event['name']
+		event_class = event['system']['name']
+		event_end   = dateutil.parser.parse(event['ends'])
+		event_url   = event['website']
 		
 		#(datetime.datetime(2012, 6, 29, 18, 0), 'Crown of the Sphinx', 'Odyssey', datetime.datetime(2012, 7, 1,
 		# datetime, description, class, datetime_end FROM events
@@ -156,15 +144,20 @@ class Reaction(lampstand.reactions.base.Reaction):
 			return message
 			
 		
+		# event_start = event[0]
+		# event_desc  = event[1]
+		# event_class = event[2]
+		# event_end   = event[3]
+		# event_url   = event[4]
 		
 		###### Deltas
 		
 		now = datetime.now();
 		
-		if direction == "past" and event[3]:
-			deltapoint = event[3]
+		if direction == "past" and event_end:
+			deltapoint = event_end
 		else:
-			deltapoint = event[0]
+			deltapoint = event_start
 		
 		if direction == "past":
 			delta = now - deltapoint;
@@ -174,9 +167,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 		deltastring = tools.nicedelta(delta)
 
 		if direction == "past":
-			return "%s: %s was %s ago" % (event[2], event[1], deltastring )
+			return "%s: %s was %s ago" % (event_class, event_desc, deltastring )
 		else:
-			return "%s: %s is in %s"   % (event[2], event[1], deltastring )
+			return "%s: %s is in %s"   % (event_class, event_desc, deltastring )
 		
 
 	#def everyLine(self, connection, user, channel, message)
