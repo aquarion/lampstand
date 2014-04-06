@@ -133,7 +133,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			deltadesc = "ago"
 			
 			if (after_timestamp == 0):
-				print "[WHOWAS] No after timestamp for %s, Now %s, Lastseen %s" % (result[1], time.locatime(), time.localtime(result[1]))
+				print "[WHOWAS] No after timestamp for %s, Now %s, Lastseen %s" % (result[1], time.localtime(), time.localtime(result[1]))
 				now = time.mktime(time.localtime())
 				deltadiff = now - result[1]
 			else:
