@@ -16,7 +16,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 	uses = []
 
 	def __init__(self, connection):
-		self.channelMatch = (re.compile('^%s.  ?ask the [oracle|8.ball]' % connection.nickname, re.IGNORECASE),
+		self.channelMatch = (re.compile('^%s.  ?ask the [oracle|8.ball|leviathan]' % connection.nickname, re.IGNORECASE),
 			re.compile('^%s. should I .*' % connection.nickname, re.IGNORECASE))
 
 
