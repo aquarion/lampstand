@@ -1,9 +1,10 @@
-from lampstand.tools import splitAt
 import re, time, random, sys, datetime
-import lampstand.reactions.base
-from lampstand import tools
 import haikufinder
 import cPickle  as pickle
+
+from lampstand import tools
+from lampstand.tools import splitAt
+import lampstand.reactions.base
 
 def __init__ ():
 	pass

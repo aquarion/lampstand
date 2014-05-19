@@ -1,14 +1,12 @@
-import lampstand.reactions.base
-
-
-from lampstand.tools import splitAt
 import re, random, sys
-
-from lampstand import tools
-
 from datetime import datetime
 import dateutil.parser
 import requests
+
+from lampstand import tools
+import lampstand.reactions.base
+from lampstand.tools import splitAt
+
 
 def __init__ ():
 	pass
