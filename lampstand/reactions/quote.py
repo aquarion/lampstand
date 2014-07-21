@@ -113,7 +113,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 		countquotes = len(quotes)
 
 		if countquotes > 0:
-			url = "http://www.maelfroth.org/quotes/index.cgi?action=browse"
+			url = "http://www.maelfroth.org/quotes/"
 			if countquotes == 1:
 				message = "One new quote has been approved at %s" % url
 			else:
