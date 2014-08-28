@@ -26,7 +26,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			('Hello', '', 'Hi there'),
 			('xyzzy', '', 'Nothing appears to happen'),
 			("Roll with it", '', "~takes his time"),
-			("look$", "", "You are in a room with no dimensions, in no place and time. There are no walls, which contain no pictures of larp characters past, present nor future; and the floor is not hardward parquet, carefully polished for ease of cleaning. There are no comfy sofas lit by no soft pools of light from antique lamps, throwing the nothings that they light into shadows that reveal nothing that you would wish to meet. There is a lesbian pit here. There are no exits in any direction."),
+			("look$", "", "You are in a room with no dimensions, in no place and time. There are no walls, which contain no pictures of larp characters past, present nor future; and the floor is not hardwood parquet, carefully polished for ease of cleaning. There are no comfy sofas lit by no soft pools of light from antique lamps, throwing the nothings that they light into shadows that reveal nothing that you would wish to meet. There is a lesbian pit here. There are no exits in any direction."),
 			("(go )?west$", "", "Life is peaceful there."),
 			("(go )?east$", "", "East is darkness, you do not want to go there"),
 			("(go )?north$", "", "North is a perilous wasteland"),
