@@ -24,7 +24,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			('Open the (pod|cargo) bay doors', "I think you have your AIs confused.", ("I can't do that, Dave", "Not a chance.", "Do you see any pods?", "Go stick your head in bacon", "I can't do that, meatsack", "... Oh do sod off.")),
 			('Where do you get the boxes?', "", "The boxes come from the Warehouse Basement documented at http://warehousebasement.com/"),
 			('Hello', '', 'Hi there'),
-			('xyzzy', '', 'Nothing happens'),
+			('xyzzy', '', 'Nothing appears to happen'),
 			("Roll with it", '', "~takes his time"),
 			("look$", "", "You are in a room with no dimensions, in no place and time. There are no walls, which contain no pictures of larp characters past, present nor future; and the floor is not hardward parquet, carefully polished for ease of cleaning. There are no comfy sofas lit by no soft pools of light from antique lamps, throwing the nothings that they light into shadows that reveal nothing that you would wish to meet. There is a lesbian pit here. There are no exits in any direction."),
 			("(go )?west$", "", "Life is peaceful there."),
@@ -41,7 +41,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			("thank( you|s)", "", thankyou),
 			("(shall we|would you like to) play a game?", "", ("How about a game of thermonuclear war?", "Not right now", "Portal 3 Co-op?", "XKCD says we've already won it.", "The only way to win is not to play.")),
 			("(fuck|screw) you", "No.", fuckyou),
-			("help", "I can't help you, you must help yourself.", "Try http://www.maelfroth.org/lampstand.php")
+			("help", "I can't help you, you must help yourself.", "Try http://www.maelfroth.org/lampstand.php"),
 			]
 
 		self.channelMatch = []
@@ -54,6 +54,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 		
 		self.reactions.append(('.*pokes %s' % connection.nickname, '', "Do I look like a facebook user? Fuck off."))
 		self.channelMatch.append(re.compile(".*pokes %s" % (connection.nickname), re.IGNORECASE))
+
+		fire = '.*sets (fire|light) to %s' % connection.nickname
+		self.reactions.append((fire, '', "~burns with a merry flame"))
+		self.channelMatch.append(re.compile(fire, re.IGNORECASE))
 		
 		self.reactions.append(("(Screw|Fuck) you,? %s" % connection.nickname, 'No', fuckyou))
 		self.channelMatch.append(re.compile("(Screw|Fuck) you.? %s" % (connection.nickname), re.IGNORECASE))
@@ -89,7 +93,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			else:
 				reaction = self.reactions[matchindex][2]
 			if reaction[0] == "~":
-				connection.me(channel, reaction[1:])
+				connection.describe(channel, reaction[1:])
 			elif reaction[0] == "%":
 				roll = random.randint(0,50)
 				if roll == 45:
