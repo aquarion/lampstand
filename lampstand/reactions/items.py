@@ -87,7 +87,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
 	def channelAction(self, connection, user, channel, message, matchIndex = False):
 		
-		print 'Looking at <<%s>>' % message
+		print '[Item] Looking at <<%s>>' % message
 
 
 		if self.overUsed(self.uses):
@@ -105,7 +105,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			self.items[channel] = ['a lantern']
 
 		if (matchIndex == 0 or matchIndex == 10):
-
+			print "[Item] Detected gift"
 			item = self.channelMatch[matchIndex].findall(message)[0][1];
 
 			if item.lower() == "a hug":
@@ -159,6 +159,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.describe(channel, result)
 			#connection.notice(channel, "I have %d items" % self.items[channel].count(True))
 		elif (matchIndex == 1):
+			print "[Item] Detected list"
 						
 			if len(self.items[channel]) == 0:
 				connection.message(channel, "I have nothing.")
@@ -178,6 +179,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			
 			connection.message(channel, "I currently have %s%sand %s." % (message, seperator, last))
 		elif (matchIndex == 2): # attack
+			print "[Item] Detected Attack"
 
 			person = self.channelMatch[2].findall(message)[0][1];
 			
@@ -231,6 +233,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			return True
 			
 		elif (matchIndex == 3): # science
+			print "[Item] Detected Science"
 			
 			actions = ("reverses", "enhances", "cross-references", "standardizes", "capitalises", "extends", "embiggens", "ensmallificates", "transmogrifies", "deliquesces", "discombobulates", "reticulates")
 			
@@ -280,7 +283,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			self.dbconnection.commit()
 			self.save()
 		
-		elif (matchIndex == 4): # drop
+		elif (matchIndex == 4): # drok
+			print "[Item] detected Drop"
 			result = self.channelMatch[4].findall(message)
 			print result
 			mesg = self.channelMatch[4].findall(message)[0][0];
@@ -312,6 +316,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 				print map(str.lower, self.items[channel])
 
 		elif (matchIndex == 5): # franklin
+			print "[Item] detected Franklin"
                         cursor = self.dbconnection.cursor()
                         cursor.execute('select item from item ORDER BY RAND() limit 2');
 			itemone = cursor.fetchone()[0];
@@ -320,6 +325,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.message(channel, "They who can give up %s to obtain %s, deserve neither %s or %s" % (itemone, itemtwo, itemone, itemtwo))
 			return 1
 		elif (matchIndex == 6): # Packing
+			print "[Item] detected forgotten"
                         cursor = self.dbconnection.cursor()
                         cursor.execute('select item from item ORDER BY RAND() limit 1');
 			itemone = cursor.fetchone()[0];
@@ -327,6 +333,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			connection.message(channel, "%s: You have forgotten %s" % (user, itemone))
 			return 1
 		elif (matchIndex == 7): # Packing
+			print "[Item] detected forgotten (elseone)"
 			person = self.channelMatch[7].findall(message)[0][0];
                         cursor = self.dbconnection.cursor()
                         cursor.execute('select item from item ORDER BY RAND() limit 1');
@@ -336,6 +343,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			return 1
 				
 		elif (matchIndex ==8 ): #Pinky
+			print "[Item] detected Pinky"
 			cursor = self.dbconnection.cursor()
 			cursor.execute('select item from item ORDER BY RAND() limit 5');
 			itemone = cursor.fetchone()[0];
@@ -384,6 +392,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			return 1
 
 		elif (matchIndex == 9): # examine
+			print "[Item] detected Examine"
 	                cursor = self.dbconnection.cursor()
 			item = self.channelMatch[9].findall(message)[0];
 			
@@ -415,6 +424,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 			else:
 				connection.message(channel, '%s: I don\'t have one.' % user)
 		elif (matchIndex == 11): # Lost and Found
+			print "[Item] detected lost & found"
 			if (channel == "#lampstand" and not user.lower() in self.admin):
 				print "Not allowing %s on %s to do that" % (user, channel)
 				connection.message(channel, "%s: Not here. " % user)
@@ -425,6 +435,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 			found = cursor.fetchone()[0];
 			
 			lost = random.choice(self.items[channel])
+			while lost == "a lantern":
+				lost = random.choice(self.items[channel])
 			self.items[channel].append(found)
 			self.drop(lost, channel)
 			
