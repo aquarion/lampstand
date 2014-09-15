@@ -1,4 +1,5 @@
-import time, ConfigParser
+import time
+import ConfigParser
 
 
 def __init__():
@@ -34,18 +35,19 @@ class Reaction:
             print "no config for %s" % self.__name
             pass
 
-    # def privateAction(self, connection, user, channel, message, matchindex = 0):
+    # def privateAction(self, connection, user, channel, message, matchindex =
+    # 0):
 
     def overUsed(self, uses=False, number=False, cooldown=False):
 
-        if (uses != False):
-            print "Note: %s is still using the old overused syntax" % self.__name;
+        if (uses):
+            print "Note: %s is still using the old overused syntax" % self.__name
 
         if len(self.uses) >= self.cooldown_number:
             first_use = int(self.uses[0])
             use_allowed_again = first_use + self.cooldown_time
             if time.time() < use_allowed_again:
-                print "Use Blocked. Try again in %s" % (int(use_allowed_again) - time.time());
+                print "Use Blocked. Try again in %s" % (int(use_allowed_again) - time.time())
                 return True
             else:
                 print "Now %s, Limit at %s (%d)" % (time.time(), use_allowed_again, time.time() - int(use_allowed_again))

@@ -1,6 +1,9 @@
 from lampstand import bible
 from lampstand.tools import splitAt
-import re, time, random, sys
+import re
+import time
+import random
+import sys
 import lampstand.reactions.base
 
 
@@ -16,20 +19,27 @@ class Reaction(lampstand.reactions.base.Reaction):
     uses = []
 
     def __init__(self, connection):
-        self.channelMatch = re.compile('%s. (\w*) (\d+\:\S+)' % connection.nickname, re.IGNORECASE)
+        self.channelMatch = re.compile(
+            '%s. (\w*) (\d+\:\S+)' %
+            connection.nickname,
+            re.IGNORECASE)
         self.privateMatch = re.compile('(\w*) (\d+\:\S+)')
 
     def channelAction(self, connection, user, channel, message):
-        matches = self.channelMatch.findall(message);
+        matches = self.channelMatch.findall(message)
 
         if self.overUsed():
-            connection.message(user, "Enough with the religion for now. (Overuse triggered)")
+            connection.message(
+                user,
+                "Enough with the religion for now. (Overuse triggered)")
             return
 
         print "[Bible] %s" % matches
 
         bibleConnection = bible.ESVSession()
-        result = bibleConnection.doPassageQuery('%s %s' % (matches[0][0], matches[0][1]))
+        result = bibleConnection.doPassageQuery(
+            '%s %s' %
+            (matches[0][0], matches[0][1]))
 
         result = ' '.join(result.split('\n'))
 
@@ -53,12 +63,14 @@ class Reaction(lampstand.reactions.base.Reaction):
         return True
 
     def privateAction(self, connection, user, channel, message):
-        matches = self.privateMatch.findall(message);
+        matches = self.privateMatch.findall(message)
 
         print "[Bible] %s" % matches
 
         bibleConnection = bible.ESVSession()
-        result = bibleConnection.doPassageQuery('%s %s' % (matches[0][0], matches[0][1]))
+        result = bibleConnection.doPassageQuery(
+            '%s %s' %
+            (matches[0][0], matches[0][1]))
 
         result = ' '.join(result.split('\n'))
 

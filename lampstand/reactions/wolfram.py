@@ -1,5 +1,8 @@
 import lampstand.reactions.base
-import re, time, random, sys
+import re
+import time
+import random
+import sys
 import requests
 import urllib
 from lxml import etree
@@ -14,12 +17,18 @@ class Reaction(lampstand.reactions.base.Reaction):
     __name = 'Wolfram'
 
     cooldown_number = 3
-    cooldown_time = 360  # So if 3 requests are made in 360 seconds, it will trigger overuse.
+    # So if 3 requests are made in 360 seconds, it will trigger overuse.
+    cooldown_time = 360
     uses = []
 
     def __init__(self, connection):
-        self.channelMatch = re.compile('^%s. (Ask Wolfram|Calculate|Wolfram) (.*)' % connection.nickname, re.IGNORECASE)
-        self.privateMatch = re.compile('^(Ask Wolfram|Calculate|Wolfram) (.*)', re.IGNORECASE)
+        self.channelMatch = re.compile(
+            '^%s. (Ask Wolfram|Calculate|Wolfram) (.*)' %
+            connection.nickname,
+            re.IGNORECASE)
+        self.privateMatch = re.compile(
+            '^(Ask Wolfram|Calculate|Wolfram) (.*)',
+            re.IGNORECASE)
 
         self.apikey = connection.config.get("wolfram", "apikey")
 
@@ -27,19 +36,24 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         print "[Wolfram] Hello"
 
-        matches = self.channelMatch.findall(message);
+        matches = self.channelMatch.findall(message)
 
         if self.overUsed():
             connection.message(user, "Overuse Triggered")
             return True
 
-        connection.message(channel, "%s: %s" % (user, self.wolfram(matches[0][1])))
+        connection.message(
+            channel,
+            "%s: %s" %
+            (user,
+             self.wolfram(
+                 matches[0][1])))
 
         return True
 
     def privateAction(self, connection, user, channel, message, index=0):
         print "[Wolfram] Hello privately"
-        matches = self.privateMatch.findall(message);
+        matches = self.privateMatch.findall(message)
         connection.message(user, self.wolfram(matches[0][1]))
         return True
 
@@ -49,7 +63,9 @@ class Reaction(lampstand.reactions.base.Reaction):
         query = question
         query = urllib.quote(query)
 
-        response = requests.get('http://api.wolframalpha.com/v2/query?appid=%s&input=%s&format=plaintext' % (self.apikey, query))
+        response = requests.get(
+            'http://api.wolframalpha.com/v2/query?appid=%s&input=%s&format=plaintext' %
+            (self.apikey, query))
         root = etree.fromstring(response.content)
 
         print response.content
@@ -58,14 +74,19 @@ class Reaction(lampstand.reactions.base.Reaction):
             possible_questions = ('Input interpretation', 'Input')
             question = self.find_node(root, possible_questions)
 
-            possible_answers = ('Current result', 'Response', 'Result', 'Results')
+            possible_answers = (
+                'Current result',
+                'Response',
+                'Result',
+                'Results')
             answer = self.find_node(root, possible_answers)
 
-            if answer == None:
+            if answer is None:
                 node = root.xpath("/queryresult/pod/subpod/plaintext")
                 if node:
                     print node
-                    return "(As %s): %s" % (node[0].text, node[1].text.replace('\n', ' // '))
+                    return "(As %s): %s" % (
+                        node[0].text, node[1].text.replace('\n', ' // '))
                 else:
                     return "You're going to need to be more specific"
 
@@ -75,7 +96,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def find_node(self, root, possible_attribs):
         for attr in possible_attribs:
-            node = root.xpath("/queryresult/pod[@title='%s']/subpod/plaintext" % attr)
+            node = root.xpath(
+                "/queryresult/pod[@title='%s']/subpod/plaintext" %
+                attr)
             if node:
                 return node[0].text
 

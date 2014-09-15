@@ -1,4 +1,7 @@
-import re, time, random, sys
+import re
+import time
+import random
+import sys
 import lampstand.reactions.base
 
 
@@ -16,21 +19,23 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def __init__(self, connection):
 
-        self.channelMatch = re.compile(".*Thanks,? (\S+)\s*\.?$", re.IGNORECASE)
+        self.channelMatch = re.compile(
+            ".*Thanks,? (\S+)\s*\.?$",
+            re.IGNORECASE)
         self.privateMatch = []
 
     def channelAction(self, connection, user, channel, message):
         print "[Thanks] called"
 
-        word = self.channelMatch.findall(message)[0];
+        word = self.channelMatch.findall(message)[0]
 
         if not word:
-            return False;
+            return False
 
         number = random.randint(0, 5)
 
         if number == 3:
-            thanks = self.thanks(word);
+            thanks = self.thanks(word)
             print "[THANKS] Thanks, %s: %s" % (word, thanks)
             connection.message(channel, thanks)
             return True
@@ -45,7 +50,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         word = word.lower().strip()
         if not word:
-            return false	
+            return false
 
         print "Thanks, %s" % word
 
@@ -55,9 +60,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 
             thanks = word
 
-        else:	
+        else:
 
-            scrugg = re.split(r'[aeiouy]', word, 1);
+            scrugg = re.split(r'[aeiouy]', word, 1)
 
             #scrugg = re.split(r'[^aeiouy]+', word)
 
@@ -78,12 +83,12 @@ class Reaction(lampstand.reactions.base.Reaction):
             print "Thanks isn't good enough: %s" % thanks
             return false
 
-        print thanks	
+        print thanks
 
         if(thanks[0] == "a"):
-            thanks = "Th%s" % thanks 
+            thanks = "Th%s" % thanks
         elif(thanks[0] == "o"):
-            thanks = "Th%s" % thanks 
+            thanks = "Th%s" % thanks
         else:
             thanks = "Tha%s" % thanks
 

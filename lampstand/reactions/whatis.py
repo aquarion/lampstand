@@ -2,7 +2,9 @@ from lampstand.tools import splitAt
 import lampstand.reactions.base
 from lampstand import tools
 import os.path
-import re, time, random
+import re
+import time
+import random
 
 
 def __init__():
@@ -24,30 +26,71 @@ class Reaction(lampstand.reactions.base.Reaction):
     lastid = 0
 
     def __init__(self, connection):
-        self.channelMatch = (re.compile('%s. (re|)define (.*?) as (.*)\s*$' % connection.nickname, re.IGNORECASE),
-                             re.compile('%s. What is (.*?)[\?|\!]*$' % connection.nickname, re.IGNORECASE),
-                             re.compile('%s. Who defined that\??$' % connection.nickname, re.IGNORECASE),
-                             re.compile('%s. Literal (.*)\s*$' % connection.nickname, re.IGNORECASE),
-                             re.compile('%s. tell me something about (.*)' % connection.nickname, re.IGNORECASE),
-                             re.compile('%s. (|give me a) Random definition' % connection.nickname, re.IGNORECASE))
+        self.channelMatch = (
+            re.compile(
+                '%s. (re|)define (.*?) as (.*)\s*$' %
+                connection.nickname,
+                re.IGNORECASE),
+            re.compile(
+                '%s. What is (.*?)[\?|\!]*$' %
+                connection.nickname,
+                re.IGNORECASE),
+            re.compile(
+                '%s. Who defined that\??$' %
+                connection.nickname,
+                re.IGNORECASE),
+            re.compile(
+                '%s. Literal (.*)\s*$' %
+                connection.nickname,
+                re.IGNORECASE),
+            re.compile(
+                '%s. tell me something about (.*)' %
+                connection.nickname,
+                re.IGNORECASE),
+            re.compile(
+                '%s. (|give me a) Random definition' %
+                connection.nickname,
+                re.IGNORECASE))
         self.dbconnection = connection.dbconnection
 
-    def channelAction(self, connection, user, channel, message, matchIndex=False):
+    def channelAction(
+            self,
+            connection,
+            user,
+            channel,
+            message,
+            matchIndex=False):
 
         print 'Looking at <<%s>>' % message
 
         matches = self.channelMatch[matchIndex].findall(message)[0]
 
         if(matchIndex == 0):
-            return self.setDefinition(connection, user, channel, message, matches)
+            return self.setDefinition(
+                connection,
+                user,
+                channel,
+                message,
+                matches)
         elif (matchIndex == 1):
-            return self.getDefinition(connection, user, channel, message, matches)
+            return self.getDefinition(
+                connection,
+                user,
+                channel,
+                message,
+                matches)
         elif (matchIndex == 2):
             return self.getBlame(connection, user, channel, message, matches)
         elif (matchIndex == 3):
             return self.getLiteral(connection, user, channel, message, matches)
         elif (matchIndex == 4):
-            return self.getDefinition(connection, user, channel, message, matches, True)
+            return self.getDefinition(
+                connection,
+                user,
+                channel,
+                message,
+                matches,
+                True)
         elif (matchIndex == 5):
             return self.randomThing(connection, user, channel, message)
 
@@ -71,12 +114,18 @@ class Reaction(lampstand.reactions.base.Reaction):
             return True
 
         if key.lower() == user.lower():
-            connection.message(channel, "%s: Narcissism is not an attractive trait." % user)
+            connection.message(
+                channel,
+                "%s: Narcissism is not an attractive trait." %
+                user)
 
         cursor = self.dbconnection.cursor()
 
         if len(key) > 254 or len(value) > 254:
-            connection.message(channel, "Definitions, not essays please %s. Keep it under 255 characters and we'll get along fine." % user) 
+            connection.message(
+                channel,
+                "Definitions, not essays please %s. Keep it under 255 characters and we'll get along fine." %
+                user)
             return True
 
         query = "Select * from define where lower(word) = %s and lower(definition) = %s"
@@ -85,16 +134,38 @@ class Reaction(lampstand.reactions.base.Reaction):
             connection.message(channel, "%s: I already had it that way" % user)
             return True
 
-        affermative = ("If you say so.", "Yeath Marthter", "It's done, but I didn't enjoy it", "... Fine", "Your worthless opinion has been recorded for eternity", "Filed under %s" % key[0], "Noted.", "Done", "That doesn't look right, but okay.", "Recorded.", "Carefully crafted consignment collated.", "Fine, done.", "Are you sure you've spelt that right?", "Saved.")
+        affermative = (
+            "If you say so.",
+            "Yeath Marthter",
+            "It's done, but I didn't enjoy it",
+            "... Fine",
+            "Your worthless opinion has been recorded for eternity",
+            "Filed under %s" %
+            key[0],
+            "Noted.",
+            "Done",
+            "That doesn't look right, but okay.",
+            "Recorded.",
+            "Carefully crafted consignment collated.",
+            "Fine, done.",
+            "Are you sure you've spelt that right?",
+            "Saved.")
 
         response = random.choice(affermative)
 
-        query = "insert into define values (0, %s, %s, %s, NOW())";
+        query = "insert into define values (0, %s, %s, %s, NOW())"
         cursor.execute(query, (key, value, user))
         connection.message(channel, "%s: %s" % (user, response))
         return True
 
-    def getDefinition(self, connection, user, channel, message, matches, like=False):
+    def getDefinition(
+            self,
+            connection,
+            user,
+            channel,
+            message,
+            matches,
+            like=False):
 
         key = matches
         print "Getting definition for %s " % key
@@ -106,7 +177,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         if key == self.lastasked:
             print "A repeat"
-            connection.message(channel, "%s: I just said, %s" % (user, self.answered))
+            connection.message(
+                channel, "%s: I just said, %s" %
+                (user, self.answered))
             return True
 
         if key.lower() == "glados":
@@ -118,7 +191,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         if row:
             if like:
-                connection.message(channel, '%s: "%s" is "%s"' % (user, row[0], row[1]))
+                connection.message(
+                    channel, '%s: "%s" is "%s"' %
+                    (user, row[0], row[1]))
             else:
                 connection.message(channel, "%s: %s" % (user, row[1]))
             self.blame = row[2]
@@ -126,7 +201,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             self.lastasked = key
             self.answered = row[1]
         else:
-            dictionary = lampstand.reactions.dict.Reaction(connection);
+            dictionary = lampstand.reactions.dict.Reaction(connection)
             try:
                 result, src = dictionary.getDefinition(key)
                 messages = dictionary.splitDefinition(result)
@@ -192,7 +267,9 @@ class Reaction(lampstand.reactions.base.Reaction):
         if not user.lower() in self.admin:
             row = self.define(key)
             if row:
-                connection.message(channel, "%s: %s is *literally* \"%s\"" % (user, row[0], row[1]))
+                connection.message(
+                    channel, "%s: %s is *literally* \"%s\"" %
+                    (user, row[0], row[1]))
                 self.blame = row[2]
                 self.lastasked2 = self.lastasked
                 self.lastasked = key

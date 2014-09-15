@@ -24,8 +24,10 @@ from datetime import datetime
 from twisted.internet.task import LoopingCall
 
 # system imports
-import time, sys
-import re, os
+import time
+import sys
+import re
+import os
 import string
 import exceptions
 
@@ -37,7 +39,7 @@ random.seed()
 
 import cymysql
 
-import lampstand.reactions;
+import lampstand.reactions
 
 import ConfigParser
 
@@ -75,27 +77,44 @@ class ChannelActions:
     def action(self, user, channel, message):
         for channelModule in self.connection.channelModules:
             if hasattr(channelModule, "channelMatch"):
-                if isinstance(channelModule.channelMatch, tuple) or isinstance(channelModule.channelMatch, list):
+                if isinstance(
+                        channelModule.channelMatch,
+                        tuple) or isinstance(
+                        channelModule.channelMatch,
+                        list):
                     indx = 0
                     for channelSubMatch in channelModule.channelMatch:
                         if channelSubMatch.match(message):
-                            result = channelModule.channelAction(self.connection, user, channel, message, indx)
-                            if result == True:
+                            result = channelModule.channelAction(
+                                self.connection,
+                                user,
+                                channel,
+                                message,
+                                indx)
+                            if result:
                                 return True
-                        indx = indx + 1;
+                        indx = indx + 1
                 elif channelModule.channelMatch.match(message):
                     print 'Channel Matched on %s' % channelModule
-                    result = channelModule.channelAction(self.connection, user, channel, message)
-                    if result == True:
+                    result = channelModule.channelAction(
+                        self.connection,
+                        user,
+                        channel,
+                        message)
+                    if result:
                         print "ChannelAction successfully replied, returning to loop"
-                        return True;
+                        return True
                     else:
                         print "ChannelAction declined, returning to loop"
 
             if hasattr(channelModule, "everyLine"):
                 result = False
-                result = channelModule.everyLine(self.connection, user, channel, message)
-                if result == True:
+                result = channelModule.everyLine(
+                    self.connection,
+                    user,
+                    channel,
+                    message)
+                if result:
                     return True
 
         # print "< %s/%s: %s" % (user, channel, message)
@@ -133,7 +152,10 @@ class ChannelActions:
         else:
             matched = 0
             for nickChangeModule in self.connection.nickChangeModules:
-                nickChangeModule.nickChangeAction(self.connection, old_nick, new_nick)
+                nickChangeModule.nickChangeAction(
+                    self.connection,
+                    old_nick,
+                    new_nick)
 
 
 class PrivateActions:
@@ -146,30 +168,45 @@ class PrivateActions:
     def action(self, user, channel, message):
 
         if user in self.peopleToIgnore or user == self.connection.nickname:
-            print "(Ignoring %s on principle)" % user 
+            print "(Ignoring %s on principle)" % user
         else:
 
             matched = 0
 
             for privateModule in self.connection.privateModules:
-                if isinstance(privateModule.privateMatch, tuple) or isinstance(privateModule.privateMatch, list):
+                if isinstance(
+                        privateModule.privateMatch,
+                        tuple) or isinstance(
+                        privateModule.privateMatch,
+                        list):
                     indx = 0
                     for privateSubMatch in privateModule.privateMatch:
                         if privateSubMatch.match(message):
                             matched = matched + 1
-                            privateModule.privateAction(self.connection, user, channel, message, indx)
-                        indx = indx + 1;
+                            privateModule.privateAction(
+                                self.connection,
+                                user,
+                                channel,
+                                message,
+                                indx)
+                        indx = indx + 1
                 elif privateModule.privateMatch.match(message):
                     matched = matched + 1
                     print 'private Matched on %s' % privateModule
-                    privateModule.privateAction(self.connection, user, channel, message)
+                    privateModule.privateAction(
+                        self.connection,
+                        user,
+                        channel,
+                        message)
 
             if matched == 0:
                 peopleToIgnore = ('NickServ', 'MemoServ', 'ChanServ')
                 if user in peopleToIgnore:
                     print "(Ignoring %s for not matching)" % user
                 else:
-                    self.connection.msg(user, "I didn't understand that, sorry. Docs: http://www.maelfroth.org/lampstand.php")
+                    self.connection.msg(
+                        user,
+                        "I didn't understand that, sorry. Docs: http://www.maelfroth.org/lampstand.php")
                     print "Sending Sorry to %s" % user
 
 
@@ -201,7 +238,11 @@ class LampstandLoop(irc.IRCClient):
         passwd = self.config.get("database", "password")
         db = self.config.get("database", "database")
 
-        self.dbconnection = cymysql.connect(user=user, passwd=passwd, db=db, charset='utf8')
+        self.dbconnection = cymysql.connect(
+            user=user,
+            passwd=passwd,
+            db=db,
+            charset='utf8')
 
     def connectionMade(self):
 
@@ -222,7 +263,7 @@ class LampstandLoop(irc.IRCClient):
         self.realname = "Lampstand L. Lampstand."
         self.userinfo = "I'm a bot! http://wiki.maelfroth.org/lampstandDocs"
 
-        logfile = self.config.get("logging", "logfile");
+        logfile = self.config.get("logging", "logfile")
 
         irc.IRCClient.connectionMade(self)
         self.logger = MessageLogger(open(logfile, "a"))
@@ -251,18 +292,18 @@ class LampstandLoop(irc.IRCClient):
 
     def installModule(self, moduleName):
 
-        self.removeModuleActions(moduleName);
+        self.removeModuleActions(moduleName)
 
         module = 'lampstand.reactions.%s' % moduleName
 
-        rtn = '';
+        rtn = ''
 
         print "Installing %s" % moduleName
 
-        if (sys.modules.has_key(module)):
+        if (module in sys.modules):
             self.removeModuleActions(moduleName)
             print 'Reloading %s' % module
-            reload(sys.modules[module]);
+            reload(sys.modules[module])
             rtn = 'Reloaded %s' % module
             print rtn
         else:
@@ -345,9 +386,11 @@ class LampstandLoop(irc.IRCClient):
         self.logger.close()
 
     def nickservGhost(self):
-        if self.password != False:
+        if self.password:
             print '[IDENTIFY] Recovering my nickname '
-            self.msg('nickserv', "Ghost %s %s" % (self.original_nickname, self.password.encode('utf8')))
+            self.msg(
+                'nickserv', "Ghost %s %s" %
+                (self.original_nickname, self.password.encode('utf8')))
 
     # callbacks for events
 
@@ -411,7 +454,7 @@ class LampstandLoop(irc.IRCClient):
             if old_nick in people:
                 self.population[channel].remove(old_nick)
 
-            if not new_nick in people:
+            if new_nick not in people:
                 self.population[channel].append(new_nick)
 
         if not new_nick in self.people:
@@ -462,7 +505,7 @@ class LampstandLoop(irc.IRCClient):
         else:
             print "%s is in %s" % (nickname, self.people)
 
-        if not self.population.has_key(channel):
+        if channel not in self.population:
             self.population[channel] = []
 
         if nickname not in self.population[channel]:
@@ -503,7 +546,7 @@ class LampstandLoop(irc.IRCClient):
         myname = params[0]
         atsign = params[1]
         channel = params[2]
-        names = params[3].split(' ');
+        names = params[3].split(' ')
 
         #people = []
 
@@ -566,7 +609,7 @@ class LampstandLoop(irc.IRCClient):
         basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
         config = ConfigParser.ConfigParser()
         config.read(["defaults.ini", basedir + '/config.ini'])
-        self.config = config		
+        self.config = config
 
 
 class LampstandFactory(protocol.ClientFactory):
@@ -595,7 +638,7 @@ class LampstandFactory(protocol.ClientFactory):
 
 
 if __name__ == '__main__':
-    cwd = os.getcwd() 
+    cwd = os.getcwd()
     print "Error log is %s/stderr.log" % cwd
 
     basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -606,8 +649,8 @@ if __name__ == '__main__':
     f = LampstandFactory(config)
 
     # connect factory to this host and port
-    server = config.get("connection", "server");
-    port = config.getint("connection", "port");
+    server = config.get("connection", "server")
+    port = config.getint("connection", "port")
     reactor.connectTCP(server, port, f)
 
     # run bot

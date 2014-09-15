@@ -1,4 +1,8 @@
-import re, time, random, sys, datetime
+import re
+import time
+import random
+import sys
+import datetime
 import haikufinder
 import cPickle as pickle
 
@@ -20,9 +24,15 @@ class Reaction(lampstand.reactions.base.Reaction):
         self.getconfig(connection)
 
         print "Haiku Init!"
-        self.channelMatch = (re.compile('%s. how many syllables in ([\w ]*)\??' % connection.nickname, re.IGNORECASE),
-                             re.compile('%s. (\w*) has (\d\d?) syllables?\.?' % connection.nickname, re.IGNORECASE)
-                             )
+        self.channelMatch = (
+            re.compile(
+                '%s. how many syllables in ([\w ]*)\??' %
+                connection.nickname,
+                re.IGNORECASE),
+            re.compile(
+                '%s. (\w*) has (\d\d?) syllables?\.?' %
+                connection.nickname,
+                re.IGNORECASE))
         self.dbconnection = connection.dbconnection
 
         self.channels = {}
@@ -39,7 +49,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def everyLine(self, connection, user, channel, message):
         channelname = channel[1:]
-        if self.config.has_key(channelname) and self.config[channelname] == "ignore":
+        if channelname in self.config and self.config[channelname] == "ignore":
             print "[HAIKU] Ignoring channel %s " % channelname
             return False
 
@@ -58,12 +68,17 @@ class Reaction(lampstand.reactions.base.Reaction):
         if syllables == 1:
             ordinal = ""
         elif syllables == -1:
-            connection.message(channel, "%s: I don't know, so I ignore it." % user)
+            connection.message(
+                channel,
+                "%s: I don't know, so I ignore it." %
+                user)
             return True
         else:
             ordinal = "s"
 
-        connection.message(channel, "%s: \"%s\" has %s syllable%s" % (user, matches[0], syllables, ordinal))
+        connection.message(
+            channel, "%s: \"%s\" has %s syllable%s" %
+            (user, matches[0], syllables, ordinal))
         return True
 
     def save(self):
@@ -80,7 +95,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             input.close()
             for word, count in self.cheatsheet:
                 print "[Haiku] %s has %d syllables" % (word, int(count))
-                haikufinder.HaikuFinder.add_word(word, int(count));
+                haikufinder.HaikuFinder.add_word(word, int(count))
         except:
             self.cheatsheet = {}
 
@@ -89,9 +104,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         matches = self.channelMatch[1].findall(message)
 
-        haikufinder.HaikuFinder.add_word(matches[0][0], int(matches[0][1]));
+        haikufinder.HaikuFinder.add_word(matches[0][0], int(matches[0][1]))
 
-        self.cheatsheet[matches[0][0]] = int(matches[0][1]);
+        self.cheatsheet[matches[0][0]] = int(matches[0][1])
 
         self.save()
 
@@ -101,28 +116,34 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def findHaiku(self, connection, user, channel, message):
 
-        if not self.channels.has_key(channel):
+        if channel not in self.channels:
             self.channels[channel] = []
 
         self.channels[channel].append(message)
         if len(self.channels[channel]) > 3:
             self.channels[channel] = self.channels[channel][-3:]
 
-        # print "Content for %s: %s " % (channel, " ".join(self.channels[channel]))
+        # print "Content for %s: %s " % (channel, "
+        # ".join(self.channels[channel]))
 
-        haikus = haikufinder.HaikuFinder(" ".join(self.channels[channel])).find_haikus()
+        haikus = haikufinder.HaikuFinder(
+            " ".join(
+                self.channels[channel])).find_haikus()
 
         # print haikus
 
         if len(haikus):
 
             channelname = channel[1:]
-            if self.config.has_key(channelname) and not self.config[channelname] == "ignore":
+            if channelname in self.config and not self.config[
+                    channelname] == "ignore":
                 channelout = "#%s" % self.config[channelname]
             else:
-                channelout = channel;
+                channelout = channel
 
-            connection.message(channelout, "That looked like a haiku on %s: %s " % (channel, " // ".join(haikus[0])))
+            connection.message(channelout,
+                               "That looked like a haiku on %s: %s " % (channel,
+                                                                        " // ".join(haikus[0])))
             self.channels[channel] = []
             self.lasthaiku[channel] = " // ".join(haikus[0])
             return True

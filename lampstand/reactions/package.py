@@ -1,7 +1,10 @@
 import lampstand.reactions.base
 
 from lampstand.tools import splitAt
-import re, time, random, sys
+import re
+import time
+import random
+import sys
 
 
 def __init__():
@@ -13,7 +16,8 @@ class Reaction(lampstand.reactions.base.Reaction):
     __name = 'Package'
 
     cooldown_number = 2
-    cooldown_time = 360  # So if 1 requests is made in 360 seconds, it will trigger overuse.
+    # So if 1 requests is made in 360 seconds, it will trigger overuse.
+    cooldown_time = 360
     uses = []
 
     package_in_play = False
@@ -35,9 +39,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def __init__(self, connection):
         self.channelMatch = (
-            re.compile('(hands|gives) (.*) (a|the) (suspicious|) package', re.IGNORECASE),
+            re.compile(
+                '(hands|gives) (.*) (a|the) (suspicious|) package',
+                re.IGNORECASE),
         )
-        # self.privateMatch = re.compile('^%s. ???' % connection.nickname, re.IGNORECASE))
+        # self.privateMatch = re.compile('^%s. ???' % connection.nickname,
+        # re.IGNORECASE))
 
         self.reset()
 
@@ -54,8 +61,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         if not user.lower() == "aquarion":
             print "Bomb disabled"
-            connection.message(user, "The packages function has been disabled.")
-            return False	
+            connection.message(
+                user,
+                "The packages function has been disabled.")
+            return False
 
         if self.overUsed():
             connection.message(user, "Overuse Triggered")
@@ -91,15 +100,18 @@ class Reaction(lampstand.reactions.base.Reaction):
             self.package_player = player
             self.message_number = 0
             self.its_a_bomb = (user.lower() == "aquarion" and hands == "hands")
-            self.sticky_bomb = (user.lower() == "aquarion" and hands == "hands")
+            self.sticky_bomb = (
+                user.lower() == "aquarion" and hands == "hands")
             self.this_channel = channel
 
             sticky_txt = ""
 
             if self.sticky_bomb:
-                sticky_txt = "slightly sticky "			
+                sticky_txt = "slightly sticky "
 
-            connection.message(channel, "Hey look, a %spackage for %s" % (sticky_txt, player))
+            connection.message(
+                channel, "Hey look, a %spackage for %s" %
+                (sticky_txt, player))
 
         elif user == self.package_player and not player in non_players and not self.sticky_bomb:
             connection.message(channel, "%s: Noted" % user)
@@ -124,18 +136,23 @@ class Reaction(lampstand.reactions.base.Reaction):
         if self.package_in_play:
             print self.message_number, '/', len(self.messages)
             if self.message_number < len(self.messages):
-                print "Send message";
+                print "Send message"
 
                 print self.message_number, self.messages[self.message_number]
 
                 if self.messages[self.message_number]:
-                    message = self.messages[self.message_number] % self.package_player
+                    message = self.messages[
+                        self.message_number] % self.package_player
                     connection.message(channel, message)
                 self.message_number += 1
             else:
-                print "Go Boom";
-                if self.its_a_bomb and not self.package_player.lower() == "aquarion":
-                    connection.kick(self.this_channel, self.package_player, "*BOOM*")
+                print "Go Boom"
+                if self.its_a_bomb and not self.package_player.lower(
+                ) == "aquarion":
+                    connection.kick(
+                        self.this_channel,
+                        self.package_player,
+                        "*BOOM*")
                 else:
                     connection.message(channel, "*BOOM*")
 

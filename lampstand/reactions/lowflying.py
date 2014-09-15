@@ -2,12 +2,15 @@ from lampstand.tools import splitAt
 import lampstand.reactions.base
 from lampstand import tools
 import os.path
-import re, time, datetime
+import re
+import time
+import datetime
 
 import dateutil.parser
 import pytz
 
-import sys, os
+import sys
+import os
 
 from datetime import datetime
 
@@ -36,22 +39,30 @@ class Reaction(lampstand.reactions.base.Reaction):
     def __init__(self, connection):
         self.dbconnection = connection.dbconnection
 
-        self.output_channel = "#%s" % connection.config.get("lowflyingrocks", "channel")	
+        self.output_channel = "#%s" % connection.config.get(
+            "lowflyingrocks",
+            "channel")
 
-        OAUTH_FILENAME = os.environ.get('HOME', '') + os.sep + '.lampstand_oauth'
+        OAUTH_FILENAME = os.environ.get(
+            'HOME',
+            '') + os.sep + '.lampstand_oauth'
         CONSUMER_KEY = connection.config.get("twitter", "consumer_key")
-        CONSUMER_SECRET = connection.config.get("twitter", "consumer_secret")		
+        CONSUMER_SECRET = connection.config.get("twitter", "consumer_secret")
 
         if not os.path.exists(OAUTH_FILENAME):
             oauth_dance(
                 "Lampstand", CONSUMER_KEY, CONSUMER_SECRET,
                 OAUTH_FILENAME)
 
-        self.oauth_token, self.oauth_token_secret = read_token_file(OAUTH_FILENAME)
+        self.oauth_token, self.oauth_token_secret = read_token_file(
+            OAUTH_FILENAME)
 
         self.twitter = Twitter(
             auth=OAuth(
-                self.oauth_token, self.oauth_token_secret, CONSUMER_KEY, CONSUMER_SECRET),
+                self.oauth_token,
+                self.oauth_token_secret,
+                CONSUMER_KEY,
+                CONSUMER_SECRET),
             secure=True,
             domain='api.twitter.com')
 
@@ -78,15 +89,18 @@ class Reaction(lampstand.reactions.base.Reaction):
         print "[LFR] Checking for Low Flying Rocks"
 
         if not self.last_lfr_seen:
-            print "[LFR] First Run";
-            statuses = self.twitter.statuses.user_timeline(screen_name="lowflyingrocks")
+            print "[LFR] First Run"
+            statuses = self.twitter.statuses.user_timeline(
+                screen_name="lowflyingrocks")
             last = statuses[0]
             #text = "Space object %s" % last['text']
             #connection.message(channel, text)
             self.last_lfr_seen = last['id']
         else:
-            print "[LFR] Future Run (from %d)" % self.last_lfr_seen;
-            statuses = self.twitter.statuses.user_timeline(screen_name="lowflyingrocks", since_id=self.last_lfr_seen)
+            print "[LFR] Future Run (from %d)" % self.last_lfr_seen
+            statuses = self.twitter.statuses.user_timeline(
+                screen_name="lowflyingrocks",
+                since_id=self.last_lfr_seen)
             if(len(statuses)):
                 print "[LFR] Rocken! :("
                 self.last_lfr_seen = statuses[0]['id']

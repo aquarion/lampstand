@@ -1,7 +1,11 @@
 # Mostly by Aquarion, modifiers (openended/lowest/best) code by ccooke.
 
 from lampstand.tools import splitAt
-import re, time, random, sys, string
+import re
+import time
+import random
+import sys
+import string
 import lampstand.reactions.base
 
 
@@ -16,18 +20,28 @@ class Reaction(lampstand.reactions.base.Reaction):
     cooldown_time = 120
 
     def __init__(self, connection):
-        self.channelMatch = (re.compile('%s. roll +((?:\w+ +)*)(\d*d\d*)(.*)' % connection.nickname, re.IGNORECASE), re.compile('%s. roll (.*)' % connection.nickname, re.IGNORECASE))
-        self.privateMatch = re.compile('roll +((?:\w+ +)*)(\d*d\d*)(.*)', re.IGNORECASE)
+        self.channelMatch = (
+            re.compile(
+                '%s. roll +((?:\w+ +)*)(\d*d\d*)(.*)' %
+                connection.nickname,
+                re.IGNORECASE),
+            re.compile(
+                '%s. roll (.*)' %
+                connection.nickname,
+                re.IGNORECASE))
+        self.privateMatch = re.compile(
+            'roll +((?:\w+ +)*)(\d*d\d*)(.*)',
+            re.IGNORECASE)
 
     def channelAction(self, connection, user, channel, message, index):
 
-        item = self.channelMatch[index].findall(message);
+        item = self.channelMatch[index].findall(message)
         result = self.rollDice(item)
         connection.message(channel, "%s: %s" % (user, result))
         return True
 
     def privateAction(self, connection, user, channel, message, matchindex=0):
-        item = self.privateMatch.findall(message);
+        item = self.privateMatch.findall(message)
         result = self.rollDice(item)
         connection.message(user, result)
 
@@ -61,7 +75,8 @@ class Reaction(lampstand.reactions.base.Reaction):
                 else:
                     fate[n] = ' '
                 total = total + roll
-            return "You rolled [%s] [%s] [%s] [%s], totalling %s" % (fate[0], fate[1], fate[2], fate[3], total)
+            return "You rolled [%s] [%s] [%s] [%s], totalling %s" % (
+                fate[0], fate[1], fate[2], fate[3], total)
 
         if item[0][0]:
             # We have some keywords.
@@ -84,15 +99,15 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         print "[ROLLING DICE] %s" % item
         try:
-            result = self.roll(item[0][1], modifiers);
+            result = self.roll(item[0][1], modifiers)
         except:
             return "The dice blew up."
             return True
 
         print "[ROLLING DICE] got %s" % result
 
-        if result == False:
-            return "I don't understand that format yet, sorry :(" 
+        if not result:
+            return "I don't understand that format yet, sorry :("
 
         total = 0.0
         for elem in result[0]:
@@ -105,11 +120,12 @@ class Reaction(lampstand.reactions.base.Reaction):
         if len(result) == 3 and len(result[2]) > 0:
             original = map(lambda x: "%.6g" % x, result[2])
             if original == roll:
-                message = "you rolled [ %s ], Total: %.6g" % (", ".join(original), total)
+                message = "you rolled [ %s ], Total: %.6g" % (
+                    ", ".join(original), total)
             else:
                 message = "you rolled [ %s ], We kept [ %s ] Total %.6g" % (
-                    ", ".join(original), 
-                    ", ".join(roll), 
+                    ", ".join(original),
+                    ", ".join(roll),
                     total
                 )
         elif len(roll) == 1:
@@ -117,7 +133,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         else:
             message = "you rolled [ %s ] Total %.6g " % (
-                ', '.join(roll), 
+                ', '.join(roll),
                 total
             )
 
@@ -163,9 +179,10 @@ class Reaction(lampstand.reactions.base.Reaction):
         if(howmany > 128):
             return False
 
-        if(howmany < 1 or type < 1): return False
+        if(howmany < 1 or type < 1):
+            return False
 
-        results = [];
+        results = []
         for i in range(0, howmany):
             overrun = False
             scale = 1.0

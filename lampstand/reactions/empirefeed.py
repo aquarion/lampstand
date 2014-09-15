@@ -3,7 +3,10 @@ import lampstand.reactions.base
 import feedparser
 
 from lampstand.tools import splitAt
-import re, time, random, sys
+import re
+import time
+import random
+import sys
 
 
 def __init__():
@@ -15,7 +18,8 @@ class Reaction(lampstand.reactions.base.Reaction):
     __name = 'EmpireFeed'
 
     cooldown_number = 3
-    cooldown_time = 360  # So if 3 requests are made in 360 seconds, it will trigger overuse.
+    # So if 3 requests are made in 360 seconds, it will trigger overuse.
+    cooldown_time = 360
     uses = []
 
     schedule_count = 0
@@ -25,9 +29,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def __init__(self, connection):
         #self.channelMatch = re.compile('^%s. Empire Feed Check' % connection.nickname, re.IGNORECASE)
-        # self.privateMatch = re.compile('^%s. ???' % connection.nickname, re.IGNORECASE))
+        # self.privateMatch = re.compile('^%s. ???' % connection.nickname,
+        # re.IGNORECASE))
 
-        # def channelAction(self, connection, user, channel, message, index = 0):
+        # def channelAction(self, connection, user, channel, message, index =
+        # 0):
 
         #     self.checkEmpireFeed(connection)
         #     self.checkOdysseyFeed(connection)
@@ -74,7 +80,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         self.last_empire_seen = last_entry['id']
 
-        text = "New Empire Facebook announcement: %s <%s>" % (last_entry['title'], last_entry['link'])
+        text = "New Empire Facebook announcement: %s <%s>" % (
+            last_entry['title'], last_entry['link'])
         print '[EmpireFeed] Announcing %s' % text
         connection.message("#empirefroth", text)
 
@@ -95,6 +102,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         self.last_odyssey_seen = last_entry['id']
 
-        text = "New Odyssey Facebook announcement: %s <%s>" % (last_entry['title'], last_entry['link'])
+        text = "New Odyssey Facebook announcement: %s <%s>" % (
+            last_entry['title'], last_entry['link'])
         print '[OdysseyFeed] Announcing %s' % text
         connection.message("#odcfroth", text)

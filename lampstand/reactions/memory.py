@@ -1,5 +1,9 @@
 from lampstand.tools import splitAt
-import re, time, random, sys, datetime
+import re
+import time
+import random
+import sys
+import datetime
 import lampstand.reactions.base
 from lampstand import tools
 
@@ -19,18 +23,22 @@ class Reaction(lampstand.reactions.base.Reaction):
         self.memorysize = 1000
 
     def everyLine(self, connection, user, channel, message):
-        if not self.memory.has_key(channel):
+        if channel not in self.memory:
             print "New memorybank for %s channel" % channel
             self.memory[channel] = []
 
-        line = {"timestamp": time.localtime(time.time()), "user": user, "message": message}
+        line = {
+            "timestamp": time.localtime(
+                time.time()),
+            "user": user,
+            "message": message}
         self.memory[channel].append(line)
         if len(self.memory[channel]) > self.memorysize:
             limit = 0 - self.memorysize
             self.memory[channel] = self.memory[channel][limit:]
 
     def search(self, channel, user=False, filter=False):
-        if not self.memory.has_key(channel):
+        if channel not in self.memory:
             return []
         lines = self.memory[channel][:]
         if user:

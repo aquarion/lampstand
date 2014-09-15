@@ -1,5 +1,6 @@
 
-import time, re
+import time
+import re
 
 
 def splitAt(string, number):
@@ -21,8 +22,10 @@ def Denary2Binary(n):
 
     n = int(n)
 
-    if n < 0: raise ValueError, "must be a positive integer"
-    if n == 0: return '0'
+    if n < 0:
+        raise ValueError("must be a positive integer")
+    if n == 0:
+        return '0'
     while n > 0:
         bStr = str(n % 2) + bStr
         n = n >> 1
@@ -73,12 +76,25 @@ def int_to_roman(input):
     >>> print int_to_roman(1999)
     MCMXCIX
     """
-    if type(input) != type(1):
-        raise TypeError, "expected integer, got %s" % type(input)
+    if not isinstance(input, type(1)):
+        raise TypeError("expected integer, got %s" % type(input))
     if not 0 < input < 4000:
-        raise ValueError, "Argument must be between 1 and 3999"   
+        raise ValueError("Argument must be between 1 and 3999")
     ints = (1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1)
-    nums = ('M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I')
+    nums = (
+        'M',
+        'CM',
+        'D',
+        'CD',
+        'C',
+        'XC',
+        'L',
+        'XL',
+        'X',
+        'IX',
+        'V',
+        'IV',
+        'I')
     result = ""
     for i in range(len(ints)):
         count = int(input / ints[i])
@@ -94,10 +110,10 @@ def int2bin(n, count=24):
 
 def convertNiceTime(number, format):
     if format == "decimal" or format == "dec":
-        return int(number);
+        return int(number)
 
     if format == "binary" or format == "bin":
-        return Denary2Binary(number);
+        return Denary2Binary(number)
 
     if format == "hex" or format == "hexadecimal":
         print "Converting %s to hex" % number
@@ -111,17 +127,17 @@ def convertNiceTime(number, format):
         print "Converting %s to roman" % number
         return int_to_roman(int(number))
 
-    return False;
+    return False
 
 
 def niceTimeDelta(timedelta, format="decimal"):
 
-    years = int(timedelta / (60 * 60 * 24 * 365));
-    remainder = timedelta % (60 * 60 * 24 * 365);
-    days = int(remainder / (60 * 60 * 24));
-    remainder = timedelta % (60 * 60 * 24);
+    years = int(timedelta / (60 * 60 * 24 * 365))
+    remainder = timedelta % (60 * 60 * 24 * 365)
+    days = int(remainder / (60 * 60 * 24))
+    remainder = timedelta % (60 * 60 * 24)
     hours = remainder / (60 * 60)
-    remainder = timedelta % (60 * 60);
+    remainder = timedelta % (60 * 60)
     minutes = remainder / 60
 
     if int(years) == 1:
@@ -133,7 +149,7 @@ def niceTimeDelta(timedelta, format="decimal"):
 
     if (days < 7 and years == 0):
         hours = hours + (24 * days)
-        days = 0;
+        days = 0
 
     # if (hours < 48 and years == 0 and days < 3):
     #	minutes = minutes + (60*hours)
@@ -179,13 +195,13 @@ def nicedelta(delta):
         years = days / 365
         days = days % 365
         suffix = "" if years == 1 else "s"
-        deltastring += "%d year%s, " % (years, suffix)		
+        deltastring += "%d year%s, " % (years, suffix)
 
     if days > 35:
         weeks = days / 7
         days = days % 7
         suffix = "" if weeks == 1 else "s"
-        deltastring += "%d week%s, " % (weeks, suffix)		
+        deltastring += "%d week%s, " % (weeks, suffix)
 
     if days > 4:
         deltastring += "%d days, " % days
@@ -199,6 +215,9 @@ def nicedelta(delta):
     hours_suffix = "" if hours == 1 else "s"
     minutes_suffix = "" if minutes == 1 else "s"
 
-    deltastring += "%i hour%s, %i minute%s" % (hours, hours_suffix, minutes, minutes_suffix)
+    deltastring += "%i hour%s, %i minute%s" % (hours,
+                                               hours_suffix,
+                                               minutes,
+                                               minutes_suffix)
 
     return deltastring

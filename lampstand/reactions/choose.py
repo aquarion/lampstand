@@ -1,7 +1,10 @@
 import lampstand.reactions.base
 
 from lampstand.tools import splitAt
-import re, time, random, sys
+import re
+import time
+import random
+import sys
 
 
 def __init__():
@@ -17,14 +20,21 @@ class Reaction(lampstand.reactions.base.Reaction):
     uses = []
 
     def __init__(self, connection):
-        self.channelMatch = re.compile('^%s. (choose|should I) (.* or .*)' % connection.nickname, re.IGNORECASE)
-        self.privateMatch = re.compile('(choose|should I) (.* or .*)\??$', re.IGNORECASE)
+        self.channelMatch = re.compile(
+            '^%s. (choose|should I) (.* or .*)' %
+            connection.nickname,
+            re.IGNORECASE)
+        self.privateMatch = re.compile(
+            '(choose|should I) (.* or .*)\??$',
+            re.IGNORECASE)
 
     def channelAction(self, connection, user, channel, message):
         print "[Choose] called"
 
         if self.overUsed(self.uses, self.cooldown_number, self.cooldown_time):
-            connection.message(channel, "I'm not running your life for you, go away.")
+            connection.message(
+                channel,
+                "I'm not running your life for you, go away.")
             return True
 
         self.updateOveruse()
@@ -32,12 +42,12 @@ class Reaction(lampstand.reactions.base.Reaction):
         match = self.channelMatch.findall(message)
 
         if random.randint(0, 100) == 69:
-            print "Yes";
+            print "Yes"
             connection.message(channel, "%s: Yes" % user)
             return True
 
         if random.randint(0, 100) == 67:
-            print "Edge";
+            print "Edge"
             connection.message(channel, "%s: edge" % user)
             return True
 
@@ -56,7 +66,9 @@ class Reaction(lampstand.reactions.base.Reaction):
         print "[Choose] called"
 
         if self.overUsed(self.uses, self.cooldown_number, self.cooldown_time):
-            connection.message(user, "I'm not running your life for you, go away.")
+            connection.message(
+                user,
+                "I'm not running your life for you, go away.")
             return
 
         self.updateOveruse()
@@ -76,8 +88,10 @@ class Reaction(lampstand.reactions.base.Reaction):
         # new regex by ccooke - 2010-05-28
         #regex = re.compile("(?:\s*(?:\s*(?:,|x?or)\s*)+\s*)+", re.IGNORECASE);
         #regex = re.compile("(?:\s+(?:\s*(?:x?or)\s*)+\s*|,)+", re.IGNORECASE);
-        regex = re.compile("(?:\s+(?:\s*(?:x?or(?=\W))\s*)+\s*|,)+\s*", re.IGNORECASE);
-        choose = regex.split(message);
+        regex = re.compile(
+            "(?:\s+(?:\s*(?:x?or(?=\W))\s*)+\s*|,)+\s*",
+            re.IGNORECASE)
+        choose = regex.split(message)
 
         #choose = []
 
@@ -96,7 +110,7 @@ class Reaction(lampstand.reactions.base.Reaction):
                 return "GLaDOS. Obviously"
 
             if thing.lower() == "hal":
-                print "Removed a Hal";
+                print "Removed a Hal"
                 choose.remove(thing)
 
         print choose

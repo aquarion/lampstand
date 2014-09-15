@@ -1,5 +1,9 @@
 from lampstand.tools import splitAt
-import re, time, random, sys, datetime
+import re
+import time
+import random
+import sys
+import datetime
 import lampstand.reactions.base
 from lampstand import tools
 
@@ -13,7 +17,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def __init__(self, connection):
         #self.channelMatch = re.compile('.*')
-        self.channelMatch = re.compile('%s.? have you seen (.*)\??' % connection.nickname, re.IGNORECASE)
+        self.channelMatch = re.compile(
+            '%s.? have you seen (.*)\??' %
+            connection.nickname,
+            re.IGNORECASE)
         #self.seenMatch    = re.compile('%s.? have you seen (.*)\??' % connection.nickname, re.IGNORECASE)
         self.privateMatch = re.compile('have you seen (.*)\??', re.IGNORECASE)
         self.dbconnection = connection.dbconnection
@@ -21,26 +28,36 @@ class Reaction(lampstand.reactions.base.Reaction):
     def channelAction(self, connection, user, channel, message):
 
         print "[WHOWAS] requested"
-        self.channel = channel;
+        self.channel = channel
 
         matches = self.channelMatch.findall(message)
-        searchingfor = matches[0];
+        searchingfor = matches[0]
 
         if searchingfor[-1:] == "?":
             searchingfor = searchingfor[0:-1]
         space = re.compile(".*\s.*")
         if searchingfor.lower() == "your mum":
-            connection.message(channel, "%s: Not since she took on one piece of crumpet too many" % user)
+            connection.message(
+                channel,
+                "%s: Not since she took on one piece of crumpet too many" %
+                user)
         elif space.match(searchingfor):
-            connection.message(channel, "No idea, %s. Have you looked under the sofa?" % user)
+            connection.message(
+                channel,
+                "No idea, %s. Have you looked under the sofa?" %
+                user)
         elif searchingfor.lower() == user.lower():
-            connection.message(channel, "Yes. You're over there. Hello %s. Did you want a cookie or something?" % user)
+            connection.message(
+                channel,
+                "Yes. You're over there. Hello %s. Did you want a cookie or something?" %
+                user)
         elif searchingfor.lower() == connection.nickname.lower():
             connection.message(channel, "I'm right here.")
         else:
-            result = self.lastseen(searchingfor);
+            result = self.lastseen(searchingfor)
             if searchingfor in connection.people:
-                result = "%s. Also, I think they're currently online!" % (result)
+                result = "%s. Also, I think they're currently online!" % (
+                    result)
             if len(result) > 440:
                 whereToSplit = splitAt(result, 440)
                 stringOne = result[0:whereToSplit]
@@ -54,7 +71,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def everyLine(self, connection, user, channel, message):
         cursor = self.dbconnection.cursor()
-        cursor.execute('replace into lastseen (username, last_seen, last_words, channel) values (%s, %s, %s, %s)', (user, int(time.time()), message, channel))
+        cursor.execute(
+            'replace into lastseen (username, last_seen, last_words, channel) values (%s, %s, %s, %s)', (user, int(
+                time.time()), message, channel))
 
         self.dbconnection.commit()
 
@@ -64,11 +83,14 @@ class Reaction(lampstand.reactions.base.Reaction):
         print "[WHOWAS] saw a nick leave: %s quit, saying %s (%s)" % (user, reason, params)
         cursor = self.dbconnection.cursor()
 
-        cursor.execute('replace into lastquit (username, last_quit, reason, method, channel) values (%s, %s, %s, %s, %s)', (user, int(time.time()), params[-1], reason, channel))
+        cursor.execute(
+            'replace into lastquit (username, last_quit, reason, method, channel) values (%s, %s, %s, %s, %s)', (user, int(
+                time.time()), params[
+                -1], reason, channel))
 
     def privateAction(self, connection, user, channel, message):
 
-        self.channel = "PM";
+        self.channel = "PM"
 
         print "[WHOWAS] privately requested"
         if self.privateMatch.match(message):
@@ -78,17 +100,27 @@ class Reaction(lampstand.reactions.base.Reaction):
                 searchingfor = searchingfor[0:-1]
             space = re.compile(".*\s.*")
             if searchingfor.lower() == "your mum":
-                connection.message(user, "%s: Not since she took on one piece of crumpet too many" % user)
+                connection.message(
+                    user,
+                    "%s: Not since she took on one piece of crumpet too many" %
+                    user)
             elif space.match(searchingfor):
-                connection.message(user, "No idea, %s. Have you looked under the sofa?" % user)
+                connection.message(
+                    user,
+                    "No idea, %s. Have you looked under the sofa?" %
+                    user)
             elif searchingfor.lower() == user.lower():
-                connection.message(user, "Yes. You're over there. Hello %s. Did you want a cookie or something?" % user)
+                connection.message(
+                    user,
+                    "Yes. You're over there. Hello %s. Did you want a cookie or something?" %
+                    user)
             elif searchingfor.lower() == connection.nickname.lower():
                 connection.message(user, "I'm right here.")
             else:
-                result = self.lastseen(searchingfor);
+                result = self.lastseen(searchingfor)
                 if searchingfor in connection.people:
-                    result = "%s, plus, I think they're online right now.!" % (result)
+                    result = "%s, plus, I think they're online right now.!" % (
+                        result)
 
                 if len(result) > 440:
                     whereToSplit = splitAt(result, 440)
@@ -108,24 +140,34 @@ class Reaction(lampstand.reactions.base.Reaction):
         print "[WHOWAS] saw a nick change"
         new_nick = ">%s" % new_nick
         cursor = self.dbconnection.cursor()
-        cursor.execute('replace into lastseen (username, last_seen, last_words) values (%s, %s, %s)', (old_nick, time.time(), new_nick))
+        cursor.execute(
+            'replace into lastseen (username, last_seen, last_words) values (%s, %s, %s)',
+            (old_nick,
+             time.time(),
+             new_nick))
 
     def lastseen(self, searchingfor, after_timestamp=0, depth=0):
 
         print "[WHOWAS] Looking for %s after %s" % (searchingfor, after_timestamp)
 
         if depth > 4:
-            return ' ... and at that point I gave up';
+            return ' ... and at that point I gave up'
 
         cursor = self.dbconnection.cursor()
-        cursor.execute('SELECT username, last_seen, last_words, channel FROM lastseen where username LIKE %s and last_seen > %s order by last_seen desc', (searchingfor, int(after_timestamp)))
+        cursor.execute(
+            'SELECT username, last_seen, last_words, channel FROM lastseen where username LIKE %s and last_seen > %s order by last_seen desc',
+            (searchingfor,
+             int(after_timestamp)))
 
         result = cursor.fetchone()
-        if result == None:
+        if result is None:
             message = "I haven't seen %s say anything" % searchingfor
             print "[WHOWAS] Looking for a quit for %s after %s" % (searchingfor, after_timestamp)
-            return "%s%s" % (message, self.lastquit(after_timestamp, searchingfor))
-        elif (result[2][0] == ">"): 
+            return "%s%s" % (message,
+                             self.lastquit(
+                                 after_timestamp,
+                                 searchingfor))
+        elif (result[2][0] == ">"):
             # Last action is a rename
 
             deltadesc = "ago"
@@ -145,12 +187,14 @@ class Reaction(lampstand.reactions.base.Reaction):
             if ((now - result[1]) > 86400):
                 timefmt = "%a %d/%b/%Y %H:%M"
             else:
-                timefmt = "%H:%M";			
+                timefmt = "%H:%M"
             #timefmt = "%a %d/%b/%Y %H:%M"
 
-            timechanged = datetime.datetime.fromtimestamp(result[1]).strftime(timefmt)
+            timechanged = datetime.datetime.fromtimestamp(
+                result[1]).strftime(timefmt)
 
-            message = "I last saw %s %s %s (%s) relabeling themselves as \"%s\". %s" % (result[0], deltastring, deltadesc, timechanged, result[2][1:], self.lastseen(result[2][1:], int(result[1]), depth + 1))
+            message = "I last saw %s %s %s (%s) relabeling themselves as \"%s\". %s" % (
+                result[0], deltastring, deltadesc, timechanged, result[2][1:], self.lastseen(result[2][1:], int(result[1]), depth + 1))
 
         else:
             # Last action is a phrase
@@ -169,45 +213,53 @@ class Reaction(lampstand.reactions.base.Reaction):
             if ((now - result[1]) > 86400):
                 timefmt = "%a %d/%b/%Y %H:%M"
             else:
-                timefmt = "%H:%M";			
+                timefmt = "%H:%M"
 
-            timechanged = datetime.datetime.fromtimestamp(result[1]).strftime(timefmt)
+            timechanged = datetime.datetime.fromtimestamp(
+                result[1]).strftime(timefmt)
 
             if (result[3] != self.channel):
-                message = "I last saw %s %s %s (%s) on %s" % (result[0], deltastring, deltadesc, timechanged, result[3])
+                message = "I last saw %s %s %s (%s) on %s" % (
+                    result[0], deltastring, deltadesc, timechanged, result[3])
             else:
-                message = "I last saw %s %s %s (%s) saying \"%s\"" % (result[0], deltastring, deltadesc, timechanged, result[2])
+                message = "I last saw %s %s %s (%s) saying \"%s\"" % (
+                    result[0], deltastring, deltadesc, timechanged, result[2])
 
         return "%s%s" % (message, self.lastquit(result[1], searchingfor))
 
     def lastquit(self, lasttime, searchingfor):
         cursor = self.dbconnection.cursor()
-        cursor.execute('SELECT last_quit, reason from lastquit where username LIKE %s and last_quit > %s', (searchingfor, lasttime))
+        cursor.execute(
+            'SELECT last_quit, reason from lastquit where username LIKE %s and last_quit > %s',
+            (searchingfor,
+             lasttime))
 
-        quitresult = cursor.fetchone();
-        if quitresult == None:
+        quitresult = cursor.fetchone()
+        if quitresult is None:
             print "[WHOWAS] No quit for %s after %s" % (searchingfor, lasttime)
 
-            return "";
+            return ""
         else:
 
             quittime = time.localtime(quitresult[0])
-            timedelta = time.mktime(quittime) - lasttime;
+            timedelta = time.mktime(quittime) - lasttime
 
             print "[WHOWAS] Quit result: %s @ %s" % (quitresult, quittime)
 
             if(timedelta < 60):
                 deltastring = "seconds"
             else:
-                deltastring = tools.niceTimeDelta(timedelta);
+                deltastring = tools.niceTimeDelta(timedelta)
 
             if (timedelta > 86400):
                 timefmt = "%a %d/%b/%Y %H:%M"
             else:
-                timefmt = "%H:%M";			
+                timefmt = "%H:%M"
 
-            quittime = datetime.datetime.fromtimestamp(quitresult[0]).strftime(timefmt)
+            quittime = datetime.datetime.fromtimestamp(
+                quitresult[0]).strftime(timefmt)
 
-            return ", they quit %s later (%s) with the message '%s'" % (deltastring, quittime, quitresult[1])
+            return ", they quit %s later (%s) with the message '%s'" % (
+                deltastring, quittime, quitresult[1])
 
-        return message;
+        return message

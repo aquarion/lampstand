@@ -2,7 +2,10 @@ import lampstand.reactions.base
 
 
 from lampstand.tools import splitAt
-import re, time, random, sys
+import re
+import time
+import random
+import sys
 
 
 def __init__():
@@ -27,11 +30,13 @@ class Reaction(lampstand.reactions.base.Reaction):
                     words = words + 1
                 index = index - 1
 
-            index = index + 2;
+            index = index + 2
 
             cutout = message[index:]
 
             if len(cutout) > 0:
-                connection.message(channel, "%s: I think that cut out at \"%s\"" % (user, cutout));
+                connection.message(
+                    channel, "%s: I think that cut out at \"%s\"" %
+                    (user, cutout))
 
             return True

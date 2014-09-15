@@ -1,5 +1,8 @@
 from twisted.internet import reactor
-import re, time, random, sys
+import re
+import time
+import random
+import sys
 import lampstand.reactions.base
 
 
@@ -46,16 +49,20 @@ class Reaction(lampstand.reactions.base.Reaction):
             # connection.me("#%s" % sys.argv[1], matches[0])
         elif matchindex == 2:
             print "[Quit] %s" % (matches[0])
-            connection.quit("I don't believe you, I don't really need to, I won't let Victoria fall")
+            connection.quit(
+                "I don't believe you, I don't really need to, I won't let Victoria fall")
         elif matchindex == 3:  # status
             connection.message(user, 'State of the lampstand is awesome')
             connection.message(user, 'Channel: %s' % connection.channelModules)
             connection.message(user, 'Private: %s' % connection.privateModules)
-            connection.message(user, 'Nick Change: %s' % connection.nickChangeModules)
+            connection.message(
+                user,
+                'Nick Change: %s' %
+                connection.nickChangeModules)
             connection.message(user, 'Leave: %s' % connection.leaveModules)
             connection.message(user, 'Join: %s' % connection.joinModules)
         elif matchindex == 4:  # reload
-            result = connection.installModule(matches[0]);
+            result = connection.installModule(matches[0])
             connection.message(user, result)
         elif matchindex == 5:  # kick
             print matches
@@ -83,11 +90,11 @@ class Reaction(lampstand.reactions.base.Reaction):
                 connection.installModule(thingy[0])
             connection.message(user, "%s" % connection.config)
         elif matchindex == 10:  # sysreload
-            module = matches[0];
-            if (sys.modules.has_key(module)):
-                reload(sys.modules[module]);
+            module = matches[0]
+            if (module in sys.modules):
+                reload(sys.modules[module])
                 rtn = 'Reloaded %s' % module
-                connection.message(user, rtn);
+                connection.message(user, rtn)
             else:
                 connection.message(user, "%s Not found" % matches[0])
         elif matchindex == 11:  # nick

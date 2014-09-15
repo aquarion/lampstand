@@ -1,4 +1,7 @@
-import re, time, urllib, sys
+import re
+import time
+import urllib
+import sys
 import random
 import lampstand.reactions.base
 from lampstand.tools import splitAt
@@ -17,21 +20,28 @@ class Reaction(lampstand.reactions.base.Reaction):
     uses = []
 
     def __init__(self, connection):
-        self.channelMatch = re.compile('%s. Open (the|a) box' % connection.nickname, re.IGNORECASE)
+        self.channelMatch = re.compile(
+            '%s. Open (the|a) box' %
+            connection.nickname,
+            re.IGNORECASE)
 
     def channelAction(self, connection, user, channel, message):
 
         if self.overUsed():
-            connection.message(channel, "I'm out of boxes, new delivery shortly.")
+            connection.message(
+                channel,
+                "I'm out of boxes, new delivery shortly.")
             return
 
         print "[Box] called "
 
-        box = simplejson.load(urllib.urlopen("http://warehousebasement.com/api.php"))
+        box = simplejson.load(
+            urllib.urlopen("http://warehousebasement.com/api.php"))
 
         print box
 
-        result = 'In a box on level %s you find %s' % (box['level'], box['description'])
+        result = 'In a box on level %s you find %s' % (
+            box['level'], box['description'])
 
         connection.message(channel, "%s" % result)
 

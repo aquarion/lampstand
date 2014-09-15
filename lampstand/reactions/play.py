@@ -1,4 +1,10 @@
-import re, time, random, sys, urllib, os, datetime
+import re
+import time
+import random
+import sys
+import urllib
+import os
+import datetime
 import lampstand.reactions.base
 
 from xml.dom.minidom import parse, parseString
@@ -18,16 +24,36 @@ class Reaction(lampstand.reactions.base.Reaction):
     def __init__(self, connection):
 
         self.channelMatch = (
-            re.compile('%s: wh(at|ich) (game |)should I play\?' % connection.nickname, re.IGNORECASE),
-            re.compile('%s: my steam profile is (\S*)' % connection.nickname, re.IGNORECASE),
-            re.compile('%s: wh(at|ich) steam game should I play\?' % connection.nickname, re.IGNORECASE),
-            re.compile('%s: wh(at|ich) of my recent steam games should I play\?' % connection.nickname, re.IGNORECASE))
+            re.compile(
+                '%s: wh(at|ich) (game |)should I play\?' %
+                connection.nickname,
+                re.IGNORECASE),
+            re.compile(
+                '%s: my steam profile is (\S*)' %
+                connection.nickname,
+                re.IGNORECASE),
+            re.compile(
+                '%s: wh(at|ich) steam game should I play\?' %
+                connection.nickname,
+                re.IGNORECASE),
+            re.compile(
+                '%s: wh(at|ich) of my recent steam games should I play\?' %
+                connection.nickname,
+                re.IGNORECASE))
 
         self.privateMatch = (
-            re.compile('wh(at|ich) (game | )should I play\?', re.IGNORECASE),
-            re.compile('my steam profile is (\S*)', re.IGNORECASE),
-            re.compile('wh(at|ich) steam game should I play\?', re.IGNORECASE),
-            re.compile('wh(at|ich) of my recent steam games should I play\?', re.IGNORECASE))
+            re.compile(
+                'wh(at|ich) (game | )should I play\?',
+                re.IGNORECASE),
+            re.compile(
+                'my steam profile is (\S*)',
+                re.IGNORECASE),
+            re.compile(
+                'wh(at|ich) steam game should I play\?',
+                re.IGNORECASE),
+            re.compile(
+                'wh(at|ich) of my recent steam games should I play\?',
+                re.IGNORECASE))
 
         self.dbconnection = connection.dbconnection
 
@@ -42,7 +68,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         return output
 
-    def channelAction(self, connection, user, channel, message, matchIndex=False):
+    def channelAction(
+            self,
+            connection,
+            user,
+            channel,
+            message,
+            matchIndex=False):
         print "[PLAY] Reacting..."
         if self.overUsed(self.uses):
             connection.message(channel, self.overuseReactions[matchIndex])
@@ -65,7 +97,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         connection.message(channel, output)
 
-    def privateAction(self, connection, user, channel, message, matchIndex=False):
+    def privateAction(
+            self,
+            connection,
+            user,
+            channel,
+            message,
+            matchIndex=False):
 
         matches = self.privateMatch[matchIndex].findall(message)
         output = self.respond(user, matchIndex, matches)
@@ -76,10 +114,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         print "[PLAY] Looking up games for %s" % username
         cursor = self.dbconnection.cursor()
-        cursor.execute('SELECT steamname from gameaccounts where username = %s', username)
+        cursor.execute(
+            'SELECT steamname from gameaccounts where username = %s',
+            username)
         result = cursor.fetchone()
 
-        if result == None:
+        if result is None:
             return self.helptext()
 
         try:
@@ -114,10 +154,14 @@ class Reaction(lampstand.reactions.base.Reaction):
         accountName = nameElement.childNodes[0].data
 
         cursor = self.dbconnection.cursor()
-        cursor.execute('REPLACE into gameaccounts (username, steamname) values (%s, %s)', (username, steamname))
+        cursor.execute(
+            'REPLACE into gameaccounts (username, steamname) values (%s, %s)',
+            (username,
+             steamname))
         self.dbconnection.commit()
 
-        return "Okay, remembering that %s's steam name is %s, aka '%s'" % (username, steamname, accountName)
+        return "Okay, remembering that %s's steam name is %s, aka '%s'" % (
+            username, steamname, accountName)
 
         return "Stub %s" % result
 
@@ -150,23 +194,25 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         try:
             i = int(username)
-        except ValueError, TypeError:
+        except ValueError as TypeError:
             profiletype = 'id'
         else:
             profiletype = 'profiles'
 
-        steamurl = "http://steamcommunity.com/%s/%s/games?tab=all&xml=1" % (profiletype, username)
+        steamurl = "http://steamcommunity.com/%s/%s/games?tab=all&xml=1" % (
+            profiletype, username)
 
         print steamurl
 
-        cachename = "/tmp/steam.lampstand.%s.xml" % username;
+        cachename = "/tmp/steam.lampstand.%s.xml" % username
 
         (fileopen, fileheaders) = urllib.urlretrieve(steamurl, cachename)
 
         print "Examining %s" % cachename
 
         stat = os.stat(fileopen)
-        delta = datetime.datetime.now() - datetime.datetime.fromtimestamp(stat.st_mtime)
+        delta = datetime.datetime.now() - \
+            datetime.datetime.fromtimestamp(stat.st_mtime)
         if delta.seconds > 60 * 60 * 12:
             print " ... Redownloading, cache expired %s" % (delta.seconds / 60 * 60)
             os.remove(fileopen)
@@ -181,6 +227,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         steamerror = steam.getElementsByTagName('error')
         if len(steamerror) > 0:
-            return (32, "Sorry, Steam said: %s" % steamerror[0].childNodes[0].data)
+            return (
+                32,
+                "Sorry, Steam said: %s" %
+                steamerror[0].childNodes[0].data)
 
         return steam

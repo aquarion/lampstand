@@ -1,4 +1,8 @@
-import re, time, random, sys, math
+import re
+import time
+import random
+import sys
+import math
 import lampstand.reactions.base
 from lampstand import tools
 import datetime
@@ -17,7 +21,10 @@ class Reaction(lampstand.reactions.base.Reaction):
     uses = []
 
     def __init__(self, connection):
-        self.channelMatch = re.compile("^%s. how many words" % connection.nickname, re.IGNORECASE)
+        self.channelMatch = re.compile(
+            "^%s. how many words" %
+            connection.nickname,
+            re.IGNORECASE)
         self.privateMatch = re.compile("^how many words", re.IGNORECASE)
 
     def channelAction(self, connection, user, channel, message):
@@ -31,24 +38,33 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         now = time.time()
 
-        then = time.mktime(datetime.datetime(datetime.datetime.now().year, 11, 1, 00, 00).timetuple())
+        then = time.mktime(
+            datetime.datetime(
+                datetime.datetime.now().year,
+                11,
+                1,
+                00,
+                00).timetuple())
 
-        delta = now - then;
+        delta = now - then
 
-        target = 50000.0;
-        month = 2592000.0;
+        target = 50000.0
+        month = 2592000.0
 
-        end = then + month;
+        end = then + month
 
         if now > then + month:
             return "You should have finished by now"
 
         if delta < 0:
             delta = math.fabs(delta)
-            return "You should start Nanowrimo in %s" % tools.niceTimeDelta(delta, "decimal")
+            return "You should start Nanowrimo in %s" % tools.niceTimeDelta(
+                delta,
+                "decimal")
 
-        persec = target / month;
+        persec = target / month
 
-        current = delta * persec;
+        current = delta * persec
 
-        return "You should be at %d words by now, %s left" % (current, tools.niceTimeDelta(month - delta));	
+        return "You should be at %d words by now, %s left" % (
+            current, tools.niceTimeDelta(month - delta))

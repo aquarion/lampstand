@@ -1,4 +1,6 @@
-import re, random, sys
+import re
+import random
+import sys
 from datetime import datetime
 import dateutil.parser
 import requests
@@ -17,23 +19,33 @@ class Reaction(lampstand.reactions.base.Reaction):
     __name = 'Events'
 
     cooldown_number = 3
-    cooldown_time = 360  # So if 3 requests are made in 360 seconds, it will trigger overuse.
+    # So if 3 requests are made in 360 seconds, it will trigger overuse.
+    cooldown_time = 360
     uses = []
 
     def __init__(self, connection):
 
         self.channelMatch = (
-            re.compile('^%s. when (is|was) (.*?)\?' % connection.nickname, re.IGNORECASE),
-            re.compile('^%s. how long (until|since) (.*?)\?' % connection.nickname, re.IGNORECASE),
-            re.compile('^%s. what\'s next\?$' % connection.nickname, re.IGNORECASE)
-        )
+            re.compile(
+                '^%s. when (is|was) (.*?)\?' %
+                connection.nickname,
+                re.IGNORECASE),
+            re.compile(
+                '^%s. how long (until|since) (.*?)\?' %
+                connection.nickname,
+                re.IGNORECASE),
+            re.compile(
+                '^%s. what\'s next\?$' %
+                connection.nickname,
+                re.IGNORECASE))
 
         self.privateMatch = (
             re.compile('^when (is|was) (.*?)\?', re.IGNORECASE),
             re.compile('^how long (until|since) (.*?)\?', re.IGNORECASE),
             re.compile('^what\'s next\?$', re.IGNORECASE)
         )
-        # self.privateMatch = re.compile('^%s. ???' % connection.nickname, re.IGNORECASE))
+        # self.privateMatch = re.compile('^%s. ???' % connection.nickname,
+        # re.IGNORECASE))
 
         self.dbconnection = connection.dbconnection
 
@@ -100,15 +112,18 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def howlong(self, desc, output, direction):
 
-        request = requests.get('http://api.larp.me/events?direction=%s&q=%s&count=1' % (direction, desc))
-        response = request.json();
+        request = requests.get(
+            'http://api.larp.me/events?direction=%s&q=%s&count=1' %
+            (direction, desc))
+        response = request.json()
 
         if not len(response['events']):
             try:
                 result = dateutil.parser.parse(desc)
                 event = (result, desc, "The date", None, None)
             except ValueError:
-                return "I can't see any events tagged '%s' in the %s, and it doesn't look like a date. Full list of events at http://larp.me/events" % (desc, direction)
+                return "I can't see any events tagged '%s' in the %s, and it doesn't look like a date. Full list of events at http://larp.me/events" % (
+                    desc, direction)
 
         event = response['events'][response['events'].keys()[0]]
 
@@ -128,11 +143,13 @@ class Reaction(lampstand.reactions.base.Reaction):
             else:
                 tiswas = "is"
 
-            timeformat = "%A %d %B %Y at %H:%M";
+            timeformat = "%A %d %B %Y at %H:%M"
             if (event_end):
-                message = "%s: %s %s from %s to %s" % (event_class, event_desc, tiswas, event_start.strftime(timeformat), event_end.strftime(timeformat))
+                message = "%s: %s %s from %s to %s" % (event_class, event_desc, tiswas, event_start.strftime(
+                    timeformat), event_end.strftime(timeformat))
             else:
-                message = "%s: %s %s on %s" % (event_class, event_desc, tiswas, event_start.strftime(timeformat))
+                message = "%s: %s %s on %s" % (
+                    event_class, event_desc, tiswas, event_start.strftime(timeformat))
 
             if (event_url):
                 message += ", More info at %s" % event_url
@@ -147,7 +164,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         # Deltas
 
-        now = datetime.now();
+        now = datetime.now()
 
         if direction == "past" and event_end:
             deltapoint = event_end
@@ -155,9 +172,9 @@ class Reaction(lampstand.reactions.base.Reaction):
             deltapoint = event_start
 
         if direction == "past":
-            delta = now - deltapoint;
+            delta = now - deltapoint
         else:
-            delta = deltapoint - now;
+            delta = deltapoint - now
 
         deltastring = tools.nicedelta(delta)
 

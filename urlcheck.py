@@ -2,7 +2,10 @@
 import ConfigParser
 import requests
 import MySQLdb
-import os, sys, re, socket
+import os
+import sys
+import re
+import socket
 
 
 class urlCheck():
@@ -19,12 +22,17 @@ class urlCheck():
         self.config = config
 
     def connectToDB(self):
-        self.dbconnection = MySQLdb.connect(user=self.config.get("database", "user"), passwd=self.config.get("database", "password"), db=self.config.get("database", "database"))
+        self.dbconnection = MySQLdb.connect(
+            user=self.config.get(
+                "database", "user"), passwd=self.config.get(
+                "database", "password"), db=self.config.get(
+                "database", "database"))
 
     def grabUrls(self, text):
         """Given a text string, returns all the urls we can find in it."""
 
-        urls = '(?: %s)' % '|'.join("""http https telnet gopher file wais ftp""".split())
+        urls = '(?: %s)' % '|'.join(
+            """http https telnet gopher file wais ftp""".split())
         ltrs = r'\w'
         gunk = r'/#~:.?+=&%@!\-'
         punc = r'.:?\-'

@@ -3,7 +3,10 @@ import lampstand.reactions.base
 
 
 from lampstand.tools import splitAt
-import re, time, random, sys
+import re
+import time
+import random
+import sys
 
 
 def __init__():
@@ -15,12 +18,14 @@ class Reaction(lampstand.reactions.base.Reaction):
     __name = 'PackageName'
 
     cooldown_number = 3
-    cooldown_time = 360  # So if 3 requests are made in 360 seconds, it will trigger overuse.
+    # So if 3 requests are made in 360 seconds, it will trigger overuse.
+    cooldown_time = 360
     uses = []
 
     def __init__(self, connection):
             # self.channelMatch = re.compile('^%s. ???' % connection.nickname, re.IGNORECASE))
-            # self.privateMatch = re.compile('^%s. ???' % connection.nickname, re.IGNORECASE))
+            # self.privateMatch = re.compile('^%s. ???' % connection.nickname,
+            # re.IGNORECASE))
 
     def channelAction(self, connection, user, channel, message, index):
 

@@ -1,5 +1,5 @@
-# This was adapted from various StackOverflow scripts 
-import ColorDB
+# This was adapted from various StackOverflow scripts
+from . import ColorDB
 
 import struct
 import Image

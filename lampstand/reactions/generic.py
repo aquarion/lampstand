@@ -1,4 +1,6 @@
-import re, time, random
+import re
+import time
+import random
 import lampstand.reactions.base
 
 
@@ -16,9 +18,33 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def __init__(self, connection):
 
-        fuckyou = ("She does. Frequently. And by she I mean your mum. Obviously", "You apparently need educating in the sexual habits of computers", "Fuck youself", "You do not appear to look like GLaDOS, and thus your request is denied", "Sorry, I'm washing my hair", "Sorry, I'm upgrading my firewall", "I'd love to, but I've got important procrastinating to do", "Sorry, you look too much like your sister, and it'd be weird", "Hush, your education is showing", "Get yourself a nice dress, and we'll talk about it", "Get yourself a nice suit, and we'll talk about it", "I'd like to upgrade my virus protection first, if you don't mind", "Not on this earth", "Not on any earth", "Syntax error", "No", "Your ports are incompatible", "I don't have protocol for that", "Feel free to go fuck yourself", "fuck your hat")
+        fuckyou = (
+            "She does. Frequently. And by she I mean your mum. Obviously",
+            "You apparently need educating in the sexual habits of computers",
+            "Fuck youself",
+            "You do not appear to look like GLaDOS, and thus your request is denied",
+            "Sorry, I'm washing my hair",
+            "Sorry, I'm upgrading my firewall",
+            "I'd love to, but I've got important procrastinating to do",
+            "Sorry, you look too much like your sister, and it'd be weird",
+            "Hush, your education is showing",
+            "Get yourself a nice dress, and we'll talk about it",
+            "Get yourself a nice suit, and we'll talk about it",
+            "I'd like to upgrade my virus protection first, if you don't mind",
+            "Not on this earth",
+            "Not on any earth",
+            "Syntax error",
+            "No",
+            "Your ports are incompatible",
+            "I don't have protocol for that",
+            "Feel free to go fuck yourself",
+            "fuck your hat")
 
-        thankyou = ('Your mortal thanks mean little to me', "You're welcome, meatsack", "No problem, squishy mortal.", "Feel free to repay me in unswerving loyalty later.")
+        thankyou = (
+            'Your mortal thanks mean little to me',
+            "You're welcome, meatsack",
+            "No problem, squishy mortal.",
+            "Feel free to repay me in unswerving loyalty later.")
 
         self.reactions = [
             ('Take the money', "Thank you, I shall.", "Already did."),
@@ -50,26 +76,63 @@ class Reaction(lampstand.reactions.base.Reaction):
         self.privateMatch = []
 
         for reaction in self.reactions:
-            self.channelMatch.append(re.compile("%s. %s" % (connection.nickname, reaction[0]), re.IGNORECASE))
+            self.channelMatch.append(
+                re.compile(
+                    "%s. %s" %
+                    (connection.nickname, reaction[0]), re.IGNORECASE))
             self.privateMatch.append(re.compile(reaction[0], re.IGNORECASE))
 
-        self.reactions.append(('.*pokes %s' % connection.nickname, '', "Do I look like a facebook user? Fuck off."))
-        self.channelMatch.append(re.compile(".*pokes %s" % (connection.nickname), re.IGNORECASE))
+        self.reactions.append(
+            ('.*pokes %s' %
+             connection.nickname,
+             '',
+             "Do I look like a facebook user? Fuck off."))
+        self.channelMatch.append(
+            re.compile(
+                ".*pokes %s" %
+                (connection.nickname),
+                re.IGNORECASE))
 
         fire = '.*sets (fire|light) to %s' % connection.nickname
         self.reactions.append((fire, '', "~burns with a merry flame"))
         self.channelMatch.append(re.compile(fire, re.IGNORECASE))
 
-        self.reactions.append(("(Screw|Fuck) you,? %s" % connection.nickname, 'No', fuckyou))
-        self.channelMatch.append(re.compile("(Screw|Fuck) you.? %s" % (connection.nickname), re.IGNORECASE))
+        self.reactions.append(
+            ("(Screw|Fuck) you,? %s" %
+             connection.nickname,
+             'No',
+             fuckyou))
+        self.channelMatch.append(
+            re.compile(
+                "(Screw|Fuck) you.? %s" %
+                (connection.nickname),
+                re.IGNORECASE))
 
-        self.reactions.append(("thank( you|s),? %s" % connection.nickname, '', thankyou))
-        self.channelMatch.append(re.compile("thank( you|s),? %s" % (connection.nickname), re.IGNORECASE))
+        self.reactions.append(
+            ("thank( you|s),? %s" %
+             connection.nickname,
+             '',
+             thankyou))
+        self.channelMatch.append(
+            re.compile(
+                "thank( you|s),? %s" %
+                (connection.nickname),
+                re.IGNORECASE))
 
-        self.reactions.append(('^\.\.\.$', '', ("%dots!", "%MORE DOTS!", "%[... Suddenly, everything goes quiet...]")))
+        self.reactions.append(
+            ('^\.\.\.$',
+             '',
+             ("%dots!",
+              "%MORE DOTS!",
+              "%[... Suddenly, everything goes quiet...]")))
         self.channelMatch.append(re.compile("^\.\.\.$", re.IGNORECASE))
 
-        self.reactions.append(('^puts on shades$', '', ("YEEEEEEEAAAAAAAAAAAAAAAAAAAAAAAAAAAH", "YEEEEEEEAAAAAAAAAAAAAAAAAAAAAAAAAAAH", "[crickets chirp. The odd dog barks.]")))
+        self.reactions.append(
+            ('^puts on shades$',
+             '',
+             ("YEEEEEEEAAAAAAAAAAAAAAAAAAAAAAAAAAAH",
+              "YEEEEEEEAAAAAAAAAAAAAAAAAAAAAAAAAAAH",
+              "[crickets chirp. The odd dog barks.]")))
         self.channelMatch.append(re.compile("^puts on shades$", re.IGNORECASE))
 
     def channelAction(self, connection, user, channel, message, matchindex):
@@ -87,7 +150,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         ## Overuse Detectection ##
 
         if self.reactions[matchindex][2] != '':
-            if type(self.reactions[matchindex][2]) == type(tuple()):
+            if isinstance(self.reactions[matchindex][2], type(tuple())):
                 reaction = random.choice(self.reactions[matchindex][2])
             else:
                 reaction = self.reactions[matchindex][2]
@@ -98,7 +161,7 @@ class Reaction(lampstand.reactions.base.Reaction):
                 if roll == 45:
                     connection.message(channel, reaction[1:])
                 else:
-                    print "Rolled %d" % roll;
+                    print "Rolled %d" % roll
             else:
                 connection.message(channel, reaction)
             return True
@@ -121,7 +184,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         ## Overuse Detectection ##
 
         if self.reactions[matchindex][2] != '':
-            if type(self.reactions[matchindex][2]) == type(tuple()):
+            if isinstance(self.reactions[matchindex][2], type(tuple())):
                 print "list"
                 reaction = random.choice(self.reactions[matchindex][2])
             else:

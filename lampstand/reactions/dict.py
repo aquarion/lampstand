@@ -1,7 +1,9 @@
 import dictclient
 from lampstand.tools import splitAt
 import lampstand.reactions.base
-import re, time, socket
+import re
+import time
+import socket
 import dns.resolver
 
 
@@ -17,7 +19,10 @@ class Reaction(lampstand.reactions.base.Reaction):
     cooldown_time = 420
 
     def __init__(self, connection):
-        self.channelMatch = re.compile('%s. look up (\w*)\s*$' % connection.nickname, re.IGNORECASE)
+        self.channelMatch = re.compile(
+            '%s. look up (\w*)\s*$' %
+            connection.nickname,
+            re.IGNORECASE)
         self.privateMatch = re.compile('look up (\w*)\s*$', re.IGNORECASE)
 
     def getDefinition(self, query):
@@ -32,10 +37,9 @@ class Reaction(lampstand.reactions.base.Reaction):
             'hal': 'grrrrr.',
             'inconceivable': 'adj. Not what you think it means.',
             'tenant': 'n. An opinion, doctrine, or principle held as being true by a person or especially by an organization',
-            'tenet': 'n. One that pays rent to use or occupy land, a building, or other property owned by another.' 
-        }
+            'tenet': 'n. One that pays rent to use or occupy land, a building, or other property owned by another.'}
 
-        if specialDict.has_key(query.lower()):
+        if query.lower() in specialDict:
             return specialDict[query.lower()]
 
         src = False
@@ -49,7 +53,9 @@ class Reaction(lampstand.reactions.base.Reaction):
             src = "Dictionary"
         except socket.error:
             print "[Define] Argh. Dictionary server's offline"
-            connection.message(channel, "Sorry, but my dictionary server's not working.")
+            connection.message(
+                channel,
+                "Sorry, but my dictionary server's not working.")
             dfn = None
 
         if not dfn:
@@ -85,19 +91,25 @@ class Reaction(lampstand.reactions.base.Reaction):
         return string
 
     def channelAction(self, connection, user, channel, message):
-        matches = self.channelMatch.findall(message);
+        matches = self.channelMatch.findall(message)
 
         print "[Define] %s" % matches
 
         if self.overUsed():
-            connection.message(user, "The dictionary is on fire. Leave it alone. (Overuse triggered)")
+            connection.message(
+                user,
+                "The dictionary is on fire. Leave it alone. (Overuse triggered)")
             return
 
         self.updateOveruse()
         try:
             result, src = self.getDefinition(matches[0])
         except:
-            connection.message(channel, "%s: There is no such word as '%s' in my dictionary. In fact, everything between 'herring' and 'marmalade' appears to be completely missing." % (user, matches[0]))
+            connection.message(
+                channel,
+                "%s: There is no such word as '%s' in my dictionary. In fact, everything between 'herring' and 'marmalade' appears to be completely missing." %
+                (user,
+                 matches[0]))
             return True
 
         print "[Define] %s" % result
@@ -109,14 +121,18 @@ class Reaction(lampstand.reactions.base.Reaction):
         return True
 
     def privateAction(self, connection, user, channel, message):
-        matches = self.privateMatch.findall(message);
+        matches = self.privateMatch.findall(message)
 
         print "[Define] %s" % matches
         try:
             result, src = self.getDefinition(matches[0])
 
-        except:	
-            connection.message(user, "%s: There is no such word as '%s' in my dictionary. In fact, everything between 'herring' and 'marmalade' appears to be completely missing." % (user, matches[0]))
+        except:
+            connection.message(
+                user,
+                "%s: There is no such word as '%s' in my dictionary. In fact, everything between 'herring' and 'marmalade' appears to be completely missing." %
+                (user,
+                 matches[0]))
             return True
 
         print "[Define] %s" % result

@@ -2,7 +2,9 @@ from lampstand.tools import splitAt
 import lampstand.reactions.base
 from lampstand import tools
 import os.path
-import re, time, datetime
+import re
+import time
+import datetime
 
 
 def __init__():
@@ -22,14 +24,30 @@ class Reaction(lampstand.reactions.base.Reaction):
     schedule_count = 6
 
     def __init__(self, connection):
-        self.channelMatch = (re.compile('%s: quote (.*?) (.*)\s*$' % connection.nickname, re.IGNORECASE),
-                             re.compile('%s: quote (.*?)$' % connection.nickname, re.IGNORECASE))
+        self.channelMatch = (
+            re.compile(
+                '%s: quote (.*?) (.*)\s*$' %
+                connection.nickname,
+                re.IGNORECASE),
+            re.compile(
+                '%s: quote (.*?)$' %
+                connection.nickname,
+                re.IGNORECASE))
 
-        self.privateMatch = (re.compile('check quotes', re.IGNORECASE), re.compile('set last to (.*)$', re.IGNORECASE))
+        self.privateMatch = (
+            re.compile(
+                'check quotes', re.IGNORECASE), re.compile(
+                'set last to (.*)$', re.IGNORECASE))
 
         self.dbconnection = connection.dbconnection
 
-    def channelAction(self, connection, user, channel, message, matchIndex=False):
+    def channelAction(
+            self,
+            connection,
+            user,
+            channel,
+            message,
+            matchIndex=False):
 
         matches = self.channelMatch[matchIndex].findall(message)[0]
 
@@ -37,37 +55,55 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         for module in connection.channelModules:
             if module.__name == "Memory":
-                memory = module;
+                memory = module
 
         if matchIndex == 1:
-            result = memory.search(channel, matches);
+            result = memory.search(channel, matches)
             quotedUser = matches
-        elif matchIndex == 0:	
-            result = memory.search(channel, matches[0], matches[1]);
+        elif matchIndex == 0:
+            result = memory.search(channel, matches[0], matches[1])
             quotedUser = matches[0]
 
         if quotedUser.lower() == user.lower():
-            connection.message(channel, "%s: Don't do that, you'll go blind" % user);
+            connection.message(
+                channel,
+                "%s: Don't do that, you'll go blind" %
+                user)
             return True
 
         if len(result) == 0:
-            connection.message(channel, "%s: Sorry, I've no idea what you're talking about" % user)
+            connection.message(
+                channel,
+                "%s: Sorry, I've no idea what you're talking about" %
+                user)
             return True
 
         else:
             line = result[-1]
-            connection.message(channel, "%s: Okay, quoting \"%s: %s\"" % (user, line['user'], line['message']))
-            # Full Texts  	id 	body 	notes 	rating 	votes 	submitted 	approved 	flagged 	score
+            connection.message(
+                channel, "%s: Okay, quoting \"%s: %s\"" %
+                (user, line['user'], line['message']))
+            # Full Texts      id      body    notes   rating  votes   submitted
+            # approved        flagged         score
             quote = "%s: %s" % (line['user'], line['message'])
             sub = "Submitted by %s" % user
 
             cursor = self.dbconnection.cursor()
-            cursor.execute('insert into chirpy.mf_quotes values (0, %s, %s, 0, 0, NOW(), 0, 0, 0)', (quote, sub))
+            cursor.execute(
+                'insert into chirpy.mf_quotes values (0, %s, %s, 0, 0, NOW(), 0, 0, 0)',
+                (quote,
+                 sub))
             self.dbconnection.commit()
 
         return True
 
-    def privateAction(self, connection, user, channel, message, matchIndex=False):
+    def privateAction(
+            self,
+            connection,
+            user,
+            channel,
+            message,
+            matchIndex=False):
 
         if matchIndex == 0:
             msg = self.checkQuotes(connection)
@@ -115,7 +151,8 @@ class Reaction(lampstand.reactions.base.Reaction):
             if countquotes == 1:
                 message = "One new quote has been approved at %s" % url
             else:
-                message = "%d new quotes have been approved at %s" % (countquotes, url)
+                message = "%d new quotes have been approved at %s" % (
+                    countquotes, url)
 
             connection.message(channel, message)
             quote = quotes[0]
