@@ -3,50 +3,52 @@ import lampstand.reactions.base
 from lampstand import tools
 import datetime
 
-def __init__ ():
-	pass
+
+def __init__():
+    pass
+
 
 class Reaction(lampstand.reactions.base.Reaction):
-	
-	__name = 'Nano'
-	
-	cooldown_number = 2
-	cooldown_time   = 360
-	uses = []
 
-	def __init__(self, connection):
-		self.channelMatch = re.compile("^%s. how many words" % connection.nickname, re.IGNORECASE)
-		self.privateMatch = re.compile("^how many words", re.IGNORECASE)
+    __name = 'Nano'
 
-	def channelAction(self, connection, user, channel, message):
-		connection.message(channel, "%s: %s" % (user, self.nano() ))
-	
-	def privateAction(self, connection, user, channel, message):
-		connection.message(user, self.nano() )
-	
-	def nano(self):
-		print "[Nano] called"
-	
-		now = time.time()
+    cooldown_number = 2
+    cooldown_time = 360
+    uses = []
 
-		then = time.mktime(datetime.datetime(datetime.datetime.now().year, 11, 1, 00, 00).timetuple() )
+    def __init__(self, connection):
+        self.channelMatch = re.compile("^%s. how many words" % connection.nickname, re.IGNORECASE)
+        self.privateMatch = re.compile("^how many words", re.IGNORECASE)
 
-		delta = now - then;
+    def channelAction(self, connection, user, channel, message):
+        connection.message(channel, "%s: %s" % (user, self.nano()))
 
-		target = 50000.0;
-		month  = 2592000.0;
+    def privateAction(self, connection, user, channel, message):
+        connection.message(user, self.nano())
 
-		end = then+month;
+    def nano(self):
+        print "[Nano] called"
 
-		if now > then+month:
-			return "You should have finished by now"
+        now = time.time()
 
-		if delta < 0:
-			delta = math.fabs(delta)
-			return "You should start Nanowrimo in %s" % tools.niceTimeDelta(delta, "decimal")
+        then = time.mktime(datetime.datetime(datetime.datetime.now().year, 11, 1, 00, 00).timetuple())
 
-		persec = target/month;
+        delta = now - then;
 
-		current = delta*persec;
+        target = 50000.0;
+        month = 2592000.0;
 
-		return "You should be at %d words by now, %s left" % (current, tools.niceTimeDelta(month-delta));	
+        end = then + month;
+
+        if now > then + month:
+            return "You should have finished by now"
+
+        if delta < 0:
+            delta = math.fabs(delta)
+            return "You should start Nanowrimo in %s" % tools.niceTimeDelta(delta, "decimal")
+
+        persec = target / month;
+
+        current = delta * persec;
+
+        return "You should be at %d words by now, %s left" % (current, tools.niceTimeDelta(month - delta));	

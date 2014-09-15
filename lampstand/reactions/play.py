@@ -3,192 +3,184 @@ import lampstand.reactions.base
 
 from xml.dom.minidom import parse, parseString
 
-def __init__ ():
-	pass
+
+def __init__():
+    pass
+
 
 class Reaction(lampstand.reactions.base.Reaction):
-	__name = 'Steam Play'
+    __name = 'Steam Play'
 
-	cooldown_number   = 5
-	cooldown_time     = 120
-	uses              = []
+    cooldown_number = 5
+    cooldown_time = 120
+    uses = []
 
-	def __init__(self, connection):
+    def __init__(self, connection):
 
-		self.channelMatch = (
-			re.compile('%s: wh(at|ich) (game |)should I play\?' % connection.nickname, re.IGNORECASE),
-			re.compile('%s: my steam profile is (\S*)' % connection.nickname, re.IGNORECASE),
-			re.compile('%s: wh(at|ich) steam game should I play\?' % connection.nickname, re.IGNORECASE),
-			re.compile('%s: wh(at|ich) of my recent steam games should I play\?' % connection.nickname, re.IGNORECASE))
+        self.channelMatch = (
+            re.compile('%s: wh(at|ich) (game |)should I play\?' % connection.nickname, re.IGNORECASE),
+            re.compile('%s: my steam profile is (\S*)' % connection.nickname, re.IGNORECASE),
+            re.compile('%s: wh(at|ich) steam game should I play\?' % connection.nickname, re.IGNORECASE),
+            re.compile('%s: wh(at|ich) of my recent steam games should I play\?' % connection.nickname, re.IGNORECASE))
 
-		self.privateMatch = (
-			re.compile('wh(at|ich) (game | )should I play\?', re.IGNORECASE),
-			re.compile('my steam profile is (\S*)', re.IGNORECASE),
-			re.compile('wh(at|ich) steam game should I play\?' , re.IGNORECASE),
-			re.compile('wh(at|ich) of my recent steam games should I play\?' , re.IGNORECASE))
+        self.privateMatch = (
+            re.compile('wh(at|ich) (game | )should I play\?', re.IGNORECASE),
+            re.compile('my steam profile is (\S*)', re.IGNORECASE),
+            re.compile('wh(at|ich) steam game should I play\?', re.IGNORECASE),
+            re.compile('wh(at|ich) of my recent steam games should I play\?', re.IGNORECASE))
 
-		self.dbconnection = connection.dbconnection
+        self.dbconnection = connection.dbconnection
 
+    def respond(self, user, matchIndex, matches):
+        if matchIndex == 0 or matchIndex == 2:
+            output = self.playWhat(user)
+        elif matchIndex == 3:
+            output = self.playWhat(user, limitToRecent=True)
+        elif matchIndex == 1:
+            result = matches
+            output = self.setSteam(user, result)
 
-	def respond(self,user,matchIndex,matches):
-		if matchIndex == 0 or matchIndex == 2:
-			output = self.playWhat(user)
-		elif matchIndex == 3:
-			output = self.playWhat(user, limitToRecent=True)
-		elif matchIndex == 1:
-			result = matches
-			output = self.setSteam(user, result)
+        return output
 
-		return output
-	
-	def channelAction(self, connection, user, channel, message, matchIndex = False):
-		print "[PLAY] Reacting..."
-		if self.overUsed(self.uses):
-				connection.message(channel, self.overuseReactions[matchIndex])
-				return True
+    def channelAction(self, connection, user, channel, message, matchIndex=False):
+        print "[PLAY] Reacting..."
+        if self.overUsed(self.uses):
+            connection.message(channel, self.overuseReactions[matchIndex])
+            return True
 
+        ## Overuse Detectection ##
+        self.uses.append(int(time.time()))
+        if len(self.uses) > self.cooldown_number:
+            self.uses = self.uses[0:self.cooldown_number - 1]
+        ## Overuse Detectection ##
 
-		## Overuse Detectection ##
-		self.uses.append(int(time.time()))
-		if len(self.uses) > self.cooldown_number:
-				self.uses = self.uses[0:self.cooldown_number-1]
-		## Overuse Detectection ##
+        matches = self.channelMatch[matchIndex].findall(message)
 
-		matches = self.channelMatch[matchIndex].findall(message)
+        output = self.respond(user, matchIndex, matches)
 
-		output = self.respond(user,matchIndex, matches)
+        if output:
+            output = "%s: %s" % (user, output)
+        else:
+            output = "%s: Settlers of Catan? Monopoly? Steam's not talking to me right now, sorry." % user
 
-		if output:
-			output = "%s: %s" % (user, output)
-		else:
-			output = "%s: Settlers of Catan? Monopoly? Steam's not talking to me right now, sorry." % user
+        connection.message(channel, output)
 
-		connection.message(channel, output)
+    def privateAction(self, connection, user, channel, message, matchIndex=False):
 
+        matches = self.privateMatch[matchIndex].findall(message)
+        output = self.respond(user, matchIndex, matches)
 
-	def privateAction(self, connection, user, channel, message, matchIndex = False):
-		
-		matches = self.privateMatch[matchIndex].findall(message)
-		output = self.respond(user,matchIndex, matches)
+        connection.message(user, output)
 
-		connection.message(user, output)
+    def playWhat(self, username, limitToRecent=False):
 
+        print "[PLAY] Looking up games for %s" % username
+        cursor = self.dbconnection.cursor()
+        cursor.execute('SELECT steamname from gameaccounts where username = %s', username)
+        result = cursor.fetchone()
 
-	def playWhat(self, username, limitToRecent=False):
-		
-		print "[PLAY] Looking up games for %s" % username
-		cursor = self.dbconnection.cursor()
-		cursor.execute('SELECT steamname from gameaccounts where username = %s', username)
-		result = cursor.fetchone()
+        if result == None:
+            return self.helptext()
 
-		if result == None:
-			return self.helptext()
+        try:
+            steam = self.getSteamXML(result[0])
+        except:
+            return False
 
-		try:
-			steam = self.getSteamXML(result[0])
-		except:
-			return False
-		
-		print steam
+        print steam
 
-		if hasattr(steam, '__getitem__'):
-			return steam[1]
+        if hasattr(steam, '__getitem__'):
+            return steam[1]
 
-		return self.pickAGame(steam, limitToRecent=limitToRecent)
+        return self.pickAGame(steam, limitToRecent=limitToRecent)
 
-	def helptext(self):
+    def helptext(self):
 
-		return """I don't have a steam account for you, sorry. Set this by saying "my steam profile is [SOMETHING]" to me. To find what '[SOMETHING]' should be log in to steamcommunity.com and it's the word after "/id/" or the numbers after "/profile/" in the URL of your home page."""
+        return """I don't have a steam account for you, sorry. Set this by saying "my steam profile is [SOMETHING]" to me. To find what '[SOMETHING]' should be log in to steamcommunity.com and it's the word after "/id/" or the numbers after "/profile/" in the URL of your home page."""
 
-	
-	def setSteam(self, username, result):
-		
-		steamname = result[0]
+    def setSteam(self, username, result):
 
-		try:
-			steam = self.getSteamXML(steamname)
-		except:
-			return False
-		
-		if hasattr(steam, '__getitem__'):
-			return steam[1]
+        steamname = result[0]
 
-		nameElement = steam.getElementsByTagName('steamID')[0]
-		accountName = nameElement.childNodes[0].data
+        try:
+            steam = self.getSteamXML(steamname)
+        except:
+            return False
 
-		cursor = self.dbconnection.cursor()
-		cursor.execute('REPLACE into gameaccounts (username, steamname) values (%s, %s)', (username, steamname) )
-		self.dbconnection.commit()
-		
-		return "Okay, remembering that %s's steam name is %s, aka '%s'" % (username,steamname, accountName)
+        if hasattr(steam, '__getitem__'):
+            return steam[1]
 
-		return "Stub %s" % result
+        nameElement = steam.getElementsByTagName('steamID')[0]
+        accountName = nameElement.childNodes[0].data
 
+        cursor = self.dbconnection.cursor()
+        cursor.execute('REPLACE into gameaccounts (username, steamname) values (%s, %s)', (username, steamname))
+        self.dbconnection.commit()
 
+        return "Okay, remembering that %s's steam name is %s, aka '%s'" % (username, steamname, accountName)
 
-	def pickAGame(self, steam, limitToRecent=False):
-		
-		if random.randint(0,100) == 25:
-			return "Odyssey, obviously"
-		
-		if not limitToRecent and random.randint(0,2) == 1:
-			limitToRecent = True
+        return "Stub %s" % result
 
-		if limitToRecent:
-			recentGames = steam.getElementsByTagName('hoursLast2Weeks')
-			if not len(recentGames):
-				limitToRecent = False
+    def pickAGame(self, steam, limitToRecent=False):
 
+        if random.randint(0, 100) == 25:
+            return "Odyssey, obviously"
 
-		if not limitToRecent:
-			games = steam.getElementsByTagName('game')
-			game = random.choice(games)
-		else:
-			game = random.choice(recentGames).parentNode
-			
+        if not limitToRecent and random.randint(0, 2) == 1:
+            limitToRecent = True
 
-		gamename = game.getElementsByTagName('name')[0].childNodes[0].data
+        if limitToRecent:
+            recentGames = steam.getElementsByTagName('hoursLast2Weeks')
+            if not len(recentGames):
+                limitToRecent = False
 
-		return gamename
+        if not limitToRecent:
+            games = steam.getElementsByTagName('game')
+            game = random.choice(games)
+        else:
+            game = random.choice(recentGames).parentNode
 
-	def getSteamXML(self, username):
+        gamename = game.getElementsByTagName('name')[0].childNodes[0].data
 
-		username = username.lower()
+        return gamename
 
-		try:
-			i = int(username)
-		except ValueError, TypeError:
-			profiletype = 'id'
-		else:
-			profiletype = 'profiles'
-		
-		steamurl = "http://steamcommunity.com/%s/%s/games?tab=all&xml=1" % (profiletype, username)
+    def getSteamXML(self, username):
 
-		print steamurl
+        username = username.lower()
 
-		cachename = "/tmp/steam.lampstand.%s.xml" % username;
+        try:
+            i = int(username)
+        except ValueError, TypeError:
+            profiletype = 'id'
+        else:
+            profiletype = 'profiles'
 
-		(fileopen, fileheaders) = urllib.urlretrieve(steamurl, cachename)
+        steamurl = "http://steamcommunity.com/%s/%s/games?tab=all&xml=1" % (profiletype, username)
 
-		print "Examining %s" % cachename
+        print steamurl
 
-		stat = os.stat(fileopen)
-		delta = datetime.datetime.now() - datetime.datetime.fromtimestamp(stat.st_mtime)
-		if delta.seconds > 60*60*12:
-			print " ... Redownloading, cache expired %s" % (delta.seconds / 60*60 )
-			os.remove(fileopen)
-			(fileopen, fileheaders) = urllib.urlretrieve(steamurl, cachename)
+        cachename = "/tmp/steam.lampstand.%s.xml" % username;
 
-		try:
-			steam = parse(fileopen)
-		except ParseError:
-			return (16, "Error getting the response from steam")
-		except:
-			return (128, "Something crazy happened: <%s>" % sys.exc_info()[0])
+        (fileopen, fileheaders) = urllib.urlretrieve(steamurl, cachename)
 
+        print "Examining %s" % cachename
 
-		steamerror = steam.getElementsByTagName('error')
-		if len(steamerror) > 0:
-			return (32, "Sorry, Steam said: %s" % steamerror[0].childNodes[0].data)
+        stat = os.stat(fileopen)
+        delta = datetime.datetime.now() - datetime.datetime.fromtimestamp(stat.st_mtime)
+        if delta.seconds > 60 * 60 * 12:
+            print " ... Redownloading, cache expired %s" % (delta.seconds / 60 * 60)
+            os.remove(fileopen)
+            (fileopen, fileheaders) = urllib.urlretrieve(steamurl, cachename)
 
-		return steam
+        try:
+            steam = parse(fileopen)
+        except ParseError:
+            return (16, "Error getting the response from steam")
+        except:
+            return (128, "Something crazy happened: <%s>" % sys.exc_info()[0])
+
+        steamerror = steam.getElementsByTagName('error')
+        if len(steamerror) > 0:
+            return (32, "Sorry, Steam said: %s" % steamerror[0].childNodes[0].data)
+
+        return steam

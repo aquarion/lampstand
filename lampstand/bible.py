@@ -1,7 +1,9 @@
 import urllib
 
+
 class ESVSession:
-    def __init__(self, key = 'IP'):
+
+    def __init__(self, key='IP'):
         options = ['include-short-copyright=0',
                    'output-format=plain-text',
                    'include-passage-horizontal-lines=0',
@@ -13,7 +15,7 @@ class ESVSession:
         passage = passage.split()
         passage = '+'.join(passage)
         url = self.baseUrl + '&passage=%s&%s' % (passage, self.options)
-	print '[Bible] %s' % url
+        print '[Bible] %s' % url
         page = urllib.urlopen(url)
         return page.read()
 
@@ -21,6 +23,6 @@ class ESVSession:
 #bible = ESVSession(key)
 
 #passage = raw_input('Enter Passage: ')
-#while passage != 'quit':
+# while passage != 'quit':
 #    print bible.doPassageQuery(passage)
 #    passage = raw_input('Enter Passage: ')

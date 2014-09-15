@@ -1,91 +1,90 @@
 import re, time, random, sys
 import lampstand.reactions.base
 
-def __init__ ():
-	pass
+
+def __init__():
+    pass
+
 
 class Reaction(lampstand.reactions.base.Reaction):
-	
-	__name = 'Thanks'
-	
-	cooldown_number = 2
-	cooldown_time   = 360
-	uses = []
 
-	def __init__(self, connection):
+    __name = 'Thanks'
 
-		self.channelMatch = re.compile(".*Thanks,? (\S+)\s*\.?$", re.IGNORECASE)
-		self.privateMatch = []
+    cooldown_number = 2
+    cooldown_time = 360
+    uses = []
 
-	def channelAction(self, connection, user, channel, message):
-		print "[Thanks] called"
+    def __init__(self, connection):
 
-		word = self.channelMatch.findall(message)[0];
+        self.channelMatch = re.compile(".*Thanks,? (\S+)\s*\.?$", re.IGNORECASE)
+        self.privateMatch = []
 
-		if not word:
-			return False;
+    def channelAction(self, connection, user, channel, message):
+        print "[Thanks] called"
 
-		number = random.randint(0,5)
+        word = self.channelMatch.findall(message)[0];
 
-		if number == 3:
-			thanks = self.thanks(word);
-			print "[THANKS] Thanks, %s: %s" % (word, thanks)
-			connection.message(channel, thanks)
-			return True
-		#elif word in connection.people:
-		#	print "[Thanks] Found, but not random"
-		else:
-			print "[thanks] Random was %d" % number
+        if not word:
+            return False;
 
-		return False
+        number = random.randint(0, 5)
 
+        if number == 3:
+            thanks = self.thanks(word);
+            print "[THANKS] Thanks, %s: %s" % (word, thanks)
+            connection.message(channel, thanks)
+            return True
+        # elif word in connection.people:
+        #	print "[Thanks] Found, but not random"
+        else:
+            print "[thanks] Random was %d" % number
 
-	def thanks(self, word):
-			
-		word = word.lower().strip()
-		if not word:
-			return false	
+        return False
 
+    def thanks(self, word):
 
-		print "Thanks, %s" % word
+        word = word.lower().strip()
+        if not word:
+            return false	
 
-		if word[0] in ("a","e","i","o","u"):
+        print "Thanks, %s" % word
 
-			print "That starts with a vowel, using the whole word"
+        if word[0] in ("a", "e", "i", "o", "u"):
 
-			thanks = word
+            print "That starts with a vowel, using the whole word"
 
-		else:	
+            thanks = word
 
-			scrugg = re.split(r'[aeiouy]', word, 1);
-	
-			#scrugg = re.split(r'[^aeiouy]+', word)
-	
-			print scrugg
+        else:	
 
-			if len(scrugg) < 2:
-				print "Failed to split on vowels"
-				return false
-	
-	
-			if(len(scrugg) > 1):
-				print "Using second element"
-				thanks = scrugg[1]
-			else:
-				print "Using whole word"
-				thanks = word
-	
-		if not thanks or len(thanks) < 1:
-			print "Thanks isn't good enough: %s" % thanks
-			return false
+            scrugg = re.split(r'[aeiouy]', word, 1);
 
-		print thanks	
+            #scrugg = re.split(r'[^aeiouy]+', word)
 
-		if(thanks[0] == "a"):
-			thanks = "Th%s" % thanks 
-		elif(thanks[0] == "o"):
-			thanks = "Th%s" % thanks 
-		else:
-			thanks = "Tha%s" % thanks
-	
-		return thanks
+            print scrugg
+
+            if len(scrugg) < 2:
+                print "Failed to split on vowels"
+                return false
+
+            if(len(scrugg) > 1):
+                print "Using second element"
+                thanks = scrugg[1]
+            else:
+                print "Using whole word"
+                thanks = word
+
+        if not thanks or len(thanks) < 1:
+            print "Thanks isn't good enough: %s" % thanks
+            return false
+
+        print thanks	
+
+        if(thanks[0] == "a"):
+            thanks = "Th%s" % thanks 
+        elif(thanks[0] == "o"):
+            thanks = "Th%s" % thanks 
+        else:
+            thanks = "Tha%s" % thanks
+
+        return thanks

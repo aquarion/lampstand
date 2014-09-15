@@ -4,35 +4,35 @@ import lampstand.reactions.base
 from lampstand.tools import splitAt
 import simplejson
 
-def __init__ ():
-	pass
+
+def __init__():
+    pass
+
 
 class Reaction(lampstand.reactions.base.Reaction):
-	__name = 'Box'
+    __name = 'Box'
 
-	cooldown_number   = 2
-	cooldown_time     = 300
-	uses              = []
+    cooldown_number = 2
+    cooldown_time = 300
+    uses = []
 
-	def __init__(self, connection):
-		self.channelMatch = re.compile('%s. Open (the|a) box' % connection.nickname, re.IGNORECASE)
+    def __init__(self, connection):
+        self.channelMatch = re.compile('%s. Open (the|a) box' % connection.nickname, re.IGNORECASE)
 
-	def channelAction(self, connection, user, channel, message):
+    def channelAction(self, connection, user, channel, message):
 
+        if self.overUsed():
+            connection.message(channel, "I'm out of boxes, new delivery shortly.")
+            return
 
-		if self.overUsed():
-			connection.message(channel, "I'm out of boxes, new delivery shortly.")
-			return
+        print "[Box] called "
 
-		print "[Box] called "
+        box = simplejson.load(urllib.urlopen("http://warehousebasement.com/api.php"))
 
+        print box
 
-		box = simplejson.load(urllib.urlopen("http://warehousebasement.com/api.php"))
+        result = 'In a box on level %s you find %s' % (box['level'], box['description'])
 
-		print box
+        connection.message(channel, "%s" % result)
 
-		result = 'In a box on level %s you find %s' % (box['level'], box['description'])
-
-		connection.message(channel, "%s" % result)
-
-		return True
+        return True

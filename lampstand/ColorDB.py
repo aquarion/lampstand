@@ -1,4 +1,4 @@
-## This is part of the Python distribution, and was not written by me - Aq.
+# This is part of the Python distribution, and was not written by me - Aq.
 """Color Database.
 
 This file contains one class, called ColorDB, and several utility functions.
@@ -26,6 +26,7 @@ import re
 from types import *
 import operator
 
+
 class BadColor(Exception):
     pass
 
@@ -34,9 +35,9 @@ SPACE = ' '
 COMMASPACE = ', '
 
 
-
 # generic class
 class ColorDB:
+
     def __init__(self, fp):
         lineno = 2
         self.__name = fp.name
@@ -124,6 +125,7 @@ class ColorDB:
             for name, aliases in self.__byrgb.values():
                 self.__allnames.append(name)
             # sort irregardless of case
+
             def nocase_cmp(n1, n2):
                 return cmp(n1.lower(), n2.lower())
             self.__allnames.sort(nocase_cmp)
@@ -136,7 +138,7 @@ class ColorDB:
             raise BadColor((red, green, blue))
         return [name] + aliases
 
-
+
 class RGBColorDB(ColorDB):
     _re = re.compile(
         '\s*(?P<red>\d+)\s+(?P<green>\d+)\s+(?P<blue>\d+)\s+(?P<name>.*)')
@@ -148,11 +150,13 @@ class HTML40DB(ColorDB):
     def _extractrgb(self, mo):
         return rrggbb_to_triplet(mo.group('hexrgb'))
 
+
 class LightlinkDB(HTML40DB):
     _re = re.compile('(?P<name>(.+))\s+(?P<hexrgb>#[0-9a-fA-F]{6})')
 
     def _extractname(self, mo):
         return mo.group('name').strip()
+
 
 class WebsafeDB(ColorDB):
     _re = re.compile('(?P<hexrgb>#[0-9a-fA-F]{6})')
@@ -164,7 +168,6 @@ class WebsafeDB(ColorDB):
         return mo.group('hexrgb').upper()
 
 
-
 # format is a tuple (RE, SCANLINES, CLASS) where RE is a compiled regular
 # expression, SCANLINES is the number of header lines to scan, and CLASS is
 # the class to instantiate if a match is found
@@ -175,7 +178,8 @@ FILETYPES = [
     (re.compile('HTML'), HTML40DB),
     (re.compile('lightlink'), LightlinkDB),
     (re.compile('Websafe'), WebsafeDB),
-    ]
+]
+
 
 def get_colordb(file, filetype=None):
     colordb = None
@@ -206,8 +210,8 @@ def get_colordb(file, filetype=None):
     return colordb
 
 
-
 _namedict = {}
+
 
 def rrggbb_to_triplet(color):
     """Converts a #rrggbb color to the tuple (red, green, blue)."""
@@ -224,6 +228,8 @@ def rrggbb_to_triplet(color):
 
 
 _tripdict = {}
+
+
 def triplet_to_rrggbb(rgbtuple):
     """Converts a (red, green, blue) tuple to #rrggbb."""
     global _tripdict
@@ -235,6 +241,8 @@ def triplet_to_rrggbb(rgbtuple):
 
 
 _maxtuple = (256.0,) * 3
+
+
 def triplet_to_fractional_rgb(rgbtuple):
     return map(operator.__div__, rgbtuple, _maxtuple)
 
@@ -245,10 +253,9 @@ def triplet_to_brightness(rgbtuple):
     r = 0.299
     g = 0.587
     b = 0.114
-    return r*rgbtuple[0] + g*rgbtuple[1] + b*rgbtuple[2]
+    return r * rgbtuple[0] + g * rgbtuple[1] + b * rgbtuple[2]
 
 
-
 if __name__ == '__main__':
     colordb = get_colordb('/usr/openwin/lib/rgb.txt')
     if not colordb:
@@ -268,7 +275,7 @@ if __name__ == '__main__':
     t0 = time.time()
     nearest = colordb.nearest(r, g, b)
     t1 = time.time()
-    print 'found nearest color', nearest, 'in', t1-t0, 'seconds'
+    print 'found nearest color', nearest, 'in', t1 - t0, 'seconds'
     # dump the database
     for n in colordb.unique_names():
         r, g, b = colordb.find_byname(n)

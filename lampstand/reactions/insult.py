@@ -2,70 +2,69 @@ import re
 import lampstand.reactions.base
 from lampstand import shakeinsult
 
-def __init__ ():
-	pass
+
+def __init__():
+    pass
+
 
 class Reaction(lampstand.reactions.base.Reaction):
-	__name = 'Insulter'
+    __name = 'Insulter'
 
-	cooldown_number = 3
-	cooldown_time   = 60
-	uses = []
+    cooldown_number = 3
+    cooldown_time = 60
+    uses = []
 
-	def __init__(self, connection):
-		self.channelMatch = re.compile('%s. insult (.*)(\W?)' % connection.nickname, re.IGNORECASE)
+    def __init__(self, connection):
+        self.channelMatch = re.compile('%s. insult (.*)(\W?)' % connection.nickname, re.IGNORECASE)
 
+    def channelAction(self, connection, user, channel, message):
 
-	def channelAction(self, connection, user, channel, message):
+        print "[INSULT] called"
 
-		print "[INSULT] called"
+        if self.overUsed():
+            connection.message(user, "I'm bored of this, insult them yourself. (Overuse triggered)")
+            return
 
-		if self.overUsed():
-			connection.message(user, "I'm bored of this, insult them yourself. (Overuse triggered)" )
-			return
+        item = self.channelMatch.findall(message);
 
-		item = self.channelMatch.findall(message);
-		
-		orig_insultee = item[0][0]
-		insultee = re.sub(r'\W', '', item[0][0])
-		
-		if insultee.lower() == 'me':
-			insultee = user
-			orig_insultee = user
+        orig_insultee = item[0][0]
+        insultee = re.sub(r'\W', '', item[0][0])
 
-		print "[INSULT] Insulting %s" % insultee
+        if insultee.lower() == 'me':
+            insultee = user
+            orig_insultee = user
 
-		if insultee.lower() == 'glados':
-			print "Kicking %s for taking the name of my lady in vain" % user
-			connection.kick(channel, user, 'No')
-			return
+        print "[INSULT] Insulting %s" % insultee
 
-		if insultee.lower() == connection.nickname.lower():
-			connection.message(channel, "%s: No." % user )
-			return
+        if insultee.lower() == 'glados':
+            print "Kicking %s for taking the name of my lady in vain" % user
+            connection.kick(channel, user, 'No')
+            return
 
-		if insultee.lower() == 'aquarion':
-			connection.message(channel, "%s: Do I look suicidal? No." % user )
-			return
+        if insultee.lower() == connection.nickname.lower():
+            connection.message(channel, "%s: No." % user)
+            return
 
-		
-		ownerMatch = re.compile('.*aquarion.*', re.IGNORECASE)
-		myNameMatch = re.compile('.*%s.*' % connection.nickname, re.IGNORECASE)
-		if ownerMatch.match(item[0][0]) or myNameMatch.match(insultee):
-			connection.message(channel, "%s: Hah. Very clever. Still no." % user )
-			return
-			
-		ownerMatch = re.compile('.*your m.m.*', re.IGNORECASE)
-		myNameMatch = re.compile('.*%s.*' % connection.nickname, re.IGNORECASE)
-		if ownerMatch.match(item[0][0]) or myNameMatch.match(insultee):
-			connection.message(channel, "%s: She was a saint. And a toaster." % user )
-			return
+        if insultee.lower() == 'aquarion':
+            connection.message(channel, "%s: Do I look suicidal? No." % user)
+            return
 
-		print "%s" % item
-		insult = shakeinsult.shakeinsult(1);
+        ownerMatch = re.compile('.*aquarion.*', re.IGNORECASE)
+        myNameMatch = re.compile('.*%s.*' % connection.nickname, re.IGNORECASE)
+        if ownerMatch.match(item[0][0]) or myNameMatch.match(insultee):
+            connection.message(channel, "%s: Hah. Very clever. Still no." % user)
+            return
 
+        ownerMatch = re.compile('.*your m.m.*', re.IGNORECASE)
+        myNameMatch = re.compile('.*%s.*' % connection.nickname, re.IGNORECASE)
+        if ownerMatch.match(item[0][0]) or myNameMatch.match(insultee):
+            connection.message(channel, "%s: She was a saint. And a toaster." % user)
+            return
 
-		self.updateOveruse()
+        print "%s" % item
+        insult = shakeinsult.shakeinsult(1);
 
-		connection.message(channel, "%s, %s" % (orig_insultee, insult )  )
-		return True
+        self.updateOveruse()
+
+        connection.message(channel, "%s, %s" % (orig_insultee, insult))
+        return True
