@@ -117,11 +117,14 @@ class Reaction(lampstand.reactions.base.Reaction):
             (direction, desc))
         response = request.json()
 
+	print response
+
         if not len(response['events']):
             try:
                 result = dateutil.parser.parse(desc)
                 event = (result, desc, "The date", None, None)
-            except ValueError:
+		print result
+            except TypeError:
                 return "I can't see any events tagged '%s' in the %s, and it doesn't look like a date. Full list of events at http://larp.me/events" % (
                     desc, direction)
 

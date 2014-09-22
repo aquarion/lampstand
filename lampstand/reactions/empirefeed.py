@@ -35,8 +35,8 @@ class Reaction(lampstand.reactions.base.Reaction):
         # def channelAction(self, connection, user, channel, message, index =
         # 0):
 
-        #     self.checkEmpireFeed(connection)
-        #     self.checkOdysseyFeed(connection)
+        self.checkEmpireFeed(connection)
+        self.checkOdysseyFeed(connection)
 
         # def everyLine(self, connection, user, channel, message)
         # def leaveAction(self, connection, user, reason, parameters)
