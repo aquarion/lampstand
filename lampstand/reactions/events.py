@@ -113,7 +113,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     def howlong(self, desc, output, direction):
 
         request = requests.get(
-            'http://api.larp.me/events?direction=%s&q=%s&count=1' %
+            'http://api.larp.me/events/all?direction=%s&q=%s&count=1' %
             (direction, desc))
         response = request.json()
 
