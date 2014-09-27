@@ -16,7 +16,7 @@ def __init__():
 class Reaction(lampstand.reactions.base.Reaction):
     __name = 'Dice'
 
-    cooldown_number = 5
+    cooldown_number = 6
     cooldown_time = 120
 
     def __init__(self, connection):
