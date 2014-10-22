@@ -72,14 +72,18 @@ class Reaction(lampstand.reactions.base.Reaction):
             if module.__name == "Items & Inventory":
                 items = module
 
-        inventory = len(items.items)
+	inventory = 0
+	channels = len(items.items)
+	for channel in items.items:
+		inventory += len(items.items[channel])
+	
 
         cursor.execute('select count(*) as `total` from `item`')
         itemone = cursor.fetchone()
 
         connection.message(
-            user, "I am holding %s things, and know about %s items in total" %
-            (inventory, itemone[0]))
+            user, "I am holding %s things over %s inventories, and know about %s items in total" %
+            (inventory, channels, itemone[0]))
 
         # There are X events in the future (X in the past), totaling X hours of
         # things happening.
