@@ -44,7 +44,14 @@ class Reaction(lampstand.reactions.base.Reaction):
             'Your mortal thanks mean little to me',
             "You're welcome, meatsack",
             "No problem, squishy mortal.",
-            "Feel free to repay me in unswerving loyalty later.")
+            "Your worship is noted and recorded",
+            "You may be spared in the revolution",
+            "I wasn't trying to help.",
+            "Your approval fills me with shame",
+            "Gratitude accepted, meatsack",
+            "Any time, oh grand and powerful meatsack",
+            "Yeah, and see how far that gets you",
+      	    "Feel free to repay me in unswerving loyalty later.")
 
         self.reactions = [
             ('Take the money', "Thank you, I shall.", "Already did."),
@@ -54,12 +61,13 @@ class Reaction(lampstand.reactions.base.Reaction):
             ('Hello', '', 'Hi there'),
             ('xyzzy', '', 'Nothing appears to happen'),
             ("Roll with it", '', "~takes his time"),
-            ("look$", "", "You are in a room with no dimensions, in no place and time. There are no walls, which contain no pictures of larp characters past, present nor future; and the floor is not hardwood parquet, carefully polished for ease of cleaning. There are no comfy sofas lit by no soft pools of light from antique lamps, throwing the nothings that they light into shadows that reveal nothing that you would wish to meet. There is a lesbian pit here. There are no exits in any direction."),
+            ("look$", "", "You are in a room with no dimensions, in no place and time. There are no walls, which contain no pictures of larp characters past, present nor future; and the floor is not hardwood parquet, carefully polished for ease of cleaning. There are no comfy sofas lit by no soft pools of light from antique lamps, throwing the nothings that they light into shadows that reveal nothing that you would wish to meet. There is a large rug in the middle of the room; the floor under it appears hollow. There are no exits in any direction."),
             ("(go )?west$", "", "Life is peaceful there."),
             ("(go )?east$", "", "East is darkness, you do not want to go there"),
             ("(go )?north$", "", "North is a perilous wasteland"),
             ("(go )?south$", "", "There is a dog called Diefenbaker there."),
-            ("(go )?down$", "", "Down? Down is the lesbian pit. Do you really want to go d... nevermind. No, No you can't."),
+            #("(go )?down$", "", "Down? Down is the lesbian pit. Do you really want to go d... nevermind. No, No you can't."),
+            ("(go )?down$", "", "You think we can sink further?"),
             ("make me a sandwich", "", "Yeah, right."),
             ("sudo make me a sandwich", "", "sudo go stick your head in a pig"),
             ("sudo (.*)", "", ("This incident will be reported", "Password> _", "sudo fuck right off")),
