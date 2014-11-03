@@ -74,7 +74,7 @@ class urlCheck():
         print "URL LIst"
         for link in links:
             urls = self.grabUrls(link[1])
-            #print link
+            # print link
             # print urls
             if len(urls) == 0:
                 params = (400, 1, link[0])
