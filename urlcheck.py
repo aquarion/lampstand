@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import ConfigParser
 import requests
-import MySQLdb
+import cymysql as MySQLdb
 import os
 import sys
 import re
@@ -63,7 +63,7 @@ class urlCheck():
         return url_re.findall(text)
 
     def checkBatch(self):
-        query = 'SELECT id, message, checked_status, checked_repeat FROM urllist WHERE datediff(`checked_date`, NOW()) > 90 or `checked_date` = 0 '
+        query = 'SELECT id, message, checked_status, checked_repeat FROM urllist WHERE datediff(NOW(), `checked_date`) > 90 or `checked_date` = 0 '
 
         update_query = "UPDATE `urllist` SET checked_date = NOW(), checked_status = %s, checked_repeat = %s where id = %s"
 
@@ -71,9 +71,10 @@ class urlCheck():
         cursor.execute(query)
         links = cursor.fetchall()
         n = 0
+        print "URL LIst"
         for link in links:
             urls = self.grabUrls(link[1])
-            print link
+            #print link
             # print urls
             if len(urls) == 0:
                 params = (400, 1, link[0])
@@ -90,7 +91,7 @@ class urlCheck():
             else:
                 repeat_code = 1
             params = (status_code, repeat_code, link[0])
-            print "[%s] %s" (status_code, link[0])
+            print "[%s] %s" % (status_code, url),
             cursor.execute(update_query, params)
             print " -"
             n = n + 1
