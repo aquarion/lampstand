@@ -122,13 +122,19 @@ class Reaction(lampstand.reactions.base.Reaction):
         if not len(response['events']):
             try:
                 result = dateutil.parser.parse(desc)
-                event = (result, desc, "The date", None, None)
+                event = {
+                    'starts': desc,
+                    'ends': desc,
+                    'name': desc,
+                    'system': {
+                        'name': 'Date'},
+                    'website': None}
                 print result
             except TypeError:
                 return "I can't see any events tagged '%s' in the %s, and it doesn't look like a date. Full list of events at http://larp.me/events" % (
                     desc, direction)
-
-        event = response['events'][response['events'].keys()[0]]
+        else:
+            event = response['events'][response['events'].keys()[0]]
 
         event_start = dateutil.parser.parse(event['starts'])
         event_desc = event['name']
