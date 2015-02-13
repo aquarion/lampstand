@@ -20,11 +20,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def __init__(self, connection):
         self.channelMatch = re.compile(
-            '%s. (\w*) (\d+\:\S+)' %
+            '%s. (?!choose)(\w*) (\d+\:\S+)' %
             connection.nickname,
             re.IGNORECASE)
-        self.privateMatch = re.compile('(\w*) (\d+\:\S+)')
-
+        self.privateMatch = re.compile('(?!choose)(\w*) (\d+\:\S+)')
+        #The {?!choose) is a negative lookahead to make sure that
+        #this does not match strings starting with choose so that
+        #we do not gobble choose action requests (Issue #7)
+        
     def channelAction(self, connection, user, channel, message):
         matches = self.channelMatch.findall(message)
 
