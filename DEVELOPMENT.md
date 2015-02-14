@@ -45,9 +45,11 @@ Your parent computer's code repository for lampstand is shared on the VM as /vag
 
 To start the server from inside the VM, you need to activate the virtual environment for python, go into the code directory, and run the server.
 
-```workon lampstand
-cd /vagrant/
-./launch.sh```
+```
+workon lampstand
+cd /vagrant
+./launch.sh
+```
 
 To stop it, ctrl-C.
 
