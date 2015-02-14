@@ -63,22 +63,27 @@ class Reaction(lampstand.reactions.base.Reaction):
         CONSUMER_KEY = connection.config.get("twitter", "consumer_key")
         CONSUMER_SECRET = connection.config.get("twitter", "consumer_secret")
 
-        if not os.path.exists(OAUTH_FILENAME):
-            oauth_dance(
-                "Lampstand", CONSUMER_KEY, CONSUMER_SECRET,
+        self.twitter = False
+
+        try:
+            if not os.path.exists(OAUTH_FILENAME):
+                oauth_dance(
+                    "Lampstand", CONSUMER_KEY, CONSUMER_SECRET,
+                    OAUTH_FILENAME)
+
+            self.oauth_token, self.oauth_token_secret = read_token_file(
                 OAUTH_FILENAME)
 
-        self.oauth_token, self.oauth_token_secret = read_token_file(
-            OAUTH_FILENAME)
-
-        self.twitter = Twitter(
-            auth=OAuth(
-                self.oauth_token,
-                self.oauth_token_secret,
-                CONSUMER_KEY,
-                CONSUMER_SECRET),
-            secure=True,
-            domain='api.twitter.com')
+            self.twitter = Twitter(
+                auth=OAuth(
+                    self.oauth_token,
+                    self.oauth_token_secret,
+                    CONSUMER_KEY,
+                    CONSUMER_SECRET),
+                secure=True,
+                domain='api.twitter.com')
+        except:
+            pass
 
     def channelAction(self, connection, user, channel, message, matchindex):
 
@@ -224,7 +229,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         urlp = urlparse.urlparse(url)
         print url
 
-        if "twitter" in urlp.netloc.split("."):
+        if "twitter" in urlp.netloc.split(".") and self.twitter:
             path = urlp.path.split("/")
             id = path[-1]
             tweet = self.twitter.statuses.show(id=id)

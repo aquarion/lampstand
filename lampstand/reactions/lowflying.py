@@ -49,22 +49,25 @@ class Reaction(lampstand.reactions.base.Reaction):
         CONSUMER_KEY = connection.config.get("twitter", "consumer_key")
         CONSUMER_SECRET = connection.config.get("twitter", "consumer_secret")
 
-        if not os.path.exists(OAUTH_FILENAME):
-            oauth_dance(
-                "Lampstand", CONSUMER_KEY, CONSUMER_SECRET,
+        try:
+            if not os.path.exists(OAUTH_FILENAME):
+                oauth_dance(
+                    "Lampstand", CONSUMER_KEY, CONSUMER_SECRET,
+                    OAUTH_FILENAME)
+
+            self.oauth_token, self.oauth_token_secret = read_token_file(
                 OAUTH_FILENAME)
 
-        self.oauth_token, self.oauth_token_secret = read_token_file(
-            OAUTH_FILENAME)
-
-        self.twitter = Twitter(
-            auth=OAuth(
-                self.oauth_token,
-                self.oauth_token_secret,
-                CONSUMER_KEY,
-                CONSUMER_SECRET),
-            secure=True,
-            domain='api.twitter.com')
+            self.twitter = Twitter(
+                auth=OAuth(
+                    self.oauth_token,
+                    self.oauth_token_secret,
+                    CONSUMER_KEY,
+                    CONSUMER_SECRET),
+                secure=True,
+                domain='api.twitter.com')
+        except:
+            self.twitter = False
 
     def scheduleAction(self, connection):
 
@@ -88,6 +91,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         print "[LFR] Checking for Low Flying Rocks"
 
+        if not self.twitter:
+            print "[LFR] No twitter connection"
         if not self.last_lfr_seen:
             print "[LFR] First Run"
             statuses = self.twitter.statuses.user_timeline(
