@@ -1,4 +1,4 @@
-# Development
+# Virtual Machine Setup
 
 Now slightly easier than before, you will need:
 
@@ -9,19 +9,29 @@ Once you have those installed (Windows, Mac, Linux, doesn't matter) go into the 
 
 `vagrant up`
 
-First time you do this will take a while, because it'll download an image of ubuntu, then set it up, then add all Lampstand's Debian packages and Python packages. Once it's finished, it'll give you back your prompt. You can then go into the server by using
+First time you do this will take a while, because it'll download an image of ubuntu, then set it up, then add all Lampstand's Debian packages and Python packages. Finally it downloads a metric fuckton of Natural Language data. It's really bad at output buffering, so it will look like it's dead, it almost certainly isn't.
+
+Once it's finished, it'll give you back your prompt. You can then go into the server by using
 
 `vagrant ssh`
 
 which will log you in.
 
-To shut it down, `vagrant halt`
+You can also connect to the server over ssh by connecting to localhost port 2222. (If you have more than one Vagrant machine active, this won't work. Vagrant Up's output will tell you the right number) username/password "vagrant/vagrant"
 
-You can also connect to the server over ssh by connecting to localhost port 2222. (If you have more than one Vagrant machine active, this won't work. Vagrant Up's output will tell you the right number)
 
-## Exposed Ports
+To shut it down, `vagrant halt`, to delete it `vagrant destroy`. Because this never touches the code, the only things you'll lose are stuff in the MySQL database.
+
+
+## Exposed Ports & Services
 
 This VM will install an IRC server, running on the VM port 6667. This is exposed to your actual machine - the parent machine - as localhost:6667 (The default IRC port), so you should be able to open localhost as an IRC server in your favourite client once the server is up.
+
+The server's also running mysql, username/password "webapp/webapp", mysql root password is 'iMPOrTanT'
+
+The "vagrant" user has full sudo access.
+
+# Lampstand Setup
 
 ## Config 
 
@@ -40,3 +50,9 @@ cd /vagrant/
 ./launch.sh```
 
 To stop it, ctrl-C.
+
+If you get an error in the definitions module about dictd, execute `toggleglobalsitepackages` and the message should be "Enabled global site-packages". I need to work out why this doesn't stick.
+
+(Almost every python module being used is from PyPi, except the access to the UNIX Dictionary Service, for which the python module documentation is - I kid you not - on a GOPHER server. So it's installed from debian package management, with regret.)
+
+Any questions, ask in `#lampstand` on irc.esper.net
