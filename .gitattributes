@@ -1,0 +1,6 @@
+*.txt -crlf
+*.py -crlf
+*.sql -crlf
+*.pip -crlf
+*.dpkg -crlf
+*.ini -crlf

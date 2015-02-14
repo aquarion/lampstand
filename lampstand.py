@@ -6,13 +6,6 @@
 """
 I am Lampstand. Beware.
 
-
-Todo:
-
-	* Database admins, probably.
-	* King James Bible
-	* Choose incoming IP
-	* All the cool shit in your head
 """
 
 # twisted imports
@@ -30,6 +23,7 @@ import re
 import os
 import string
 import exceptions
+import os.path
 
 import random
 
@@ -641,16 +635,24 @@ if __name__ == '__main__':
     cwd = os.getcwd()
     print "Error log is %s/stderr.log" % cwd
 
+
     basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
     config = ConfigParser.ConfigParser()
-    config.read(["defaults.ini", basedir + '/config.ini'])
+
+    config_files = ['defaults.ini', ]
+    if os.path.exists(basedir + '/config.ini')
+        config_files.append(basedir + '/config.ini')
+    config.read(config_files)
+
+    server = config.get("connection", "server")
+    port = config.getint("connection", "port")
+
+    print "Connecting to %s:%s" % (server, port)
 
     # create factory protocol and application
     f = LampstandFactory(config)
 
     # connect factory to this host and port
-    server = config.get("connection", "server")
-    port = config.getint("connection", "port")
     reactor.connectTCP(server, port, f)
 
     # run bot
