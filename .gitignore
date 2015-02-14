@@ -6,3 +6,4 @@ venv
 *.err
 
 .vagrant
+build

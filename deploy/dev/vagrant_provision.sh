@@ -20,11 +20,12 @@ echo '-------------------------------------------------------------------'
 echo ">> Installing Python Packages"
 echo '-------------------------------------------------------------------'
 echo -ne "source /etc/bash_completion.d/virtualenvwrapper; 
-    mkvirtualenv -q lampstand;
+    mkvirtualenv -q lampstand --system-site-packages;
 	workon lampstand; 
-	pip install -qr /vagrant/requirements.pip --log ~/pip.log" | su vagrant -c bash
+	pip install -qr /vagrant/requirements.pip --log ~/pip.log;
+	python -m nltk.downloader all" | su vagrant -c bash
 
-
+gem install foreman
 
 echo '-------------------------------------------------------------------'
 echo ">> Setup MySQL"
@@ -38,4 +39,4 @@ echo "grant all on lampstand.* to webapp@localhost identified by 'webapp'" | mys
 cat /vagrant/schema.sql | mysql -uwebapp -pwebapp lampstand
 #cat /vagrant/data/example_data.sql | mysql -uwebapp -pwebapp lampstand
 
-su vagrant -c "cp /vagrant/config.ini /vagrant/config.dev.ini "
+su vagrant -c "cp /vagrant/config.dev.ini /vagrant/config.ini "
