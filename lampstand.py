@@ -600,9 +600,15 @@ class LampstandLoop(irc.IRCClient):
             self.people.remove(nickname)
 
     def loadConfig(self):
+
         basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
         config = ConfigParser.ConfigParser()
-        config.read(["defaults.ini", basedir + '/config.ini'])
+
+        config_files = ['defaults.ini', ]
+        if os.path.exists(basedir + '/config.ini'):
+            config_files.append(basedir + '/config.ini')
+        config.read(config_files)
+
         self.config = config
 
 
@@ -622,9 +628,10 @@ class LampstandFactory(protocol.ClientFactory):
     def clientConnectionLost(self, connector, reason):
         """If we get disconnected, reconnect to server."""
         sms.send('Lampstand: HAZ NO CONEXON')
-        # Todo: Implement backoff
-        time.sleep(45)  # Our very own fourty five second claim.
-        connector.connect()
+        # # Todo: Implement backoff
+        # time.sleep(45)  # Our very own fourty five second claim.
+        # connector.connect()
+        reactor.stop()
 
     def clientConnectionFailed(self, connector, reason):
         print "connection failed:", reason
@@ -640,7 +647,7 @@ if __name__ == '__main__':
     config = ConfigParser.ConfigParser()
 
     config_files = ['defaults.ini', ]
-    if os.path.exists(basedir + '/config.ini')
+    if os.path.exists(basedir + '/config.ini'):
         config_files.append(basedir + '/config.ini')
     config.read(config_files)
 

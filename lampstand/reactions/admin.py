@@ -13,9 +13,18 @@ def __init__():
 class Reaction(lampstand.reactions.base.Reaction):
     __name = 'Admin'
 
-    canSay = ("Aquarion", "ccooke")
+    canSay = ["Aquarion", "ccooke"]
 
     def __init__(self, connection):
+
+        adminconf = connection.config.items("admin")
+        if adminconf:
+            canSay = []
+            for admin in adminconf:
+                canSay.append(admin[1])
+            self.canSay = canSay
+            print "Admins are: %s" % canSay
+
         self.privateMatch = (
             re.compile('say (\#\w*) (.*)', re.IGNORECASE),
             re.compile('do (\#\w*) (.*)', re.IGNORECASE),
@@ -35,6 +44,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         print "[Admin] called"
 
         if user not in self.canSay:
+            connection.message(user, "That's admin functionality, sorry")
             return
 
         matches = self.privateMatch[matchindex].findall(message)
