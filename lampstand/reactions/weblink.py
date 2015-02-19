@@ -258,6 +258,9 @@ class Reaction(lampstand.reactions.base.Reaction):
                 req = requests.get(url, headers=headers, timeout=30)
             except requests.exceptions.Timeout:
                 return "That link timed out"
+            except requests.exceptions.SSLError as e:
+                return "Something's up with the security on %s. Tread carefully. (%s)" % (urlp.netloc, e)
+
             k = len(req.content) / 1024
             if req.status_code != 200:
                 title = "That link returned an error %s" % (req.status_code)
