@@ -58,7 +58,7 @@ class Reaction(lampstand.reactions.base.Reaction):
                 "Sorry, but my dictionary server's not working.")
             dfn = None
 
-        #if not dfn:
+        # if not dfn:
         #    print "Nothing in Dictionary, looking up on wikipedia"
         #    try:
         #        dfn = dns.resolver.query('%s.wp.dg.cx' % query, 'TXT')

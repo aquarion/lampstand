@@ -259,7 +259,8 @@ class Reaction(lampstand.reactions.base.Reaction):
             except requests.exceptions.Timeout:
                 return "That link timed out"
             except requests.exceptions.SSLError as e:
-                return "Something's up with the security on %s. Tread carefully. (%s)" % (urlp.netloc, e)
+                return "Something's up with the security on %s. Tread carefully. (%s)" % (
+                    urlp.netloc, e)
 
             k = len(req.content) / 1024
             if req.status_code != 200:

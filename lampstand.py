@@ -628,7 +628,7 @@ class LampstandFactory(protocol.ClientFactory):
     def clientConnectionLost(self, connector, reason):
         """If we get disconnected, reconnect to server."""
         sms.send('Lampstand: HAZ NO CONEXON')
-        # # Todo: Implement backoff
+        # Todo: Implement backoff
         # time.sleep(45)  # Our very own fourty five second claim.
         # connector.connect()
         reactor.stop()
@@ -641,7 +641,6 @@ class LampstandFactory(protocol.ClientFactory):
 if __name__ == '__main__':
     cwd = os.getcwd()
     print "Error log is %s/stderr.log" % cwd
-
 
     basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
     config = ConfigParser.ConfigParser()
