@@ -15,7 +15,7 @@ def __init__():
 
 class Reaction(lampstand.reactions.base.Reaction):
 
-    __name = 'EmpireFeed'
+    __name = 'watchFeeds'
 
     cooldown_number = 3
     # So if 3 requests are made in 360 seconds, it will trigger overuse.
@@ -24,25 +24,51 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     schedule_count = 0
 
-    last_empire_seen = False
-    last_odyssey_seen = False
+    feeds = {
+        'odyssey' : {
+            'url' : "https://www.facebook.com/feeds/page.php?format=rss20&id=319644741567",
+            'plural': "Odyssey Updates",
+            'singular': "Odyssey update",
+            'channels': ['#odyfroth', ],
+            'last_seen': False
+        },
+        'empire' : {
+            'url' : "https://www.facebook.com/feeds/page.php?format=rss20&id=136575943105061",
+            'plural': "Empire Updates",
+            'singular': "Empire update",
+            'channels': ['#empirefroth', ],
+            'last_seen': False
+        },
+        'larphacks' : {
+            'url' : "http://larphacks.tumblr.com/rss",
+            'plural': "Larp Hacks",
+            'singular': "Larp Hack",
+            'channels': ['#maelfroth', ],
+            'last_seen': False
+        }
+
+    }
 
     def __init__(self, connection):
-        #self.channelMatch = re.compile('^%s. Empire Feed Check' % connection.nickname, re.IGNORECASE)
+        self.channelMatch = re.compile('^%s. Feed Check' % connection.nickname, re.IGNORECASE)
         # self.privateMatch = re.compile('^%s. ???' % connection.nickname,
         # re.IGNORECASE))
 
         # def channelAction(self, connection, user, channel, message, index =
         # 0):
 
-        self.checkEmpireFeed(connection)
-        self.checkOdysseyFeed(connection)
+        for feed in self.feeds.keys():
+            self.checkFeed(feed)
 
         # def everyLine(self, connection, user, channel, message)
         # def leaveAction(self, connection, user, reason, parameters)
         # def nickChangeAction(self, connection, old_nick, new_nick)
         # def privateAction(self, connection, user, channel, message, index)
         # def scheduleAction(self, connection)
+
+    def channelAction(self, connection, user, channel, message, index=0):
+        for feed in self.feeds.keys():
+            self.checkFeed(feed)
 
     def scheduleAction(self, connection):
 
@@ -60,49 +86,30 @@ class Reaction(lampstand.reactions.base.Reaction):
         if not self.schedule_count == 0:
             return
 
-        self.checkEmpireFeed(connection)
-        self.checkOdysseyFeed(connection)
+        for feed in self.feeds.keys():
+            self.checkFeed(feed)
 
-    def checkEmpireFeed(self, connection):
-        empire_feed = 'https://www.facebook.com/feeds/page.php?format=rss20&id=136575943105061'
-        print '[EmpireFeed] Fetching feed'
-        feed = feedparser.parse(empire_feed)
+    def checkFeed(self, feedname):
+        feed_settings = self.feeds[feedname]
+    
+        print '[FeedWatch] Fetching feed ' + feed_settings['url']
+        feed = feedparser.parse(feed_settings['url'])
         last_entry = feed['entries'][0]
 
-        if self.last_empire_seen == last_entry['id']:
-            print '[EmpireFeed] Same as last ID: %s' % last_entry['title']
+        if self.feeds[feedname]['last_seen'] == last_entry['id']:
+            print '[FeedWatch] Same as last ID: %s' % last_entry['title']
             return
 
-        if not self.last_empire_seen:
-            print '[EmpireFeed] No previous ID, setting, leaving: %s' % last_entry['title']
-            self.last_empire_seen = last_entry['id']
+        if not self.feeds[feedname]['last_seen']:
+            print '[FeedWatch] No previous ID, setting, leaving: %s' % last_entry['title']
+            self.feeds[feedname]['last_seen'] = last_entry['id']
             return
 
-        self.last_empire_seen = last_entry['id']
+        self.feeds[feedname]['last_seen'] = last_entry['id']
 
-        text = "New Empire Facebook announcement: %s <%s>" % (
-            last_entry['title'], last_entry['link'])
-        print '[EmpireFeed] Announcing %s' % text
-        connection.message("#empirefroth", text)
+        text = "New %s announcement: %s <%s>" % (
+            self.feeds[feedname]['singular'], last_entry['title'], last_entry['link'])
+        print '[FeedWatch] Announcing %s' % text
+        for channel in self.feeds[feedname]['channels']:
+            connection.message("#lstest", text)
 
-    def checkOdysseyFeed(self, connection):
-        empire_feed = 'https://www.facebook.com/feeds/page.php?format=rss20&id=319644741567'
-        print '[OdysseyFeed] Fetching feed'
-        feed = feedparser.parse(empire_feed)
-        last_entry = feed['entries'][0]
-
-        if self.last_odyssey_seen == last_entry['id']:
-            print '[OdysseyFeed] Same as last ID: %s' % last_entry['title']
-            return
-
-        if not self.last_odyssey_seen:
-            print '[OdysseyFeed] No previous ID, setting, leaving: %s' % last_entry['title']
-            self.last_odyssey_seen = last_entry['id']
-            return
-
-        self.last_odyssey_seen = last_entry['id']
-
-        text = "New Odyssey Facebook announcement: %s <%s>" % (
-            last_entry['title'], last_entry['link'])
-        print '[OdysseyFeed] Announcing %s' % text
-        connection.message("#odcfroth", text)
