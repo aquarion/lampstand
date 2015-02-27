@@ -111,5 +111,5 @@ class Reaction(lampstand.reactions.base.Reaction):
             self.feeds[feedname]['singular'], last_entry['title'], last_entry['link'])
         print '[FeedWatch] Announcing %s' % text
         for channel in self.feeds[feedname]['channels']:
-            connection.message("#lstest", text)
+            connection.message(channel, text)
 
