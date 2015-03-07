@@ -43,9 +43,10 @@ class Reaction(lampstand.reactions.base.Reaction):
             "lowflyingrocks",
             "channel")
 
-        OAUTH_FILENAME = os.environ.get(
-            'HOME',
-            '') + os.sep + '.lampstand_oauth'
+        #OAUTH_FILENAME = os.environ.get(
+        #    'HOME',
+        #    '') + os.sep + '.lampstand_oauth'
+	OAUTH_FILENAME = connection.config.get("twitter", "oauth_cache")
         CONSUMER_KEY = connection.config.get("twitter", "consumer_key")
         CONSUMER_SECRET = connection.config.get("twitter", "consumer_secret")
 

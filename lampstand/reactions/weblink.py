@@ -57,9 +57,10 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         self.lastlink = {}
 
-        OAUTH_FILENAME = os.environ.get(
-            'HOME',
-            '') + os.sep + '.lampstand_oauth'
+        #OAUTH_FILENAME = os.environ.get(
+        #    'HOME',
+        #    '') + os.sep + '.lampstand_oauth'
+	OAUTH_FILENAME = connection.config.get("twitter", "oauth_cache")
         CONSUMER_KEY = connection.config.get("twitter", "consumer_key")
         CONSUMER_SECRET = connection.config.get("twitter", "consumer_secret")
 
@@ -196,7 +197,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             """http https telnet gopher file wais ftp""".split())
         ltrs = r'\w'
         gunk = r'/#~:.?+=&%@!\-'
-        punc = r'.:?\-,'
+        punc = r'.:?\-,\''
         any = "%(ltrs)s%(gunk)s%(punc)s" % {'ltrs': ltrs,
                                             'gunk': gunk,
                                             'punc': punc}

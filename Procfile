@@ -1,1 +1,1 @@
-bot: ./launch.sh
+lampstand: /home/lampstand/lampstand/launch.sh
