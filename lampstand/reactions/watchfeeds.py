@@ -58,7 +58,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         # 0):
 
         for feed in self.feeds.keys():
-            self.checkFeed(feed)
+            self.checkFeed(feed, connection)
 
         # def everyLine(self, connection, user, channel, message)
         # def leaveAction(self, connection, user, reason, parameters)
@@ -68,7 +68,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def channelAction(self, connection, user, channel, message, index=0):
         for feed in self.feeds.keys():
-            self.checkFeed(feed)
+            self.checkFeed(feed, connection)
 
     def scheduleAction(self, connection):
 
@@ -87,9 +87,9 @@ class Reaction(lampstand.reactions.base.Reaction):
             return
 
         for feed in self.feeds.keys():
-            self.checkFeed(feed)
+            self.checkFeed(feed, connection)
 
-    def checkFeed(self, feedname):
+    def checkFeed(self, feedname, connection):
         feed_settings = self.feeds[feedname]
     
         print '[FeedWatch] Fetching feed ' + feed_settings['url']
@@ -111,5 +111,6 @@ class Reaction(lampstand.reactions.base.Reaction):
             self.feeds[feedname]['singular'], last_entry['title'], last_entry['link'])
         print '[FeedWatch] Announcing %s' % text
         for channel in self.feeds[feedname]['channels']:
+	    print "[FeedWatch] (%s) %s" % (channel, text)
             connection.message(channel, text)
 
