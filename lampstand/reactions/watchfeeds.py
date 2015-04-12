@@ -29,7 +29,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             'url' : "https://www.facebook.com/feeds/page.php?format=rss20&id=319644741567",
             'plural': "Odyssey Updates",
             'singular': "Odyssey update",
-            'channels': ['#odyfroth', ],
+            'channels': ['#odcfroth', ],
             'last_seen': False
         },
         'empire' : {
