@@ -2,6 +2,7 @@ import re
 import lampstand.reactions.base
 from lampstand import shakeinsult
 
+import logging
 
 def __init__():
     pass
@@ -15,6 +16,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     uses = []
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
         self.channelMatch = re.compile(
             '%s. insult (.*)(\W?)' %
             connection.nickname,
@@ -22,7 +24,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def channelAction(self, connection, user, channel, message):
 
-        print "[INSULT] called"
+        self.logger.info("[INSULT] called")
 
         if self.overUsed():
             connection.message(
@@ -39,10 +41,10 @@ class Reaction(lampstand.reactions.base.Reaction):
             insultee = user
             orig_insultee = user
 
-        print "[INSULT] Insulting %s" % insultee
+        self.logger.info("[INSULT] Insulting %s" % insultee)
 
         if insultee.lower() == 'glados':
-            print "Kicking %s for taking the name of my lady in vain" % user
+            self.logger.info("Kicking %s for taking the name of my lady in vain" % user)
             connection.kick(channel, user, 'No')
             return
 
@@ -72,7 +74,7 @@ class Reaction(lampstand.reactions.base.Reaction):
                 user)
             return
 
-        print "%s" % item
+        self.logger.info("%s" % item)
         insult = shakeinsult.shakeinsult(1)
 
         self.updateOveruse()

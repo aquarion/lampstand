@@ -10,6 +10,7 @@ from lampstand import tools
 from lampstand.tools import splitAt
 import lampstand.reactions.base
 
+import logging
 
 def __init__():
     pass
@@ -19,11 +20,12 @@ class Reaction(lampstand.reactions.base.Reaction):
     __name = 'Haiku'
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
         self.config = {}
 
         self.getconfig(connection)
 
-        print "Haiku Init!"
+        self.logger.info("Haiku Init!")
         self.channelMatch = (
             re.compile(
                 '%s. how many syllables in ([\w ]*)\??' %
@@ -50,7 +52,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     def everyLine(self, connection, user, channel, message):
         channelname = channel[1:]
         if channelname in self.config and self.config[channelname] == "ignore":
-            print "[HAIKU] Ignoring channel %s " % channelname
+            self.logger.info("[HAIKU] Ignoring channel %s " % channelname)
             return False
 
         # Fallback
@@ -60,7 +62,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         matches = self.channelMatch[0].findall(message)
 
-        # print matches
+        # self.logger.info(matches)
 
         syllables = haikufinder.LineSyllablizer(matches[0]).count_syllables()
         #syllables = haikufinder.HaikuFinder(matches[0]).count_syllables()
@@ -82,25 +84,25 @@ class Reaction(lampstand.reactions.base.Reaction):
         return True
 
     def save(self):
-        print "[Haiku] Saving database..."
+        self.logger.info("[Haiku] Saving database...")
         output = open("haiku_cheatsheet.pkl.db", 'wb')
         pickle.dump(self.cheatsheet, output)
         output.close()
 
     def load(self):
-        print "[Haiku] Loading database..."
+        self.logger.info("[Haiku] Loading database...")
         try:
             input = open("haiku_cheatsheet.pkl.db", 'rb')
             self.cheatsheet = pickle.load(input)
             input.close()
             for word, count in self.cheatsheet:
-                print "[Haiku] %s has %d syllables" % (word, int(count))
+                self.logger.info("[Haiku] %s has %d syllables" % (word, int(count)))
                 haikufinder.HaikuFinder.add_word(word, int(count))
         except:
             self.cheatsheet = {}
 
     def cheatSheet(self, connection, user, channel, message):
-        print "Cheatsheet"
+        self.logger.info("Cheatsheet")
 
         matches = self.channelMatch[1].findall(message)
 
@@ -123,14 +125,14 @@ class Reaction(lampstand.reactions.base.Reaction):
         if len(self.channels[channel]) > 3:
             self.channels[channel] = self.channels[channel][-3:]
 
-        # print "Content for %s: %s " % (channel, "
+        # self.logger.info("Content for %s: %s " % (channel, ")
         # ".join(self.channels[channel]))
 
         haikus = haikufinder.HaikuFinder(
             " ".join(
                 self.channels[channel])).find_haikus()
 
-        # print haikus
+        # self.logger.info(haikus)
 
         if len(haikus):
 

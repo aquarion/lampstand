@@ -6,6 +6,7 @@ import time
 import random
 import sys
 
+import logging
 
 def __init__():
     pass
@@ -38,6 +39,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     ]
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
         self.channelMatch = (
             re.compile(
                 '(hands|gives) (.*) (a|the) (suspicious|) package',
@@ -60,7 +62,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     def channelAction(self, connection, user, channel, message, index):
 
         if not user.lower() == "aquarion":
-            print "Bomb disabled"
+            self.logger.info("Bomb disabled")
             connection.message(
                 user,
                 "The packages function has been disabled.")
@@ -70,11 +72,11 @@ class Reaction(lampstand.reactions.base.Reaction):
             connection.message(user, "Overuse Triggered")
             return True
 
-        print "[PACKAGE]"
+        self.logger.info("[PACKAGE]")
 
         matchwork = self.channelMatch[0].findall(message)
 
-        print matchwork
+        self.logger.info(matchwork)
 
         hands = matchwork[0][0]
         player = matchwork[0][1]
@@ -121,7 +123,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         elif not user == self.package_player:
             connection.message(channel, "%s: You don't have it" % user)
 
-        print "[/PACKAGE]"
+        self.logger.info("[/PACKAGE]")
         return True
 
     # def everyLine(self, connection, user, channel, message)
@@ -134,11 +136,11 @@ class Reaction(lampstand.reactions.base.Reaction):
         channel = self.this_channel
 
         if self.package_in_play:
-            print self.message_number, '/', len(self.messages)
+            self.logger.info(self.message_number, '/', len(self.messages))
             if self.message_number < len(self.messages):
-                print "Send message"
+                self.logger.info("Send message")
 
-                print self.message_number, self.messages[self.message_number]
+                self.logger.info(self.message_number, self.messages[self.message_number])
 
                 if self.messages[self.message_number]:
                     message = self.messages[
@@ -146,7 +148,7 @@ class Reaction(lampstand.reactions.base.Reaction):
                     connection.message(channel, message)
                 self.message_number += 1
             else:
-                print "Go Boom"
+                self.logger.info("Go Boom")
                 if self.its_a_bomb and not self.package_player.lower(
                 ) == "aquarion":
                     connection.kick(

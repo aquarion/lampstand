@@ -19,6 +19,7 @@ from twitter import Twitter
 from twitter.oauth import OAuth, write_token_file, read_token_file
 from twitter.oauth_dance import oauth_dance
 
+import logging
 
 def __init__():
     pass
@@ -37,6 +38,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     schedule_count = 30
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
         self.dbconnection = connection.dbconnection
 
         self.output_channel = "#%s" % connection.config.get(
@@ -80,7 +82,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         self.schedule_count = self.schedule_count + 1
 
-        # print "[LFR] %s/%s" % (self.schedule_count, ticks_between_runs)
+        # self.logger.info("[LFR] %s/%s" % (self.schedule_count, ticks_between_runs))
 
         if self.schedule_count >= ticks_between_runs:
             self.schedule_count = 0
@@ -90,12 +92,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         channel = self.output_channel
 
-        print "[LFR] Checking for Low Flying Rocks"
+        self.logger.info("[LFR] Checking for Low Flying Rocks")
 
         if not self.twitter:
-            print "[LFR] No twitter connection"
+            self.logger.info("[LFR] No twitter connection")
         if not self.last_lfr_seen:
-            print "[LFR] First Run"
+            self.logger.info("[LFR] First Run")
             statuses = self.twitter.statuses.user_timeline(
                 screen_name="lowflyingrocks")
             last = statuses[0]
@@ -103,16 +105,16 @@ class Reaction(lampstand.reactions.base.Reaction):
             #connection.message(channel, text)
             self.last_lfr_seen = last['id']
         else:
-            print "[LFR] Future Run (from %d)" % self.last_lfr_seen
+            self.logger.info("[LFR] Future Run (from %d)" % self.last_lfr_seen)
             statuses = self.twitter.statuses.user_timeline(
                 screen_name="lowflyingrocks",
                 since_id=self.last_lfr_seen)
             if(len(statuses)):
-                print "[LFR] Rocken! :("
+                self.logger.info("[LFR] Rocken! :(")
                 self.last_lfr_seen = statuses[0]['id']
                 for status in statuses:
                     text = "Space object %s" % status['text']
                     connection.message(channel, text)
-                    print "[LFR] %s" % text
+                    self.logger.info("[LFR] %s" % text)
             else:
-                print "[LFR] ... No rocks :("
+                self.logger.info("[LFR] ... No rocks :(")

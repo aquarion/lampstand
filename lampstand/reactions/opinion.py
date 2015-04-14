@@ -2,6 +2,7 @@ import re
 import time
 import random
 import lampstand.reactions.base
+import logging
 
 
 def __init__():
@@ -12,6 +13,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     __name = 'Opinion'
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
         self.channelMatch = (
             re.compile('(.*?)(\S*)(\+\+|--)\s*$'),
             re.compile(
@@ -31,7 +33,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             message,
             matchIndex=False):
         return False
-        print 'Looking at <<%s>>' % message
+        self.logger.info('Looking at <<%s>>' % message)
         if (matchIndex == 0):
             matchResult = self.channelMatch[0].findall(message)
             channel, self.vote(matchResult, user, message)
@@ -41,7 +43,7 @@ class Reaction(lampstand.reactions.base.Reaction):
                 connection.nickname,
                 re.IGNORECASE)
             matchResult = matchRegex.findall(message)
-            print 'match at <<%s>>' % matchResult
+            self.logger.info('match at <<%s>>' % matchResult)
 
             reactions = {
                 'your mum': 'She was a saint. And a toaster',
@@ -60,8 +62,8 @@ class Reaction(lampstand.reactions.base.Reaction):
     def privateAction(self, connection, user, channel, message):
 
         match = self.privateMatch.findall(message)
-        print "Private Match"
-        print match
+        self.logger.info("Private Match")
+        self.logger.info(match)
         connection.message(
             self.opinion(
                 match[0],
@@ -72,7 +74,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         match = match[0]
 
         if len(match[1]) < 3:
-            print '[OPINION] Not recording vote for %s' % match[1]
+            self.logger.info('[OPINION] Not recording vote for %s' % match[1])
             return
 
         if match[2] == '--':
@@ -92,12 +94,12 @@ class Reaction(lampstand.reactions.base.Reaction):
                 vote,
                 fullmessage))
 
-        print '[OPINION] A vote for %s' % match[1]
+        self.logger.info('[OPINION] A vote for %s' % match[1])
 
         # return match;
 
     def opinion(self, item, connection):
-        print '[OPINION] A query on %s' % item
+        self.logger.info('[OPINION] A query on %s' % item)
 
         if item.lower() == connection.nickname.lower():
             return "Obviously, I'm awesome"
@@ -109,13 +111,13 @@ class Reaction(lampstand.reactions.base.Reaction):
              ))
         result = cursor.fetchone()
 
-        print result
+        self.logger.info(result)
         if not result or result[0] is None:
             return 'I have no opinions on that'
 
         OpinionOptions = []
 
-        print result[1]
+        self.logger.info(result[1])
         rating = int(result[1])
 
         cursor.execute(
@@ -124,8 +126,8 @@ class Reaction(lampstand.reactions.base.Reaction):
              ))
 
         rows = cursor.fetchall()
-        print rows
-        # print "Better: %s " % rows;
+        self.logger.info(rows)
+        # self.logger.info("Better: %s " % rows;)
         OpinionOptions.extend(rows)
 
         cursor.execute(
@@ -133,7 +135,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             rating)
 
         rows = cursor.fetchall()
-        # print "Worse: %s " % rows;
+        # self.logger.info("Worse: %s " % rows;)
         OpinionOptions.extend(rows)
 
         Choice = random.choice(OpinionOptions)
@@ -143,5 +145,5 @@ class Reaction(lampstand.reactions.base.Reaction):
         else:
             return "Better than %s" % Choice[0]
 
-        print result
-        print OpinionOptions
+        self.logger.info(result)
+        self.logger.info(OpinionOptions)

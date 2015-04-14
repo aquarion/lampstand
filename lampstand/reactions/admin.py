@@ -4,7 +4,7 @@ import time
 import random
 import sys
 import lampstand.reactions.base
-
+import logging
 
 def __init__():
     pass
@@ -16,6 +16,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     canSay = ["Aquarion", "ccooke"]
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
 
         adminconf = connection.config.items("admin")
         if adminconf:

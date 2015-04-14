@@ -6,6 +6,7 @@ import re
 import time
 import datetime
 
+import logging
 
 def __init__():
     pass
@@ -24,6 +25,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     schedule_count = 6
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
         self.channelMatch = (
             re.compile(
                 '%s: quote (.*?) (.*)\s*$' %
@@ -134,9 +136,9 @@ class Reaction(lampstand.reactions.base.Reaction):
             cursor.execute(q)
             result = cursor.fetchone()
             self.last_quote_seen = result[0]
-            print "[QUOTE] Defaulting last seen: %s" % self.last_quote_seen
+            self.logger.info("[QUOTE] Defaulting last seen: %s" % self.last_quote_seen)
 
-        print "[QUOTE] Looking for quotes submitted > %s" % self.last_quote_seen
+        self.logger.info("[QUOTE] Looking for quotes submitted > %s" % self.last_quote_seen)
 
         q = "select submitted from chirpy.mf_quotes where submitted > %s and approved = 1 order by submitted desc"
         cursor = self.dbconnection.cursor()
@@ -157,6 +159,6 @@ class Reaction(lampstand.reactions.base.Reaction):
             connection.message(channel, message)
             quote = quotes[0]
             self.last_quote_seen = quote[0]
-            print "[QUOTE] Found %s since %s " % (countquotes, self.last_quote_seen)
+            self.logger.info("[QUOTE] Found %s since %s " % (countquotes, self.last_quote_seen))
 
         return "Found %s since %s " % (countquotes, self.last_quote_seen)

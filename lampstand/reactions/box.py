@@ -6,7 +6,7 @@ import random
 import lampstand.reactions.base
 from lampstand.tools import splitAt
 import simplejson
-
+import logging
 
 def __init__():
     pass
@@ -20,6 +20,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     uses = []
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
         self.channelMatch = re.compile(
             '%s. Open (the|a) box' %
             connection.nickname,

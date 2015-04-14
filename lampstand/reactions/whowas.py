@@ -7,6 +7,7 @@ import datetime
 import lampstand.reactions.base
 from lampstand import tools
 
+import logging
 
 def __init__():
     pass
@@ -16,6 +17,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     __name = 'Whowas'
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
         #self.channelMatch = re.compile('.*')
         self.channelMatch = re.compile(
             '%s.? have you seen (.*)\??' %
@@ -27,7 +29,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def channelAction(self, connection, user, channel, message):
 
-        print "[WHOWAS] requested"
+        self.logger.info("[WHOWAS] requested")
         self.channel = channel
 
         matches = self.channelMatch.findall(message)
@@ -80,7 +82,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     def leaveAction(self, connection, user, reason, params):
 
         channel = params[0]
-        print "[WHOWAS] saw a nick leave: %s quit, saying %s (%s)" % (user, reason, params)
+        self.logger.info("[WHOWAS] saw a nick leave: %s quit, saying %s (%s)" % (user, reason, params))
         cursor = self.dbconnection.cursor()
 
         cursor.execute(
@@ -92,7 +94,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         self.channel = "PM"
 
-        print "[WHOWAS] privately requested"
+        self.logger.info("[WHOWAS] privately requested")
         if self.privateMatch.match(message):
             matches = self.privateMatch.findall(message)
             searchingfor = matches[0]
@@ -133,11 +135,11 @@ class Reaction(lampstand.reactions.base.Reaction):
                     connection.message(user, result)
 
             #returnMessage = self.lastseen(searchingfor)
-            # print "[WHOWAS] %s " % returnMessage
+            # self.logger.info("[WHOWAS] %s " % returnMessage)
             #connection.message(user, returnMessage.encode('utf8'))
 
     def nickChangeAction(self, connection, old_nick, new_nick):
-        print "[WHOWAS] saw a nick change"
+        self.logger.info("[WHOWAS] saw a nick change")
         new_nick = ">%s" % new_nick
         cursor = self.dbconnection.cursor()
         cursor.execute(
@@ -148,7 +150,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def lastseen(self, searchingfor, after_timestamp=0, depth=0):
 
-        print "[WHOWAS] Looking for %s after %s" % (searchingfor, after_timestamp)
+        self.logger.info("[WHOWAS] Looking for %s after %s" % (searchingfor, after_timestamp))
 
         if depth > 4:
             return ' ... and at that point I gave up'
@@ -162,7 +164,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         result = cursor.fetchone()
         if result is None:
             message = "I haven't seen %s say anything" % searchingfor
-            print "[WHOWAS] Looking for a quit for %s after %s" % (searchingfor, after_timestamp)
+            self.logger.info("[WHOWAS] Looking for a quit for %s after %s" % (searchingfor, after_timestamp))
             return "%s%s" % (message,
                              self.lastquit(
                                  after_timestamp,
@@ -173,11 +175,11 @@ class Reaction(lampstand.reactions.base.Reaction):
             deltadesc = "ago"
 
             if (after_timestamp == 0):
-                print "[WHOWAS] No after timestamp for %s, Now %s, Lastseen %s" % (result[1], time.localtime(), time.localtime(result[1]))
+                self.logger.info("[WHOWAS] No after timestamp for %s, Now %s, Lastseen %s" % (result[1], time.localtime(), time.localtime(result[1])))
                 now = time.mktime(time.localtime())
                 deltadiff = now - result[1]
             else:
-                print "[WHOWAS After timestamp %s" % after_timestamp
+                self.logger.info("[WHOWAS After timestamp %s" % after_timestamp)
                 now = after_timestamp
                 deltadesc = "later"
                 deltadiff = result[1] - after_timestamp
@@ -198,7 +200,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         else:
             # Last action is a phrase
-            print "[WHOWAS] Found a last phrase:"
+            self.logger.info("[WHOWAS] Found a last phrase:")
             deltadesc = "ago"
 
             if (after_timestamp == 0):
@@ -236,7 +238,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         quitresult = cursor.fetchone()
         if quitresult is None:
-            print "[WHOWAS] No quit for %s after %s" % (searchingfor, lasttime)
+            self.logger.info("[WHOWAS] No quit for %s after %s" % (searchingfor, lasttime))
 
             return ""
         else:
@@ -244,7 +246,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             quittime = time.localtime(quitresult[0])
             timedelta = time.mktime(quittime) - lasttime
 
-            print "[WHOWAS] Quit result: %s @ %s" % (quitresult, quittime)
+            self.logger.info("[WHOWAS] Quit result: %s @ %s" % (quitresult, quittime))
 
             if(timedelta < 60):
                 deltastring = "seconds"

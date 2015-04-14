@@ -7,6 +7,7 @@ import datetime
 import lampstand.reactions.base
 from lampstand import tools
 
+import logging
 
 def __init__():
     pass
@@ -16,6 +17,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     __name = 'Memory'
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
         self.dbconnection = connection.dbconnection
         self.memory = {}
         self.channelMatch = ()
@@ -24,7 +26,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def everyLine(self, connection, user, channel, message):
         if channel not in self.memory:
-            print "New memorybank for %s channel" % channel
+            self.logger.info("New memorybank for %s channel" % channel)
             self.memory[channel] = []
 
         line = {
@@ -42,26 +44,26 @@ class Reaction(lampstand.reactions.base.Reaction):
             return []
         lines = self.memory[channel][:]
         if user:
-            print "looking for user %s " % user
+            self.logger.info("looking for user %s " % user)
             for line in lines[:]:
                 if not line['user'].lower() == user.lower():
                     lines.remove(line)
-                    print "Dropping %s: %s" % (line['user'], line['message'])
+                    self.logger.info("Dropping %s: %s" % (line['user'], line['message']))
 
         if filter:
             filter = filter.lower()
-            print "looking for filter %s " % filter
+            self.logger.info("looking for filter %s " % filter)
             for line in lines[:]:
                 if line['message'].lower().find(filter) == -1:
                     lines.remove(line)
-                    print "Dropping %s: %s" % (line['user'], line['message'])
+                    self.logger.info("Dropping %s: %s" % (line['user'], line['message']))
 
         for line in lines:
-            print "Kept %s: %s" % (line['user'], line['message'])
+            self.logger.info("Kept %s: %s" % (line['user'], line['message']))
 
         return lines
 
         pass
 
     def dump(self, connection, user, reason, params):
-        print self.memory
+        self.logger.info(self.memory)

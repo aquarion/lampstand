@@ -8,6 +8,7 @@ import random
 import sys
 from datetime import datetime, date, time
 
+import logging
 
 def __init__():
     pass
@@ -23,6 +24,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     uses = []
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
 
         self.dbconnection = connection.dbconnection
 
@@ -106,7 +108,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         channeltriggers = 0
         for mod in connection.channelModules:
-            print "Chan %s" % mod
+            self.logger.info("Chan %s" % mod)
             if hasattr(mod, "channelMatch"):
                 if (isinstance(mod.channelMatch,
                                tuple) or isinstance(mod.channelMatch,

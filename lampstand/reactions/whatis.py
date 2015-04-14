@@ -5,6 +5,7 @@ import os.path
 import re
 import time
 import random
+import logging
 
 
 def __init__():
@@ -26,6 +27,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     lastid = 0
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
         self.channelMatch = (
             re.compile(
                 '%s. (re|)define (.*?) as (.*)\s*$' %
@@ -61,7 +63,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             message,
             matchIndex=False):
 
-        print 'Looking at <<%s>>' % message
+        self.logger.info('Looking at <<%s>>' % message)
 
         matches = self.channelMatch[matchIndex].findall(message)[0]
 
@@ -168,22 +170,22 @@ class Reaction(lampstand.reactions.base.Reaction):
             like=False):
 
         key = matches
-        print "Getting definition for %s " % key
+        self.logger.info("Getting definition for %s " % key)
 
         if key == self.lastasked and key == self.lastasked2:
-            print "Bored of this now"
+            self.logger.info("Bored of this now")
             connection.kick(channel, user, "Bored now.")
             return True
 
         if key == self.lastasked:
-            print "A repeat"
+            self.logger.info("A repeat")
             connection.message(
                 channel, "%s: I just said, %s" %
                 (user, self.answered))
             return True
 
         if key.lower() == "glados":
-            print "a Glados"
+            self.logger.info("a Glados")
             connection.message(channel, "%s: The AI of my dreams" % user)
             return True
 
@@ -209,7 +211,7 @@ class Reaction(lampstand.reactions.base.Reaction):
                 self.lastasked = key
                 self.answered = " ".join(messages)
                 self.blame = src
-                print messages
+                self.logger.info(messages)
                 for message in messages:
                     connection.message(channel, message)
 
@@ -219,7 +221,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         return True
 
     def define(self, key, like=False):
-        print "Looking up %s" % key
+        self.logger.info("Looking up %s" % key)
 
         cursor = self.dbconnection.cursor()
 
@@ -250,7 +252,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         row = cursor.fetchone()
 
         if(row[3] > 1):
-            print "%s has %s definitions, randomizing..." % (row[0], row[3])
+            self.logger.info("%s has %s definitions, randomizing..." % (row[0], row[3]))
             query = "Select word,definition,author from define where word = %s order by rand() limit 1"
             cursor.execute(query, (row[0],))
             row = cursor.fetchone()

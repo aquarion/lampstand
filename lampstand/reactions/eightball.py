@@ -5,6 +5,7 @@ import re
 import time
 import random
 import sys
+import logging
 
 
 def __init__():
@@ -20,6 +21,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     uses = []
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
         self.channelMatch = (
             re.compile(
                 '^%s.  ?ask the [oracle|8.ball|leviathan]' %
@@ -31,10 +33,10 @@ class Reaction(lampstand.reactions.base.Reaction):
                 re.IGNORECASE))
 
     def channelAction(self, connection, user, channel, message, matchIndex):
-        print "[8Ball] called"
+        self.logger.info("[8Ball] called")
 
         if not message.lower().find(" or ") == -1:
-            print "[8Ball] ... That looks like a choice to me"
+            self.logger.info("[8Ball] ... That looks like a choice to me")
             return False
 
         if self.overUsed():

@@ -8,6 +8,7 @@ import time
 import random
 import sys
 
+import logging
 
 def __init__():
     pass
@@ -23,6 +24,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     uses = []
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
         self.channelMatch = re.compile(
             '^%s. contribute' %
             connection.nickname,
@@ -46,12 +48,12 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         mark = markov.Markov(words)
 
-        print words
-        print mark.words
+        self.logger.info(words)
+        self.logger.info(mark.words)
 
         text = mark.generate_markov_text(50)
 
-        print text
+        self.logger.info(text)
 
         connection.msg(channel, text)
 

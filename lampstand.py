@@ -40,26 +40,7 @@ import ConfigParser
 from BeautifulSoup import UnicodeDammit
 
 from lampstand import sms
-
-
-class MessageLogger:
-
-    """
-    An independent logger class (because separation of application
-    and protocol logic is a good thing).
-    """
-
-    def __init__(self, file):
-        self.file = file
-
-    def log(self, message):
-        """Write a message to the file."""
-        timestamp = time.strftime("[%H:%M:%S]", time.localtime(time.time()))
-        self.file.write('%s %s\n' % (timestamp, message))
-        self.file.flush()
-
-    def close(self):
-        self.file.close()
+import logging
 
 
 class ChannelActions:
@@ -67,6 +48,7 @@ class ChannelActions:
 
     def __init__(self, connection):
         self.connection = connection
+        self.logger = connection.logger
 
     def action(self, user, channel, message):
         for channelModule in self.connection.channelModules:
@@ -89,17 +71,17 @@ class ChannelActions:
                                 return True
                         indx = indx + 1
                 elif channelModule.channelMatch.match(message):
-                    print 'Channel Matched on %s' % channelModule
+                    self.logger.info('Channel Matched on %s' % channelModule)
                     result = channelModule.channelAction(
                         self.connection,
                         user,
                         channel,
                         message)
                     if result:
-                        print "ChannelAction successfully replied, returning to loop"
+                        self.logger.info("ChannelAction successfully replied, returning to loop")
                         return True
                     else:
-                        print "ChannelAction declined, returning to loop"
+                        self.logger.info("ChannelAction declined, returning to loop")
 
             if hasattr(channelModule, "everyLine"):
                 result = False
@@ -111,7 +93,7 @@ class ChannelActions:
                 if result:
                     return True
 
-        # print "< %s/%s: %s" % (user, channel, message)
+        # self.logger.info("< %s/%s: %s" % (user, channel, message))
 
     def leave(self, reason, user, parameters):
 
@@ -126,23 +108,23 @@ class ChannelActions:
         for joinModule in self.connection.joinModules:
             joinModule.joinAction(self.connection, user, reason, parameters)
 
-        # print "< %s/%s: %s" % (user, channel, message)
+        # self.logger.info("< %s/%s: %s" % (user, channel, message))
 
     def nickChange(self, old_nick, new_nick):
 
         if new_nick not in self.connection.people:
             self.connection.people.append(new_nick)
-            print "Added %s to user list" % new_nick
+            self.logger.info("Added %s to user list" % new_nick)
 
         if (old_nick in self.connection.people):
             self.connection.people.remove(old_nick)
-            print "Removed %s from user list" % old_nick
+            self.logger.info("Removed %s from user list" % old_nick)
 
         if old_nick == self.connection.original_nickname and self.connection.nickname != self.connection.original_nickname:
             self.connection.register(self.connection.original_nickname)
 
         if old_nick in self.peopleToIgnore or new_nick in self.peopleToIgnore:
-            print "(Ignoring)"
+            self.logger.info("(Ignoring)")
         else:
             matched = 0
             for nickChangeModule in self.connection.nickChangeModules:
@@ -158,11 +140,12 @@ class PrivateActions:
 
     def __init__(self, connection):
         self.connection = connection
+        self.logger = connection.logger
 
     def action(self, user, channel, message):
 
         if user in self.peopleToIgnore or user == self.connection.nickname:
-            print "(Ignoring %s on principle)" % user
+            self.logger.info("(Ignoring %s on principle)" % user)
         else:
 
             matched = 0
@@ -186,7 +169,7 @@ class PrivateActions:
                         indx = indx + 1
                 elif privateModule.privateMatch.match(message):
                     matched = matched + 1
-                    print 'private Matched on %s' % privateModule
+                    self.logger.info('private Matched on %s' % privateModule)
                     privateModule.privateAction(
                         self.connection,
                         user,
@@ -196,12 +179,12 @@ class PrivateActions:
             if matched == 0:
                 peopleToIgnore = ('NickServ', 'MemoServ', 'ChanServ')
                 if user in peopleToIgnore:
-                    print "(Ignoring %s for not matching)" % user
+                    self.logger.info("(Ignoring %s for not matching)" % user)
                 else:
                     self.connection.msg(
                         user,
                         "I didn't understand that, sorry. Docs: http://www.maelfroth.org/lampstand.php")
-                    print "Sending Sorry to %s" % user
+                    self.logger.info("Sending Sorry to %s" % user)
 
 
 class LampstandLoop(irc.IRCClient):
@@ -227,7 +210,7 @@ class LampstandLoop(irc.IRCClient):
             except:
                 pass
 
-    def mysqlConnection(self):
+    def setupMysql(self):
         user = self.config.get("database", "user")
         passwd = self.config.get("database", "password")
         db = self.config.get("database", "database")
@@ -238,13 +221,38 @@ class LampstandLoop(irc.IRCClient):
             db=db,
             charset='utf8')
 
+    def setupLogging(self):
+        LOG_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
+        print "logging to %s/lampstand.log" % LOG_DIR
+
+        formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+
+        console = logging.StreamHandler()
+        console.setLevel(logging.DEBUG)
+        console.setFormatter(formatter)
+        logging.getLogger('').addHandler(console)
+
+        logfile = FileHandler("%s/lampstand.log" % LOG_DIR, mode='a')
+        logfile.setLevel(logging.DEBUG)
+        logfile.setFormatter(formatter)
+        logging.getLogger('').addHandler(logfile)
+
+        # logging.getLogger('').setLevel(logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
+        self.logger.debug("Hello Debug")
+        self.logger.info("Hello Info")
+        self.logger.warn("Hello Warn")
+        self.logger.error("Hello Error")
+
+
     def connectionMade(self):
 
         self.date_started = datetime.now()
 
         self.config = self.factory.config
 
-        self.mysqlConnection()
+        self.setupMysql()
+        self.setupLogging()
 
         # threads.deferToThread(self.scheduledTasks)
         # reactor.callInThread(self.scheduledTask);
@@ -260,8 +268,7 @@ class LampstandLoop(irc.IRCClient):
         logfile = self.config.get("logging", "logfile")
 
         irc.IRCClient.connectionMade(self)
-        self.logger = MessageLogger(open(logfile, "a"))
-
+        
         self.channel = ChannelActions(self)
         self.private = PrivateActions(self)
 
@@ -278,7 +285,7 @@ class LampstandLoop(irc.IRCClient):
         for thingy in config.items("modules"):
             self.installModule(thingy[0])
 
-        self.logger.log("[connected at %s]" %
+        self.logger.info("[connected at %s]" %
                         time.asctime(time.localtime(time.time())))
 
         self.loopy = LoopingCall(self.scheduledTasks)
@@ -292,14 +299,14 @@ class LampstandLoop(irc.IRCClient):
 
         rtn = ''
 
-        print "Installing %s" % moduleName
+        self.logger.info("Installing %s" % moduleName)
 
         if (module in sys.modules):
             self.removeModuleActions(moduleName)
-            print 'Reloading %s' % module
+            self.logger.info('Reloading %s' % module)
             reload(sys.modules[module])
             rtn = 'Reloaded %s' % module
-            print rtn
+            self.logger.info(rtn)
         else:
             try:
                 rtn = 'Loaded %s' % module
@@ -342,46 +349,45 @@ class LampstandLoop(irc.IRCClient):
 
     def addModuleActions(self, moduleName):
 
-        # print sys.modules;
+        # self.logger.info(sys.modules;)
 
         module = sys.modules['lampstand.reactions.%s' % moduleName]
 
         reaction = module.Reaction(self)
 
         if hasattr(reaction, 'channelMatch') or hasattr(reaction, 'everyLine'):
-            print '[%s] Installing channel text reaction' % (moduleName)
+            self.logger.info('[%s] Installing channel text reaction' % (moduleName))
             self.channelModules.append(reaction)
 
         if hasattr(reaction, 'privateMatch'):
-            print '[%s] Installing private text reaction' % moduleName
+            self.logger.info('[%s] Installing private text reaction' % moduleName)
             self.privateModules.append(reaction)
 
         if hasattr(reaction, 'nickChangeAction'):
-            print '[%s] Installing nick change reaction' % moduleName
+            self.logger.info('[%s] Installing nick change reaction' % moduleName)
             self.nickChangeModules.append(reaction)
 
         if hasattr(reaction, 'leaveAction'):
-            print '[%s] Installing channel leave reaction' % moduleName
+            self.logger.info('[%s] Installing channel leave reaction' % moduleName)
             self.leaveModules.append(reaction)
 
         if hasattr(reaction, 'joinAction'):
-            print '[%s] Installing channel join reaction' % moduleName
+            self.logger.info('[%s] Installing channel join reaction' % moduleName)
             self.joinModules.append(reaction)
 
         if hasattr(reaction, 'scheduleAction'):
-            print '[%s] Installing schedule reaction' % moduleName
+            self.logger.info('[%s] Installing schedule reaction' % moduleName)
             self.scheduledTaskModules.append(reaction)
 
     def connectionLost(self, reason):
-        print "Connection lost for reason %s" % reason
+        self.logger.info("Connection lost for reason %s" % reason)
         irc.IRCClient.connectionLost(self, reason)
-        self.logger.log("[disconnected at %s]" %
+        self.logger.info("[disconnected at %s]" %
                         time.asctime(time.localtime(time.time())))
-        self.logger.close()
 
     def nickservGhost(self):
         if self.password:
-            print '[IDENTIFY] Recovering my nickname '
+            self.logger.info('[IDENTIFY] Recovering my nickname ')
             self.msg(
                 'nickserv', "Ghost %s %s" %
                 (self.original_nickname, self.password.encode('utf8')))
@@ -400,15 +406,15 @@ class LampstandLoop(irc.IRCClient):
 
     def joined(self, channel):
         """This will get called when the bot joins the channel."""
-        self.logger.log("[I have joined %s]" % channel)
+        self.logger.info("[I have joined %s]" % channel)
 
     def privmsg(self, user, channel, msg):
         """This will get called when the bot receives a message."""
         user = user.split('!', 1)[0]
-        self.logger.log("<%s> %s" % (user, msg))
+        self.logger.info("<%s> %s" % (user, msg))
 
-        print "%s/%s: %s" % (channel, user, msg)
-        #self.logger.log("<%s> %s" % (self.nickname, msg))
+        self.logger.info("%s/%s: %s" % (channel, user, msg))
+        #self.logger.info("<%s> %s" % (self.nickname, msg))
 
         if (msg[0:3] == '***'):
             return
@@ -425,11 +431,11 @@ class LampstandLoop(irc.IRCClient):
         #    msg = self.channel.action(user, channel, msg)
 
     def action(self, user, channel, msg):
-        print "* %s/%s: %s" % (user, channel, msg)
+        self.logger.info("* %s/%s: %s" % (user, channel, msg))
         """This will get called when the bot sees someone do an action."""
         user = user.split('!', 1)[0]
         self.channel.action(user, channel, msg)
-        self.logger.log("* %s %s" % (user, msg))
+        self.logger.info("* %s %s" % (user, msg))
 
     def message(self, user, message, length=380):
         message = message.replace('\n', '').replace('\r', '')
@@ -442,7 +448,7 @@ class LampstandLoop(irc.IRCClient):
         """Called when an IRC user changes their nickname."""
         old_nick = prefix.split('!')[0]
         new_nick = params[0]
-        self.logger.log("%s is now known as %s" % (old_nick, new_nick))
+        self.logger.info("%s is now known as %s" % (old_nick, new_nick))
         self.channel.nickChange(old_nick, new_nick)
         for channel, people in self.population.items():
             if old_nick in people:
@@ -457,23 +463,23 @@ class LampstandLoop(irc.IRCClient):
         if old_nick in self.people:
             self.people.remove(old_nick)
 
-        print self.people
-        print self.population
+        self.logger.info(self.people)
+        self.logger.info(self.population)
 
     def irc_PART(self, prefix, params):
         """Saw someone part from the channel"""
-        print "Saw a part: %s %s" % (prefix, params)
+        self.logger.info("Saw a part: %s %s" % (prefix, params))
         nickname = prefix.split('!')[0]
         self.channel.leave('part', nickname, params)
 
-        print params
+        self.logger.info(params)
 
         self.leave(nickname, params[0])
         pass
 
     def irc_QUIT(self, prefix, params):
         """Saw someone Quit from the channel"""
-        print "Saw a quit: %s %s" % (prefix, params)
+        self.logger.info("Saw a quit: %s %s" % (prefix, params))
         nickname = prefix.split('!')[0]
         self.channel.leave('quit', nickname, params)
 
@@ -484,49 +490,49 @@ class LampstandLoop(irc.IRCClient):
 
     def irc_TOPIC(self, prefix, params):
         """Saw someone change the topic"""
-        print "Saw a topic change: %s %s" % (prefix, params)
+        self.logger.info("Saw a topic change: %s %s" % (prefix, params))
         pass
 
     def irc_JOIN(self, prefix, params):
         """Saw someone Join the channel"""
-        print "Saw a join: %s %s" % (prefix, params)
+        self.logger.info("Saw a join: %s %s" % (prefix, params))
         nickname = prefix.split('!')[0]
         channel = params[0]
 
         if nickname not in self.people:
             self.people.append(nickname)
-            print "Added %s to user list" % nickname
+            self.logger.info("Added %s to user list" % nickname)
         else:
-            print "%s is in %s" % (nickname, self.people)
+            self.logger.info("%s is in %s" % (nickname, self.people))
 
         if channel not in self.population:
             self.population[channel] = []
 
         if nickname not in self.population[channel]:
             self.population[channel].append(nickname)
-            print "Added %s to %s user list" % (nickname, channel)
+            self.logger.info("Added %s to %s user list" % (nickname, channel))
         else:
-            print "%s is in %s already" % (nickname, channel)
+            self.logger.info("%s is in %s already" % (nickname, channel))
 
-        print self.population
+        self.logger.info(self.population)
 
         self.channel.join(nickname, params)
         pass
 
     def irc_RPL_TOPIC(self, prefix, params):
         """??????????"""
-        print "Saw a RPL_TOPIC (!!): %s %s" % (prefix, params)
+        self.logger.info("Saw a RPL_TOPIC (!!): %s %s" % (prefix, params))
         pass
 
     def irc_ERR_NICKNAMEINUSE(self, prefix, params):
         """??????????"""
-        print "Saw a irc_ERR_NICKNAMEINUSE (!!): %s %s" % (prefix, params)
+        self.logger.info("Saw a irc_ERR_NICKNAMEINUSE (!!): %s %s" % (prefix, params))
         if (self.nickname == self.original_nickname):
-            print '[IDENTIFY] Downgrading to  ' + self.alt_nickname
+            self.logger.info('[IDENTIFY] Downgrading to  ' + self.alt_nickname)
             self.register(self.alt_nickname)
             self.nickname = self.alt_nickname
         elif (self.nickname == self.alt_nickname):
-            print '[IDENTIFY] Downgrading to  ' + self.original_nickname + '_'
+            self.logger.info('[IDENTIFY] Downgrading to  ' + self.original_nickname + '_')
             self.register(self.original_nickname + '_')
             self.nickname = self.original_nickname + '_'
 
@@ -534,7 +540,7 @@ class LampstandLoop(irc.IRCClient):
 
     def irc_RPL_NAMREPLY(self, prefix, params):
         """??????????"""
-        print "Saw a irc_RPL_NAMREPLY (!!): %s %s" % (prefix, params)
+        self.logger.info("Saw a irc_RPL_NAMREPLY (!!): %s %s" % (prefix, params))
 
         server = prefix
         myname = params[0]
@@ -547,7 +553,7 @@ class LampstandLoop(irc.IRCClient):
         self.population[channel] = []
 
         for nickname in names:
-            print "saw %s" % nickname
+            self.logger.info("saw %s" % nickname)
             if len(nickname) == 0:
                 pass
             elif nickname[0] == '@' or nickname[0] == '+':
@@ -559,8 +565,8 @@ class LampstandLoop(irc.IRCClient):
                     self.people.append(nickname)
                 self.population[channel].append(nickname)
 
-        # print 'People: %s' % self.people
-        # print 'Population: %s' % self.population
+        # self.logger.info('People: %s' % self.people)
+        # self.logger.info('Population: %s' % self.population)
 
         #self.people = people
 
@@ -568,12 +574,12 @@ class LampstandLoop(irc.IRCClient):
 
     def irc_333(self, prefix, params):
         """??????????"""
-        print "Saw a 333 (!!): %s %s" % (prefix, params)
+        self.logger.info("Saw a 333 (!!): %s %s" % (prefix, params))
         pass
 
     def userKicked(self, kickee, channel, kicker, message):
         """Saw someone kicked from the channel"""
-        print "Saw a kick: %s kicked %s saying %s" % (kickee, kicker, message)
+        self.logger.info("Saw a kick: %s kicked %s saying %s" % (kickee, kicker, message))
         self.channel.leave('kick', kickee, message)
         self.leave(kickee, channel)
 
@@ -583,20 +589,20 @@ class LampstandLoop(irc.IRCClient):
 
         if nickname[1:] in self.population[channel]:
             self.population[channel].remove(nickname[1:])
-            print "[LEAVE] Removed %s from %s user list" % (nickname, channel)
+            self.logger.info("[LEAVE] Removed %s from %s user list" % (nickname, channel))
 
         if nickname in self.population[channel]:
             self.population[channel].remove(nickname)
-            print "[LEAVE] Removed %s from %s user list" % (nickname, channel)
+            self.logger.info("[LEAVE] Removed %s from %s user list" % (nickname, channel))
 
         found = False
         for channel, people in self.population.items():
             if nickname in people:
                 found = True
-                print "[LEAVE] Found %s in %s user list, keeping in dictionary" % (nickname, channel)
+                self.logger.info("[LEAVE] Found %s in %s user list, keeping in dictionary" % (nickname, channel))
                 return
         if not found:
-            print "[LEAVE] Lost %s entirely" % nickname
+            self.logger.info("[LEAVE] Lost %s entirely" % nickname)
             self.people.remove(nickname)
 
     def loadConfig(self):
@@ -634,13 +640,13 @@ class LampstandFactory(protocol.ClientFactory):
         reactor.stop()
 
     def clientConnectionFailed(self, connector, reason):
-        print "connection failed:", reason
+        self.logger.info("connection failed:", reason)
         reactor.stop()
 
 
 if __name__ == '__main__':
     cwd = os.getcwd()
-    print "Error log is %s/stderr.log" % cwd
+    logging.info("Error log is %s/stderr.log" % cwd)
 
     basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
     config = ConfigParser.ConfigParser()
@@ -653,7 +659,7 @@ if __name__ == '__main__':
     server = config.get("connection", "server")
     port = config.getint("connection", "port")
 
-    print "Connecting to %s:%s" % (server, port)
+    logging.info("Connecting to %s:%s" % (server, port))
 
     # create factory protocol and application
     f = LampstandFactory(config)

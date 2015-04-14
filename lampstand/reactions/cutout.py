@@ -6,6 +6,7 @@ import re
 import time
 import random
 import sys
+import logging
 
 
 def __init__():
@@ -16,10 +17,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     __name = 'Cutout'
 
+    def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
+
     def everyLine(self, connection, user, channel, message):
 
         if len(message) > 450 or (len(message) > 357 and len(message) <= 362):
-            print "[CUTOUT] Message length: %s" % len(message)
+            self.logger.info("[CUTOUT] Message length: %s" % len(message))
             index = len(message) - 1
             words = 0
             maxword = 5

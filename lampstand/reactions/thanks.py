@@ -4,6 +4,7 @@ import random
 import sys
 import lampstand.reactions.base
 
+import logging
 
 def __init__():
     pass
@@ -18,6 +19,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     uses = []
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
 
         self.channelMatch = re.compile(
             ".*Thanks,? (\S+)\s*\.?$",
@@ -25,7 +27,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         self.privateMatch = []
 
     def channelAction(self, connection, user, channel, message):
-        print "[Thanks] called"
+        self.logger.info("[Thanks] called")
 
         word = self.channelMatch.findall(message)[0]
 
@@ -36,13 +38,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         if number == 3:
             thanks = self.thanks(word)
-            print "[THANKS] Thanks, %s: %s" % (word, thanks)
+            self.logger.info("[THANKS] Thanks, %s: %s" % (word, thanks))
             connection.message(channel, thanks)
             return True
         # elif word in connection.people:
-        #	print "[Thanks] Found, but not random"
+        #	self.logger.info("[Thanks] Found, but not random")
         else:
-            print "[thanks] Random was %d" % number
+            self.logger.info("[thanks] Random was %d" % number)
 
         return False
 
@@ -52,11 +54,11 @@ class Reaction(lampstand.reactions.base.Reaction):
         if not word:
             return false
 
-        print "Thanks, %s" % word
+        self.logger.info("Thanks, %s" % word)
 
         if word[0] in ("a", "e", "i", "o", "u"):
 
-            print "That starts with a vowel, using the whole word"
+            self.logger.info("That starts with a vowel, using the whole word")
 
             thanks = word
 
@@ -66,24 +68,24 @@ class Reaction(lampstand.reactions.base.Reaction):
 
             #scrugg = re.split(r'[^aeiouy]+', word)
 
-            print scrugg
+            self.logger.info(scrugg)
 
             if len(scrugg) < 2:
-                print "Failed to split on vowels"
+                self.logger.info("Failed to split on vowels")
                 return false
 
             if(len(scrugg) > 1):
-                print "Using second element"
+                self.logger.info("Using second element")
                 thanks = scrugg[1]
             else:
-                print "Using whole word"
+                self.logger.info("Using whole word")
                 thanks = word
 
         if not thanks or len(thanks) < 1:
-            print "Thanks isn't good enough: %s" % thanks
+            self.logger.info("Thanks isn't good enough: %s" % thanks)
             return false
 
-        print thanks
+        self.logger.info(thanks)
 
         if(thanks[0] == "a"):
             thanks = "Th%s" % thanks

@@ -9,6 +9,7 @@ import lampstand.reactions.base
 
 from xml.dom.minidom import parse, parseString
 
+import logging
 
 def __init__():
     pass
@@ -22,6 +23,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     uses = []
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
 
         self.channelMatch = (
             re.compile(
@@ -75,7 +77,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             channel,
             message,
             matchIndex=False):
-        print "[PLAY] Reacting..."
+        self.logger.info("[PLAY] Reacting...")
         if self.overUsed(self.uses):
             connection.message(channel, self.overuseReactions[matchIndex])
             return True
@@ -112,7 +114,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def playWhat(self, username, limitToRecent=False):
 
-        print "[PLAY] Looking up games for %s" % username
+        self.logger.info("[PLAY] Looking up games for %s" % username)
         cursor = self.dbconnection.cursor()
         cursor.execute(
             'SELECT steamname from gameaccounts where username = %s',
@@ -127,7 +129,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         except:
             return False
 
-        print steam
+        self.logger.info(steam)
 
         if hasattr(steam, '__getitem__'):
             return steam[1]
@@ -202,19 +204,19 @@ class Reaction(lampstand.reactions.base.Reaction):
         steamurl = "http://steamcommunity.com/%s/%s/games?tab=all&xml=1" % (
             profiletype, username)
 
-        print steamurl
+        self.logger.info(steamurl)
 
         cachename = "/tmp/steam.lampstand.%s.xml" % username
 
         (fileopen, fileheaders) = urllib.urlretrieve(steamurl, cachename)
 
-        print "Examining %s" % cachename
+        self.logger.info("Examining %s" % cachename)
 
         stat = os.stat(fileopen)
         delta = datetime.datetime.now() - \
             datetime.datetime.fromtimestamp(stat.st_mtime)
         if delta.seconds > 60 * 60 * 12:
-            print " ... Redownloading, cache expired %s" % (delta.seconds / 60 * 60)
+            self.logger.info(" ... Redownloading, cache expired %s" % (delta.seconds / 60 * 60))
             os.remove(fileopen)
             (fileopen, fileheaders) = urllib.urlretrieve(steamurl, cachename)
 

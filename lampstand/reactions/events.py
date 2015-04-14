@@ -9,6 +9,7 @@ from lampstand import tools
 import lampstand.reactions.base
 from lampstand.tools import splitAt
 
+import logging
 
 def __init__():
     pass
@@ -24,6 +25,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     uses = []
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
 
         self.channelMatch = (
             re.compile(
@@ -117,7 +119,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             (direction, desc))
         response = request.json()
 
-        print response
+        self.logger.info(response)
 
         if not len(response['events']):
             try:
@@ -129,7 +131,7 @@ class Reaction(lampstand.reactions.base.Reaction):
                     'system': {
                         'name': 'Date'},
                     'website': None}
-                print result
+                self.logger.info(result)
             except TypeError:
                 return "I can't see any events tagged '%s' in the %s, and it doesn't look like a date. Full list of events at http://larp.me/events" % (
                     desc, direction)

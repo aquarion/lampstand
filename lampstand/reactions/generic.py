@@ -3,6 +3,7 @@ import time
 import random
 import lampstand.reactions.base
 
+import logging
 
 def __init__():
     pass
@@ -17,6 +18,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     uses = []
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
 
         fuckyou = (
             "She does. Frequently. And by she I mean your mum. Obviously",
@@ -180,7 +182,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         self.channelMatch.append(re.compile("^puts on shades$", re.IGNORECASE))
 
     def channelAction(self, connection, user, channel, message, matchindex):
-        print "[Generic Reaction] called"
+        self.logger.info("[Generic Reaction] called")
 
         if self.overUsed(self.uses):
             if self.reactions[matchindex][1] != '':
@@ -205,7 +207,7 @@ class Reaction(lampstand.reactions.base.Reaction):
                 if roll == 45:
                     connection.message(channel, reaction[1:])
                 else:
-                    print "Rolled %d" % roll
+                    self.logger.info("Rolled %d" % roll)
             else:
                 connection.message(channel, reaction)
             return True
@@ -214,7 +216,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         #match = self.privateMatch.findall(message);
         #connection.message(user, self.howLong(match).encode('ascii'))
 
-        print "[Generic Reaction] called"
+        self.logger.info("[Generic Reaction] called")
 
         if self.overUsed(self.uses, self.cooldown_number, self.cooldown_time):
             if self.reactions[matchindex][1] != '':
@@ -229,14 +231,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         if self.reactions[matchindex][2] != '':
             if isinstance(self.reactions[matchindex][2], type(tuple())):
-                print "list"
+                self.logger.info("list")
                 reaction = random.choice(self.reactions[matchindex][2])
             else:
-                print "Not list"
-                print type(self.reactions[matchindex][2])
+                self.logger.info("Not list")
+                self.logger.info(type(self.reactions[matchindex][2]))
                 reaction = self.reactions[matchindex][2]
             if reaction[0] == "~":
-                print "ACtion %s : %s" % (user, reaction)
+                self.logger.info("ACtion %s : %s" % (user, reaction))
                 connection.me(user, reaction)
             else:
                 connection.message(user, reaction)

@@ -7,6 +7,7 @@ import random
 import sys
 import string
 import lampstand.reactions.base
+import logging
 
 
 def __init__():
@@ -20,6 +21,8 @@ class Reaction(lampstand.reactions.base.Reaction):
     cooldown_time = 120
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
+        self.logger = logging.getLogger(self.__name)
         self.channelMatch = (
             re.compile(
                 '%s. roll +((?:\w+ +)*)(\d*d\d*)(.*)' %
@@ -53,7 +56,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         #item = self.channelMatch.findall(message);
 
         if random.randint(0, 100) == 66:
-            print "[ROLLING DICE] Rickroll!"
+            self.logger.info("[ROLLING DICE] Rickroll!")
             return "You rolled %s. You get Rick Astley." % item[0][0]
 
         modifiers = {
@@ -67,7 +70,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             total = 0
             for n in (0, 1, 2, 3):
                 roll = random.randint(-1, 1)
-                print roll
+                self.logger.info(roll)
                 if roll == -1:
                     fate[n] = "-"
                 elif roll == 1:
@@ -82,29 +85,29 @@ class Reaction(lampstand.reactions.base.Reaction):
             # We have some keywords.
             keywords = item[0][0].lower()
 
-            print keywords
+            self.logger.info(keywords)
             if "open" in keywords:
-                print "[DIE KEYWORD] openended"
+                self.logger.info("[DIE KEYWORD] openended")
                 modifiers['openended'] = True
 
             match = re.search("lowest(\d+)", keywords)
             if match:
-                print "[DIE KEYWORD] lowestN = %s" % match.group(1)
+                self.logger.info("[DIE KEYWORD] lowestN = %s" % match.group(1))
                 modifiers['lowestN'] = int(match.group(1))
 
             match = re.search("best(\d+)", keywords)
             if match:
-                print "[DIE KEYWORD] bestN = %s" % match.group(1)
+                self.logger.info("[DIE KEYWORD] bestN = %s" % match.group(1))
                 modifiers['bestN'] = int(match.group(1))
 
-        print "[ROLLING DICE] %s" % item
+        self.logger.info("[ROLLING DICE] %s" % item)
         try:
             result = self.roll(item[0][1], modifiers)
         except:
             return "The dice blew up."
             return True
 
-        print "[ROLLING DICE] got %s" % result
+        self.logger.info("[ROLLING DICE] got %s" % result)
 
         if not result:
             return "I don't understand that format yet, sorry :("
@@ -137,13 +140,13 @@ class Reaction(lampstand.reactions.base.Reaction):
                 total
             )
 
-        print "Item: %s " % item
+        self.logger.info("Item: %s " % item)
 
         if len(item[0]) > 1 and item[0][2] != '':
             oldtotal = total
             modifier = ''.join(item[0][2].split(' '))
-            print "Modifier is %s" % modifier
-            print "Modifier is %s -- %s" % (modifier[0], modifier[1:])
+            self.logger.info("Modifier is %s" % modifier)
+            self.logger.info("Modifier is %s -- %s" % (modifier[0], modifier[1:]))
 
             if modifier[0] == "+":
                 total = total + string.atof(modifier[1:])
@@ -189,10 +192,10 @@ class Reaction(lampstand.reactions.base.Reaction):
             value = 0
             while True:
                 roll = random.randrange(1, type + 1)
-                print "[DICE] Rolled a %s " % roll
+                self.logger.info("[DICE] Rolled a %s " % roll)
                 if modifiers['openended'] and (roll == 1 or roll == type):
                     if roll == 1:
-                        print "[DICE] Rerolling that 1...."
+                        self.logger.info("[DICE] Rerolling that 1....")
                         value = 0
                     elif roll == type:
                         value = type - (1 / scale)
@@ -206,26 +209,26 @@ class Reaction(lampstand.reactions.base.Reaction):
             else:
                 results.append(value)
 
-        print modifiers
+        self.logger.info(modifiers)
         original = results[:]
         changed = False
         if modifiers['bestN']:
-            print "Length: %d" % len(keep)
+            self.logger.info("Length: %d" % len(keep))
 
             while len(results) > modifiers['bestN']:
-                print "Length: %d" % len(results)
+                self.logger.info("Length: %d" % len(results))
                 results.remove(min(results))
-                print "Changed"
+                self.logger.info("Changed")
                 changed = True
 
         if modifiers['lowestN']:
             while len(results) > modifiers['lowestN']:
                 results.remove(max(results))
-                print "Changed"
+                self.logger.info("Changed")
                 changed = True
 
         # if not changed:
-        #	print "No change!"
+        #	self.logger.info("No change!")
         #	original = []
 
         return [results, str(howmany) + 'd' + str(type), original]

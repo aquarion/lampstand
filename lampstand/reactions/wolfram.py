@@ -7,6 +7,7 @@ import requests
 import urllib
 from lxml import etree
 
+import logging
 
 def __init__():
     pass
@@ -22,6 +23,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     uses = []
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
         self.channelMatch = re.compile(
             '^%s. (Ask Wolfram|Calculate|Wolfram) (.*)' %
             connection.nickname,
@@ -34,7 +36,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def channelAction(self, connection, user, channel, message, index=0):
 
-        print "[Wolfram] Hello"
+        self.logger.info("[Wolfram] Hello")
 
         matches = self.channelMatch.findall(message)
 
@@ -52,7 +54,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         return True
 
     def privateAction(self, connection, user, channel, message, index=0):
-        print "[Wolfram] Hello privately"
+        self.logger.info("[Wolfram] Hello privately")
         matches = self.privateMatch.findall(message)
         connection.message(user, self.wolfram(matches[0][1]))
         return True
@@ -68,7 +70,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             (self.apikey, query))
         root = etree.fromstring(response.content)
 
-        print response.content
+        self.logger.info(response.content)
 
         if root.xpath("/queryresult")[0].attrib['success'] == 'true':
             possible_questions = ('Input interpretation', 'Input')
@@ -84,7 +86,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             if answer is None:
                 node = root.xpath("/queryresult/pod/subpod/plaintext")
                 if node:
-                    print node
+                    self.logger.info(node)
                     return "(As %s): %s" % (
                         node[0].text, node[1].text.replace('\n', ' // '))
                 else:

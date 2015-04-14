@@ -1,5 +1,6 @@
 import re
 import lampstand.reactions.base
+import logging
 
 
 def __init__():
@@ -10,6 +11,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     __name = 'Nickserv'
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
         self.privateMatch = (
             re.compile(
                 '^Please identify via', re.IGNORECASE), re.compile(
@@ -21,14 +23,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 
             if user == 'NickServ' or user == "Aquarion":
                 if connection.chanserv_password:
-                    print '[IDENTIFY] Identifying myself to %s ' % user
+                    self.logger.info('[IDENTIFY] Identifying myself to %s ' % user)
                     response = "Identify %s" % connection.chanserv_password.encode(
                         'ascii')
                     connection.message('NickServ', response)
-                    print response
+                    self.logger.info(response)
                 else:
-                    print '[IDENTIFY] Couldn\'t Identify myself to %s, no password ' % user
+                    self.logger.info('[IDENTIFY] Couldn\'t Identify myself to %s, no password ' % user)
             else:
-                print '[IDENTIFY] I think %s is trying to scam my password' % user
+                self.logger.info('[IDENTIFY] I think %s is trying to scam my password' % user)
         elif matchindex == 1:
             connection.register(connection.original_nickname)

@@ -4,6 +4,7 @@ import random
 import sys
 import lampstand.reactions.base
 
+import logging
 
 def __init__():
     pass
@@ -17,6 +18,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     uses = []
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
 
         self.default = "chocolate"
 
@@ -33,7 +35,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     def channelAction(self, connection, user, channel, message):
 
         if self.overUsed():
-            print "[HUG REACTION] OVERUSED %s" % user
+            self.logger.info("[HUG REACTION] OVERUSED %s" % user)
             connection.message(
                 channel,
                 "%s: I am not a vending machine :(" %
@@ -41,7 +43,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             return
 
         if (user.lower() in self.banned):
-            print "[HUG REACTION] BANNED %s" % user
+            self.logger.info("[HUG REACTION] BANNED %s" % user)
             insult = shakeinsult.shakeinsult(1)
             connection.message(
                 channel,
@@ -54,7 +56,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         self.updateOveruse()
 
-        print "[HUG REACTION] GET %s" % user
+        self.logger.info("[HUG REACTION] GET %s" % user)
         connection.describe(
             channel,
             self.hug(user).decode("utf-8").encode("utf-8"))
@@ -64,7 +66,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         item = self.privateMatch.findall(message)
 
-        print "[HUG REACTION] SET %s %s" % (user, item[0])
+        self.logger.info("[HUG REACTION] SET %s %s" % (user, item[0]))
         connection.message(user, self.set(user, item[0]))
 
     def set(self, username, item):
@@ -79,11 +81,11 @@ class Reaction(lampstand.reactions.base.Reaction):
              item))
         self.dbconnection.commit()
 
-        print "Set %s hug reaction to %s" % (username, item)
+        self.logger.info("Set %s hug reaction to %s" % (username, item))
         return "When you hug me, I'll give you '%s'" % item
 
     def hug(self, username):
-        print "Hug %s" % username
+        self.logger.info("Hug %s" % username)
         cursor = self.dbconnection.cursor()
         cursor.execute(
             'SELECT * FROM hugReaction where username LIKE %s',
@@ -92,9 +94,9 @@ class Reaction(lampstand.reactions.base.Reaction):
         result = cursor.fetchone()
 
         if result is not None:
-            print "I have a replacement for %s: %s" % (username, result[1])
+            self.logger.info("I have a replacement for %s: %s" % (username, result[1]))
             return "gives %s %s " % (username, result[1])
 
         else:
-            print "I have no replacement for %s" % username
+            self.logger.info("I have no replacement for %s" % username)
             return "gives %s %s " % (username, self.default)

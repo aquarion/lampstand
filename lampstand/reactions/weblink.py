@@ -20,6 +20,7 @@ from twitter import Twitter
 from twitter.oauth import OAuth, write_token_file, read_token_file
 from twitter.oauth_dance import oauth_dance
 
+import logging
 
 def __init__():
     pass
@@ -29,6 +30,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     __name = 'Weblink'
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
         self.channelMatch = [
             re.compile(
                 '%s: Shorten that( URL)?' %
@@ -88,14 +90,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def channelAction(self, connection, user, channel, message, matchindex):
 
-        print "[WEBLINK] Activated, matchindex is %d" % matchindex
+        self.logger.info("[WEBLINK] Activated, matchindex is %d" % matchindex)
 
         if matchindex == 3:  # Weblink
-            print "[WEBLINK] That looks like a weblink : %s" % message
+            self.logger.info("[WEBLINK] That looks like a weblink : %s" % message)
 
             links = self.grabUrls(message)
 
-            print links
+            self.logger.info(links)
             now = time.time()
 
             for url in links:
@@ -119,9 +121,9 @@ class Reaction(lampstand.reactions.base.Reaction):
             self.dbconnection.commit()
 
         elif matchindex == 0:  # Shorten That
-            print "[WEBLINK] Shortening URL"
+            self.logger.info("[WEBLINK] Shortening URL")
 
-            print self.lastlink
+            self.logger.info(self.lastlink)
             surl = self.bitly.shorten(self.lastlink[channel]['url'])
 
             url_split = urlparse.urlparse(self.lastlink[channel]['url'])
@@ -142,9 +144,9 @@ class Reaction(lampstand.reactions.base.Reaction):
                     memory = module
 
             matches = self.channelMatch[matchindex].findall(message)[0]
-            print matches
+            self.logger.info(matches)
             result = memory.search(channel, matches[0], "http")
-            print result
+            self.logger.info(result)
 
             if len(result) == 0:
                 output = "%s: I've no idea which link you mean" % user
@@ -160,22 +162,22 @@ class Reaction(lampstand.reactions.base.Reaction):
                     connection.message(channel, output.encode("utf-8"))
 
         elif matchindex == 2:  # Shorten this URL
-            print "[WEBLINK] Shortening requested URL : %s" % message
+            self.logger.info("[WEBLINK] Shortening requested URL : %s" % message)
             links = self.grabUrls(message)
 
             if len(links) == 0:
-                print "[WEBLINK] No links found"
+                self.logger.info("[WEBLINK] No links found")
                 connection.message(
                     channel,
                     "%s: I see no links in that" %
                     user)
                 return
 
-            print links
+            self.logger.info(links)
 
             cursor = self.dbconnection.cursor()
             for link in links:
-                print link
+                self.logger.info(link)
                 now = time.time()
                 surl = self.bitly.shorten(link)
                 cursor.execute(
@@ -203,20 +205,20 @@ class Reaction(lampstand.reactions.base.Reaction):
                                             'punc': punc}
 
         url = r"""
-		    \b                            # start at word boundary
-			%(urls)s    :             # need resource and a colon
-			[%(any)s]  +?             # followed by one or more
-						  #  of any valid character, but
-						  #  be conservative and take only
-						  #  what you need to....
-		    (?=                           # look-ahead non-consumptive assertion
-			    [%(punc)s]*           # either 0 or more punctuation
-			    (?:   [^%(any)s]      #  followed by a non-url char
-				|                 #   or end of the string
-				  $
-			    )
-		    )
-		    """ % {'urls' : urls,
+            \b                            # start at word boundary
+        	%(urls)s    :             # need resource and a colon
+        	[%(any)s]  +?             # followed by one or more
+                          #  of any valid character, but
+                          #  be conservative and take only
+                          #  what you need to....
+            (?=                           # look-ahead non-consumptive assertion
+        	    [%(punc)s]*           # either 0 or more punctuation
+        	    (?:   [^%(any)s]      #  followed by a non-url char
+                |                 #   or end of the string
+                  $
+        	    )
+            )
+            """ % {'urls' : urls,
              'any': any,
              'punc': punc}
 
@@ -228,29 +230,29 @@ class Reaction(lampstand.reactions.base.Reaction):
         title = False
 
         urlp = urlparse.urlparse(url)
-        print url
+        self.logger.info(url)
 
         if "twitter" in urlp.netloc.split(".") and self.twitter:
             path = urlp.path.split("/")
             id = path[-1]
             tweet = self.twitter.statuses.show(id=id)
-            print tweet
+            self.logger.info(tweet)
             title = "@%s (%s): %s" % (
                 tweet['user']['name'], tweet['user']['screen_name'], tweet['text'])
         elif "youtube" in urlp.netloc.split("."):
-            print "That's a Youtube Link"
+            self.logger.info("That's a Youtube Link")
             query = urlparse.parse_qs(urlp.query)
             if "v" in query.keys():
-                print "That's a Youtube Link with a v! %s " % query['v'][0]
+                self.logger.info("That's a Youtube Link with a v! %s " % query['v'][0])
                 entry = self.yt_service.GetYouTubeVideoEntry(
                     video_id=query['v'][0])
-                print entry
+                self.logger.info(entry)
                 deltastring = tools.niceTimeDelta(
                     int(entry.media.duration.seconds))
                 #deltastring = entry.media.duration.seconds
                 title = "Youtube video: %s (%s)" % (
                     entry.media.title.text, deltastring)
-                print title
+                self.logger.info(title)
                 # connection.message(channel,title)
         else:
             headers = {

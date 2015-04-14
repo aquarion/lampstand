@@ -5,6 +5,7 @@ import re
 import time
 import random
 import sys
+import logging
 
 
 def __init__():
@@ -20,6 +21,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     uses = []
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
         self.channelMatch = re.compile(
             '^%s. (choose|should I) (.* or .*)' %
             connection.nickname,
@@ -29,7 +31,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             re.IGNORECASE)
 
     def channelAction(self, connection, user, channel, message):
-        print "[Choose] called"
+        self.logger.info("[Choose] called")
 
         if self.overUsed(self.uses, self.cooldown_number, self.cooldown_time):
             connection.message(
@@ -42,16 +44,16 @@ class Reaction(lampstand.reactions.base.Reaction):
         match = self.channelMatch.findall(message)
 
         if random.randint(0, 100) == 69:
-            print "Yes"
+            self.logger.info("Yes")
             connection.message(channel, "%s: Yes" % user)
             return True
 
         if random.randint(0, 100) == 67:
-            print "Edge"
+            self.logger.info("Edge")
             connection.message(channel, "%s: edge" % user)
             return True
 
-        print match
+        self.logger.info(match)
         reaction = self.choose(match[0][1])
         if reaction.lower() == "death" and user.lower() != "aquarion":
             connection.kick(channel, user, "Death.")
@@ -63,7 +65,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         return True
 
     def privateAction(self, connection, user, channel, message):
-        print "[Choose] called"
+        self.logger.info("[Choose] called")
 
         if self.overUsed(self.uses, self.cooldown_number, self.cooldown_time):
             connection.message(
@@ -74,7 +76,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         self.updateOveruse()
 
         match = self.privateMatch.findall(message)
-        print "Match: %s" % match
+        self.logger.info("Match: %s" % match)
 
         reaction = self.choose(match[0][1])
         connection.message(user, "%s: %s" % (user, reaction))
@@ -83,7 +85,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         if message[-1:] == "?":
             message = message[:-1]
 
-        print message
+        self.logger.info(message)
 
         # new regex by ccooke - 2010-05-28
         #regex = re.compile("(?:\s*(?:\s*(?:,|x?or)\s*)+\s*)+", re.IGNORECASE);
@@ -99,19 +101,19 @@ class Reaction(lampstand.reactions.base.Reaction):
         # for thing in orsplit:
         #	lst = thing.split(", ")
         #	for x in lst:
-        #		choose.append(x)
-        # print choose
+        #        choose.append(x)
+        # self.logger.info(choose)
 
-        print choose
+        self.logger.info(choose)
 
         for thing in choose:
             if thing.lower() == "glados":
-                print "Chosen Glados"
+                self.logger.info("Chosen Glados")
                 return "GLaDOS. Obviously"
 
             if thing.lower() == "hal":
-                print "Removed a Hal"
+                self.logger.info("Removed a Hal")
                 choose.remove(thing)
 
-        print choose
+        self.logger.info(choose)
         return random.choice(choose)

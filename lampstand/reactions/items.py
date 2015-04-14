@@ -9,6 +9,7 @@ from lampstand import tools
 import cPickle as pickle
 import os.path
 
+import logging
 
 def __init__():
     pass
@@ -28,6 +29,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     inventorysize = 10
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
 
         random.seed()
 
@@ -111,13 +113,13 @@ class Reaction(lampstand.reactions.base.Reaction):
         self.load()
 
     def save(self):
-        print "[ITEMS] Saving database..."
+        self.logger.info("[ITEMS] Saving database...")
         output = open("inventory.pkl.db", 'wb')
         pickle.dump(self.items, output)
         output.close()
 
     def load(self):
-        print "[ITEMS] Loading database..."
+        self.logger.info("[ITEMS] Loading database...")
         try:
             input = open("inventory.pkl.db", 'rb')
             items = pickle.load(input)
@@ -132,7 +134,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     def drop(self, item, channel):
         if item in map(str, self.items[channel]):
             i = map(str, self.items[channel]).index(item)
-            print "Dropped %s" % self.items[channel][i]
+            self.logger.info("Dropped %s" % self.items[channel][i])
             del self.items[channel][i]
             return True
         else:
@@ -146,7 +148,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             message,
             matchIndex=False):
 
-        print '[Item] Looking at <<%s>>' % message
+        self.logger.info('[Item] Looking at <<%s>>' % message)
 
         if self.overUsed(self.uses):
             connection.message(channel, self.overuseReactions[matchIndex])
@@ -162,7 +164,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             self.items[channel] = ['a lantern']
 
         if (matchIndex == 0 or matchIndex == 10):
-            print "[Item] Detected gift"
+            self.logger.info("[Item] Detected gift")
             item = self.channelMatch[matchIndex].findall(message)[0][1]
 
             if item.lower() == "a hug":
@@ -207,7 +209,7 @@ class Reaction(lampstand.reactions.base.Reaction):
                 # if self.items[channel][dropi] == "a lantern":
                 #	dropi += 1
                 #	if dropi > (len(self.items[channel])-1):
-                #		dropi = dropi - 2
+                #        dropi = dropi - 2
                 del self.items[channel][dropi]
                 self.items[channel].append(item)
                 result = "gives %s %s in return for %s" % (user, drop, item)
@@ -223,7 +225,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             connection.describe(channel, result)
             #connection.notice(channel, "I have %d items" % self.items[channel].count(True))
         elif (matchIndex == 1):
-            print "[Item] Detected list"
+            self.logger.info("[Item] Detected list")
 
             if len(self.items[channel]) == 0:
                 connection.message(channel, "I have nothing.")
@@ -248,18 +250,18 @@ class Reaction(lampstand.reactions.base.Reaction):
                 channel, "I currently have %s%sand %s." %
                 (message, seperator, last))
         elif (matchIndex == 2):  # attack
-            print "[Item] Detected Attack"
+            self.logger.info("[Item] Detected Attack")
 
             person = self.channelMatch[2].findall(message)[0][1]
 
-            print "Searching %s for <<%s>>" % (connection.people, person)
-            print "for %s" % person
+            self.logger.info("Searching %s for <<%s>>" % (connection.people, person))
+            self.logger.info("for %s" % person)
 
             if person.lower() == 'me':
                 person = user
 
             if person.lower() == 'glados':
-                print "Kicking %s for taking the name of my lady in vain" % user
+                self.logger.info("Kicking %s for taking the name of my lady in vain" % user)
                 connection.kick(
                     channel,
                     user,
@@ -327,7 +329,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             return True
 
         elif (matchIndex == 3):  # science
-            print "[Item] Detected Science"
+            self.logger.info("[Item] Detected Science")
 
             actions = (
                 "reverses",
@@ -415,9 +417,9 @@ class Reaction(lampstand.reactions.base.Reaction):
             self.save()
 
         elif (matchIndex == 4):  # drok
-            print "[Item] detected Drop"
+            self.logger.info("[Item] detected Drop")
             result = self.channelMatch[4].findall(message)
-            print result
+            self.logger.info(result)
             mesg = self.channelMatch[4].findall(message)[0][0]
             item = self.channelMatch[4].findall(message)[0][1]
 
@@ -455,11 +457,11 @@ class Reaction(lampstand.reactions.base.Reaction):
 
             else:
                 connection.message(channel, '%s: I don\'t have one.' % user)
-                print item
-                print map(str.lower, self.items[channel])
+                self.logger.info(item)
+                self.logger.info(map(str.lower, self.items[channel]))
 
         elif (matchIndex == 5):  # franklin
-            print "[Item] detected Franklin"
+            self.logger.info("[Item] detected Franklin")
             cursor = self.dbconnection.cursor()
             cursor.execute('select item from item ORDER BY RAND() limit 2')
             itemone = cursor.fetchone()[0]
@@ -470,7 +472,7 @@ class Reaction(lampstand.reactions.base.Reaction):
                 (itemone, itemtwo, itemone, itemtwo))
             return 1
         elif (matchIndex == 6):  # Packing
-            print "[Item] detected forgotten"
+            self.logger.info("[Item] detected forgotten")
             cursor = self.dbconnection.cursor()
             cursor.execute('select item from item ORDER BY RAND() limit 1')
             itemone = cursor.fetchone()[0]
@@ -480,7 +482,7 @@ class Reaction(lampstand.reactions.base.Reaction):
                 (user, itemone))
             return 1
         elif (matchIndex == 7):  # Packing
-            print "[Item] detected forgotten (elseone)"
+            self.logger.info("[Item] detected forgotten (elseone)")
             person = self.channelMatch[7].findall(message)[0][0]
             cursor = self.dbconnection.cursor()
             cursor.execute('select item from item ORDER BY RAND() limit 1')
@@ -492,7 +494,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             return 1
 
         elif (matchIndex == 8):  # Pinky
-            print "[Item] detected Pinky"
+            self.logger.info("[Item] detected Pinky")
             cursor = self.dbconnection.cursor()
             cursor.execute('select item from item ORDER BY RAND() limit 5')
             itemone = cursor.fetchone()[0]
@@ -542,7 +544,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             return 1
 
         elif (matchIndex == 9):  # examine
-            print "[Item] detected Examine"
+            self.logger.info("[Item] detected Examine")
             cursor = self.dbconnection.cursor()
             item = self.channelMatch[9].findall(message)[0]
 
@@ -590,9 +592,9 @@ class Reaction(lampstand.reactions.base.Reaction):
             else:
                 connection.message(channel, '%s: I don\'t have one.' % user)
         elif (matchIndex == 11):  # Lost and Found
-            print "[Item] detected lost & found"
+            self.logger.info("[Item] detected lost & found")
             if (channel == "#lampstand" and not user.lower() in self.admin):
-                print "Not allowing %s on %s to do that" % (user, channel)
+                self.logger.info("Not allowing %s on %s to do that" % (user, channel))
                 connection.message(channel, "%s: Not here. " % user)
                 return
 

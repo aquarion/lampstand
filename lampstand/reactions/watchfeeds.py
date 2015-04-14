@@ -8,6 +8,7 @@ import time
 import random
 import sys
 
+import logging
 
 def __init__():
     pass
@@ -50,6 +51,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     }
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
         self.channelMatch = re.compile('^%s. Feed Check' % connection.nickname, re.IGNORECASE)
         # self.privateMatch = re.compile('^%s. ???' % connection.nickname,
         # re.IGNORECASE))
@@ -92,16 +94,16 @@ class Reaction(lampstand.reactions.base.Reaction):
     def checkFeed(self, feedname, connection):
         feed_settings = self.feeds[feedname]
     
-        print '[FeedWatch] Fetching feed ' + feed_settings['url']
+        self.logger.info('[FeedWatch] Fetching feed ' + feed_settings['url'])
         feed = feedparser.parse(feed_settings['url'])
         last_entry = feed['entries'][0]
 
         if self.feeds[feedname]['last_seen'] == last_entry['id']:
-            print '[FeedWatch] Same as last ID: %s' % last_entry['title']
+            self.logger.info('[FeedWatch] Same as last ID: %s' % last_entry['title'])
             return
 
         if not self.feeds[feedname]['last_seen']:
-            print '[FeedWatch] No previous ID, setting, leaving: %s' % last_entry['title']
+            self.logger.info('[FeedWatch] No previous ID, setting, leaving: %s' % last_entry['title'])
             self.feeds[feedname]['last_seen'] = last_entry['id']
             return
 
@@ -109,8 +111,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         text = "New %s announcement: %s <%s>" % (
             self.feeds[feedname]['singular'], last_entry['title'], last_entry['link'])
-        print '[FeedWatch] Announcing %s' % text
+        self.logger.info('[FeedWatch] Announcing %s' % text)
         for channel in self.feeds[feedname]['channels']:
-	    print "[FeedWatch] (%s) %s" % (channel, text)
+	    self.logger.info("[FeedWatch] (%s) %s" % (channel, text))
             connection.message(channel, text)
 

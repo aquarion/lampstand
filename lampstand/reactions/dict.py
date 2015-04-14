@@ -6,6 +6,7 @@ import time
 import socket
 import dns.resolver
 
+import logging
 
 def __init__():
     pass
@@ -19,6 +20,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     cooldown_time = 420
 
     def __init__(self, connection):
+        self.logger = logging.getLogger(self.__name)
         self.channelMatch = re.compile(
             '%s. look up (\w*)\s*$' %
             connection.nickname,
@@ -52,14 +54,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 
             src = "Dictionary"
         except socket.error:
-            print "[Define] Argh. Dictionary server's offline"
+            self.logger.info("[Define] Argh. Dictionary server's offline")
             connection.message(
                 channel,
                 "Sorry, but my dictionary server's not working.")
             dfn = None
 
         # if not dfn:
-        #    print "Nothing in Dictionary, looking up on wikipedia"
+        #    self.logger.info("Nothing in Dictionary, looking up on wikipedia")
         #    try:
         #        dfn = dns.resolver.query('%s.wp.dg.cx' % query, 'TXT')
         #        if dfn:
@@ -86,14 +88,14 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         string.append("%s" % result)
 
-        print string
+        self.logger.info(string)
 
         return string
 
     def channelAction(self, connection, user, channel, message):
         matches = self.channelMatch.findall(message)
 
-        print "[Define] %s" % matches
+        self.logger.info("[Define] %s" % matches)
 
         if self.overUsed():
             connection.message(
@@ -112,7 +114,7 @@ class Reaction(lampstand.reactions.base.Reaction):
                  matches[0]))
             return True
 
-        print "[Define] %s" % result
+        self.logger.info("[Define] %s" % result)
 
         messages = self.splitDefinition(result)
         for message in messages:
@@ -123,7 +125,7 @@ class Reaction(lampstand.reactions.base.Reaction):
     def privateAction(self, connection, user, channel, message):
         matches = self.privateMatch.findall(message)
 
-        print "[Define] %s" % matches
+        self.logger.info("[Define] %s" % matches)
         try:
             result, src = self.getDefinition(matches[0])
 
@@ -135,7 +137,7 @@ class Reaction(lampstand.reactions.base.Reaction):
                  matches[0]))
             return True
 
-        print "[Define] %s" % result
+        self.logger.info("[Define] %s" % result)
 
         if len(result) > 880:
 

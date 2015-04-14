@@ -26,6 +26,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             # self.channelMatch = re.compile('^%s. ???' % connection.nickname, re.IGNORECASE))
             # self.privateMatch = re.compile('^%s. ???' % connection.nickname,
             # re.IGNORECASE))
+            pass
 
     def channelAction(self, connection, user, channel, message, index):
 
