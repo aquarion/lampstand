@@ -1,6 +1,6 @@
 *.pyc
 *.pkl.db
-*.log
+*.log*
 config.ini
 venv
 *.err

@@ -41,7 +41,7 @@ from BeautifulSoup import UnicodeDammit
 
 from lampstand import sms
 import logging
-
+from logging.handlers import TimedRotatingFileHandler
 
 class ChannelActions:
     peopleToIgnore = ('ChanServ')
@@ -197,6 +197,7 @@ class LampstandLoop(irc.IRCClient):
     #original_nickname = "Newstand"
     alt_nickname = "Catbus"
     password = False
+    log = False
 
     dbconnection = False
     config = False
@@ -223,27 +224,29 @@ class LampstandLoop(irc.IRCClient):
 
     def setupLogging(self):
         LOG_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
+        logfile = self.config.get("logging", "logfile")
         print "logging to %s/lampstand.log" % LOG_DIR
 
-        formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+	self.logger = logging.getLogger('lampstand')
+        logging.getLogger('').setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s [%(name)s] %(message)s')
 
-        console = logging.StreamHandler()
+        #console = logging.StreamHandler()
+        console = logging.getLogger('').handlers[0]
         console.setLevel(logging.DEBUG)
         console.setFormatter(formatter)
         logging.getLogger('').addHandler(console)
 
-        logfile = FileHandler("%s/lampstand.log" % LOG_DIR, mode='a')
+        filename = "%s/lampstand.log" % LOG_DIR
+	logfile = TimedRotatingFileHandler(filename, when='W0', interval=1, utc=True)
         logfile.setLevel(logging.DEBUG)
         logfile.setFormatter(formatter)
         logging.getLogger('').addHandler(logfile)
 
-        # logging.getLogger('').setLevel(logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
         self.logger.debug("Hello Debug")
         self.logger.info("Hello Info")
         self.logger.warn("Hello Warn")
         self.logger.error("Hello Error")
-
 
     def connectionMade(self):
 
@@ -265,7 +268,6 @@ class LampstandLoop(irc.IRCClient):
         self.realname = "Lampstand L. Lampstand."
         self.userinfo = "I'm a bot! http://wiki.maelfroth.org/lampstandDocs"
 
-        logfile = self.config.get("logging", "logfile")
 
         irc.IRCClient.connectionMade(self)
         
@@ -380,10 +382,9 @@ class LampstandLoop(irc.IRCClient):
             self.scheduledTaskModules.append(reaction)
 
     def connectionLost(self, reason):
-        self.logger.info("Connection lost for reason %s" % reason)
+	if self.logger:
+        	self.logger.info("Connection lost for reason %s" % reason)
         irc.IRCClient.connectionLost(self, reason)
-        self.logger.info("[disconnected at %s]" %
-                        time.asctime(time.localtime(time.time())))
 
     def nickservGhost(self):
         if self.password:
