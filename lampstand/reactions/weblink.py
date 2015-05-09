@@ -5,29 +5,20 @@ import lampstand.reactions.base
 from lampstand import tools
 import bitly_api
 import urlparse
-
-import gdata.youtube
-import gdata.youtube.service
-
-import requests
-import BeautifulSoup
-
-import StringIO
-import Image
-
-from twitter import Twitter
-
-from twitter.oauth import OAuth, write_token_file, read_token_file
-from twitter.oauth_dance import oauth_dance
-
+import sys
 import logging
+
+from lampstand.titlefetcher import *
 
 def __init__():
     pass
 
 
+
 class Reaction(lampstand.reactions.base.Reaction):
     __name = 'Weblink'
+
+    youtube = False
 
     def __init__(self, connection):
         self.logger = logging.getLogger(self.__name)
@@ -54,39 +45,15 @@ class Reaction(lampstand.reactions.base.Reaction):
                 "bitly", "username"), connection.config.get(
                 "bitly", "apikey"))
 
-        self.yt_service = gdata.youtube.service.YouTubeService()
-        self.yt_service.ssl = True
-
         self.lastlink = {}
 
-        #OAUTH_FILENAME = os.environ.get(
-        #    'HOME',
-        #    '') + os.sep + '.lampstand_oauth'
-	OAUTH_FILENAME = connection.config.get("twitter", "oauth_cache")
-        CONSUMER_KEY = connection.config.get("twitter", "consumer_key")
-        CONSUMER_SECRET = connection.config.get("twitter", "consumer_secret")
+        self.connection = connection
 
-        self.twitter = False
+        self.tf_twitter = False
+        self.tf_youtube = False
 
-        try:
-            if not os.path.exists(OAUTH_FILENAME):
-                oauth_dance(
-                    "Lampstand", CONSUMER_KEY, CONSUMER_SECRET,
-                    OAUTH_FILENAME)
+        reload(sys.modules['lampstand.titlefetcher'])
 
-            self.oauth_token, self.oauth_token_secret = read_token_file(
-                OAUTH_FILENAME)
-
-            self.twitter = Twitter(
-                auth=OAuth(
-                    self.oauth_token,
-                    self.oauth_token_secret,
-                    CONSUMER_KEY,
-                    CONSUMER_SECRET),
-                secure=True,
-                domain='api.twitter.com')
-        except:
-            pass
 
     def channelAction(self, connection, user, channel, message, matchindex):
 
@@ -232,63 +199,24 @@ class Reaction(lampstand.reactions.base.Reaction):
         urlp = urlparse.urlparse(url)
         self.logger.info(url)
 
-        if "twitter" in urlp.netloc.split(".") and self.twitter:
-            path = urlp.path.split("/")
-            id = path[-1]
-            tweet = self.twitter.statuses.show(id=id)
-            self.logger.info(tweet)
-            title = "@%s (%s): %s" % (
-                tweet['user']['name'], tweet['user']['screen_name'], tweet['text'])
+        if "twitter" in urlp.netloc.split("."):
+            self.logger.info("That's a Twitter Link")
+
+            if not self.tf_twitter:
+                self.tf_twitter = TwitterTitleFetcher(self.connection)
+
+            title = self.tf_twitter.fetch_title(url)
+
         elif "youtube" in urlp.netloc.split("."):
             self.logger.info("That's a Youtube Link")
-            query = urlparse.parse_qs(urlp.query)
-            if "v" in query.keys():
-                self.logger.info("That's a Youtube Link with a v! %s " % query['v'][0])
-                entry = self.yt_service.GetYouTubeVideoEntry(
-                    video_id=query['v'][0])
-                self.logger.info(entry)
-                deltastring = tools.niceTimeDelta(
-                    int(entry.media.duration.seconds))
-                #deltastring = entry.media.duration.seconds
-                title = "Youtube video: %s (%s)" % (
-                    entry.media.title.text, deltastring)
-                self.logger.info(title)
-                # connection.message(channel,title)
+
+            if not self.tf_youtube:
+                self.tf_youtube = YoutubeTitleFetcher(self.connection)
+
+            title = self.tf_youtube.fetch_title(url)
+
         else:
-            headers = {
-                'User-agent': 'Lampstand IRC Bot (contact aquarion@maelfroth.org)'}
-            try:
-                req = requests.get(url, headers=headers, timeout=30)
-            except requests.exceptions.Timeout:
-                return "That link timed out"
-            except requests.exceptions.SSLError as e:
-                return "Something's up with the security on %s. Tread carefully. (%s)" % (
-                    urlp.netloc, e)
-
-            k = len(req.content) / 1024
-            if req.status_code != 200:
-                title = "That link returned an error %s" % (req.status_code)
-            elif req.headers['content-type'].find("text/html") != -1 or req.headers['content-type'].find("application/xhtml+xml") != -1:
-                soup = BeautifulSoup.BeautifulSoup(
-                    req.text,
-                    convertEntities=BeautifulSoup.BeautifulSoup.HTML_ENTITIES)
-                title = soup.title.string
-            else:
-                if req.headers['content-type'].find("image/") == 0:
-                    image_file = StringIO.StringIO(req.content)
-                    #color = most_colour.most_colour(image_file)
-
-                    image_file.seek(0)
-                    im = Image.open(image_file)
-                    try:
-                        im.seek(1)
-                        title = "An animation, %dx%d (%dk)" % (
-                            im.size[0], im.size[1], k)
-                    except:
-                        title = "An image, %dx%d (%dk)" % (
-                            im.size[0], im.size[1], k)
-                else:
-                    title = "A %s file (%dk)" % (
-                        req.headers['content-type'], k)
+            titler = TitleFetcher(self.connection)
+            title = titler.fetch_title(url)
 
         return title.strip()
