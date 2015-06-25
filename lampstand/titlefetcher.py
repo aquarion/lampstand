@@ -18,6 +18,8 @@ import Image
 
 import logging
 import urlparse
+import StringIO
+
 
 class TitleFetcher():
     def __init__(self, connection):
