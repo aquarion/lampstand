@@ -169,6 +169,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             ('^\.\.\.$',
              '',
              ("%dots!",
+              "%[Bwaaaaaaaam]",
               "%MORE DOTS!",
               "%[... Suddenly, everything goes quiet...]")))
         self.channelMatch.append(re.compile("^\.\.\.$", re.IGNORECASE))
@@ -203,8 +204,8 @@ class Reaction(lampstand.reactions.base.Reaction):
             if reaction[0] == "~":
                 connection.describe(channel, reaction[1:])
             elif reaction[0] == "%":
-                roll = random.randint(0, 50)
-                if roll == 45:
+                roll = random.randint(0, 20)
+                if roll == 25:
                     connection.message(channel, reaction[1:])
                 else:
                     self.logger.info("Rolled %d" % roll)
