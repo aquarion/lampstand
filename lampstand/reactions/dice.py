@@ -8,7 +8,7 @@ import sys
 import string
 import lampstand.reactions.base
 import logging
-
+import traceback
 
 def __init__():
     pass
@@ -103,7 +103,9 @@ class Reaction(lampstand.reactions.base.Reaction):
         self.logger.info("[ROLLING DICE] %s" % item)
         try:
             result = self.roll(item[0][1], modifiers)
-        except:
+        except Exception as e:
+            self.logger.error("[DIE KEYWORD] Exception: %s" % e)
+            self.logger.error(traceback.format_exc())
             return "The dice blew up."
             return True
 
@@ -213,7 +215,7 @@ class Reaction(lampstand.reactions.base.Reaction):
         original = results[:]
         changed = False
         if modifiers['bestN']:
-            self.logger.info("Length: %d" % len(keep))
+            self.logger.info("Length: %d" % modifiers['bestN'])
 
             while len(results) > modifiers['bestN']:
                 self.logger.info("Length: %d" % len(results))
