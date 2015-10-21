@@ -172,7 +172,7 @@ class Reaction(lampstand.reactions.base.Reaction):
                 connection.describe(channel, hug.hug(user))
                 return
 
-            if item.lower() == "a botsnack":
+            if item.lower() == "a botsnack" or item.lower() == "a bot snack":
                 connection.message(channel, "Nom")
                 return
 
