@@ -6,7 +6,7 @@ import os
 import sys
 import re
 import socket
-
+import datetime
 
 class urlCheck():
     config = {}
@@ -63,7 +63,7 @@ class urlCheck():
         return url_re.findall(text)
 
     def checkBatch(self):
-        query = 'SELECT id, message, checked_status, checked_repeat FROM urllist WHERE datediff(NOW(), `checked_date`) > 90 or `checked_date` = 0 '
+        query = 'SELECT id, message, checked_status, checked_repeat, `time` FROM urllist WHERE datediff(NOW(), `checked_date`) > 90 or `checked_date` = 0 '
 
         update_query = "UPDATE `urllist` SET checked_date = NOW(), checked_status = %s, checked_repeat = %s where id = %s"
 
@@ -83,6 +83,7 @@ class urlCheck():
                 continue
 
             url = urls[0]
+            seconds_since_epoch = link[4]
 
             status_code = self.get_url(url)
 
@@ -91,7 +92,10 @@ class urlCheck():
             else:
                 repeat_code = 1
             params = (status_code, repeat_code, link[0])
-            print "[%s] %s" % (status_code, url),
+            dt = datetime.datetime.utcfromtimestamp(seconds_since_epoch)
+            iso_format = dt.isoformat() + 'Z'
+
+            print "[%s] %s %s" % (status_code, iso_format, url),
             cursor.execute(update_query, params)
             print " -"
             n = n + 1
