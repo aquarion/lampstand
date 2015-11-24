@@ -108,6 +108,7 @@ class urlCheck():
 
     def get_url(self, url):
         try:
+	    print url
             r = requests.get(url, timeout=10)
             return r.status_code
         except requests.exceptions.Timeout:
@@ -118,6 +119,8 @@ class urlCheck():
             return 508  # Loop Detected
         except (requests.exceptions.RequestException, AttributeError, UnicodeError):
             return 418  # I'm a teapot
+        except: 
+            return 501  # I'm a teapot
 
 if __name__ == '__main__':
     checker = urlCheck()
