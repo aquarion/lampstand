@@ -52,17 +52,43 @@ class TitleFetcher():
         else:
             if req.headers['content-type'].find("image/") == 0:
                 image_file = StringIO.StringIO(req.content)
+
+		api_url = "http://api.imagga.com/v1/tagging"
+
+		querystring = {"url": url,"version":"2"}
+
+		auth_key = connection.config.get("imagga", "auth_key")
+
+		headers = {
+		    'accept': "application/json",
+		    'authorization': "Basic %s==" % auth_key
+    		}
+
+		response = requests.request("GET", api_url, headers=headers, params=querystring)
+
+		prefix = "An %s - %dx%d (%dk)"
+
+		print response.text
+
+		if "results" in response.json():
+			tags = response.json()['results'][0]['tags']
+			first_tag = tags[0]
+			if first_tag['confidence'] > 60:
+				prefix = "An %%s of a %s %%dx%%d (%%dk)" % first_tag['tag'] 
+
                 #color = most_colour.most_colour(image_file)
+
+		print prefix
 
                 image_file.seek(0)
                 im = Image.open(image_file)
                 try:
                     im.seek(1)
-                    title = "An animation, %dx%d (%dk)" % (
-                        im.size[0], im.size[1], k)
+                    title = prefix % (
+                        "animation", im.size[0], im.size[1], k)
                 except:
-                    title = "An image, %dx%d (%dk)" % (
-                        im.size[0], im.size[1], k)
+                    title = prefix % (
+                        "image", im.size[0], im.size[1], k)
             else:
                 title = "A %s file (%dk)" % (
                     req.headers['content-type'], k)
