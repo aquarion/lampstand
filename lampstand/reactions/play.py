@@ -11,6 +11,7 @@ from xml.dom.minidom import parse, parseString
 
 import logging
 
+
 def __init__():
     pass
 
@@ -216,7 +217,8 @@ class Reaction(lampstand.reactions.base.Reaction):
         delta = datetime.datetime.now() - \
             datetime.datetime.fromtimestamp(stat.st_mtime)
         if delta.seconds > 60 * 60 * 12:
-            self.logger.info(" ... Redownloading, cache expired %s" % (delta.seconds / 60 * 60))
+            self.logger.info(" ... Redownloading, cache expired %s" %
+                             (delta.seconds / 60 * 60))
             os.remove(fileopen)
             (fileopen, fileheaders) = urllib.urlretrieve(steamurl, cachename)
 

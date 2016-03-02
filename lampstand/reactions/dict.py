@@ -8,6 +8,7 @@ import dns.resolver
 
 import logging
 
+
 def __init__():
     pass
 

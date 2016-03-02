@@ -8,6 +8,7 @@ from lampstand.tools import splitAt
 import simplejson
 import logging
 
+
 def __init__():
     pass
 

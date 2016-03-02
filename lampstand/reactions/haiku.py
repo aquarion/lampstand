@@ -12,6 +12,7 @@ import lampstand.reactions.base
 
 import logging
 
+
 def __init__():
     pass
 
@@ -96,7 +97,8 @@ class Reaction(lampstand.reactions.base.Reaction):
             self.cheatsheet = pickle.load(input)
             input.close()
             for word, count in self.cheatsheet:
-                self.logger.info("[Haiku] %s has %d syllables" % (word, int(count)))
+                self.logger.info("[Haiku] %s has %d syllables" %
+                                 (word, int(count)))
                 haikufinder.HaikuFinder.add_word(word, int(count))
         except:
             self.cheatsheet = {}

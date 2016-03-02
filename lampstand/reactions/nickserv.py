@@ -23,14 +23,17 @@ class Reaction(lampstand.reactions.base.Reaction):
 
             if user == 'NickServ' or user == "Aquarion":
                 if connection.chanserv_password:
-                    self.logger.info('[IDENTIFY] Identifying myself to %s ' % user)
+                    self.logger.info(
+                        '[IDENTIFY] Identifying myself to %s ' % user)
                     response = "Identify %s" % connection.chanserv_password.encode(
                         'ascii')
                     connection.message('NickServ', response)
                     self.logger.info(response)
                 else:
-                    self.logger.info('[IDENTIFY] Couldn\'t Identify myself to %s, no password ' % user)
+                    self.logger.info(
+                        '[IDENTIFY] Couldn\'t Identify myself to %s, no password ' % user)
             else:
-                self.logger.info('[IDENTIFY] I think %s is trying to scam my password' % user)
+                self.logger.info(
+                    '[IDENTIFY] I think %s is trying to scam my password' % user)
         elif matchindex == 1:
             connection.register(connection.original_nickname)

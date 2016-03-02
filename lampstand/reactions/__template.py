@@ -23,10 +23,10 @@ class Reaction(lampstand.reactions.base.Reaction):
     uses = []
 
     def __init__(self, connection):
-            # self.channelMatch = re.compile('^%s. ???' % connection.nickname, re.IGNORECASE))
-            # self.privateMatch = re.compile('^%s. ???' % connection.nickname,
-            # re.IGNORECASE))
-            pass
+        # self.channelMatch = re.compile('^%s. ???' % connection.nickname, re.IGNORECASE))
+        # self.privateMatch = re.compile('^%s. ???' % connection.nickname,
+        # re.IGNORECASE))
+        pass
 
     def channelAction(self, connection, user, channel, message, index):
 

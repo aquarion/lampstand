@@ -43,6 +43,7 @@ from lampstand import sms
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
+
 class ChannelActions:
     peopleToIgnore = ('ChanServ')
 
@@ -78,10 +79,12 @@ class ChannelActions:
                         channel,
                         message)
                     if result:
-                        self.logger.info("ChannelAction successfully replied, returning to loop")
+                        self.logger.info(
+                            "ChannelAction successfully replied, returning to loop")
                         return True
                     else:
-                        self.logger.info("ChannelAction declined, returning to loop")
+                        self.logger.info(
+                            "ChannelAction declined, returning to loop")
 
             if hasattr(channelModule, "everyLine"):
                 result = False
@@ -227,7 +230,7 @@ class LampstandLoop(irc.IRCClient):
         logfile = self.config.get("logging", "logfile")
         print "logging to %s/lampstand.log" % LOG_DIR
 
-	self.logger = logging.getLogger('lampstand')
+        self.logger = logging.getLogger('lampstand')
         logging.getLogger('').setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s [%(name)s] %(message)s')
 
@@ -238,7 +241,8 @@ class LampstandLoop(irc.IRCClient):
         logging.getLogger('').addHandler(console)
 
         filename = "%s/lampstand.log" % LOG_DIR
-	logfile = TimedRotatingFileHandler(filename, when='W0', interval=1, utc=True)
+        logfile = TimedRotatingFileHandler(
+            filename, when='W0', interval=1, utc=True)
         logfile.setLevel(logging.DEBUG)
         logfile.setFormatter(formatter)
         logging.getLogger('').addHandler(logfile)
@@ -268,9 +272,8 @@ class LampstandLoop(irc.IRCClient):
         self.realname = "Lampstand L. Lampstand."
         self.userinfo = "I'm a bot! http://wiki.maelfroth.org/lampstandDocs"
 
-
         irc.IRCClient.connectionMade(self)
-        
+
         self.channel = ChannelActions(self)
         self.private = PrivateActions(self)
 
@@ -288,7 +291,7 @@ class LampstandLoop(irc.IRCClient):
             self.installModule(thingy[0])
 
         self.logger.info("[connected at %s]" %
-                        time.asctime(time.localtime(time.time())))
+                         time.asctime(time.localtime(time.time())))
 
         self.loopy = LoopingCall(self.scheduledTasks)
         self.loopy.start(5)
@@ -358,23 +361,28 @@ class LampstandLoop(irc.IRCClient):
         reaction = module.Reaction(self)
 
         if hasattr(reaction, 'channelMatch') or hasattr(reaction, 'everyLine'):
-            self.logger.info('[%s] Installing channel text reaction' % (moduleName))
+            self.logger.info(
+                '[%s] Installing channel text reaction' % (moduleName))
             self.channelModules.append(reaction)
 
         if hasattr(reaction, 'privateMatch'):
-            self.logger.info('[%s] Installing private text reaction' % moduleName)
+            self.logger.info(
+                '[%s] Installing private text reaction' % moduleName)
             self.privateModules.append(reaction)
 
         if hasattr(reaction, 'nickChangeAction'):
-            self.logger.info('[%s] Installing nick change reaction' % moduleName)
+            self.logger.info(
+                '[%s] Installing nick change reaction' % moduleName)
             self.nickChangeModules.append(reaction)
 
         if hasattr(reaction, 'leaveAction'):
-            self.logger.info('[%s] Installing channel leave reaction' % moduleName)
+            self.logger.info(
+                '[%s] Installing channel leave reaction' % moduleName)
             self.leaveModules.append(reaction)
 
         if hasattr(reaction, 'joinAction'):
-            self.logger.info('[%s] Installing channel join reaction' % moduleName)
+            self.logger.info(
+                '[%s] Installing channel join reaction' % moduleName)
             self.joinModules.append(reaction)
 
         if hasattr(reaction, 'scheduleAction'):
@@ -382,8 +390,8 @@ class LampstandLoop(irc.IRCClient):
             self.scheduledTaskModules.append(reaction)
 
     def connectionLost(self, reason):
-	if self.logger:
-        	self.logger.info("Connection lost for reason %s" % reason)
+        if self.logger:
+            self.logger.info("Connection lost for reason %s" % reason)
         irc.IRCClient.connectionLost(self, reason)
 
     def nickservGhost(self):
@@ -527,13 +535,15 @@ class LampstandLoop(irc.IRCClient):
 
     def irc_ERR_NICKNAMEINUSE(self, prefix, params):
         """??????????"""
-        self.logger.info("Saw a irc_ERR_NICKNAMEINUSE (!!): %s %s" % (prefix, params))
+        self.logger.info(
+            "Saw a irc_ERR_NICKNAMEINUSE (!!): %s %s" % (prefix, params))
         if (self.nickname == self.original_nickname):
             self.logger.info('[IDENTIFY] Downgrading to  ' + self.alt_nickname)
             self.register(self.alt_nickname)
             self.nickname = self.alt_nickname
         elif (self.nickname == self.alt_nickname):
-            self.logger.info('[IDENTIFY] Downgrading to  ' + self.original_nickname + '_')
+            self.logger.info('[IDENTIFY] Downgrading to  ' +
+                             self.original_nickname + '_')
             self.register(self.original_nickname + '_')
             self.nickname = self.original_nickname + '_'
 
@@ -541,7 +551,8 @@ class LampstandLoop(irc.IRCClient):
 
     def irc_RPL_NAMREPLY(self, prefix, params):
         """??????????"""
-        self.logger.info("Saw a irc_RPL_NAMREPLY (!!): %s %s" % (prefix, params))
+        self.logger.info("Saw a irc_RPL_NAMREPLY (!!): %s %s" %
+                         (prefix, params))
 
         server = prefix
         myname = params[0]
@@ -580,7 +591,8 @@ class LampstandLoop(irc.IRCClient):
 
     def userKicked(self, kickee, channel, kicker, message):
         """Saw someone kicked from the channel"""
-        self.logger.info("Saw a kick: %s kicked %s saying %s" % (kickee, kicker, message))
+        self.logger.info("Saw a kick: %s kicked %s saying %s" %
+                         (kickee, kicker, message))
         self.channel.leave('kick', kickee, message)
         self.leave(kickee, channel)
 
@@ -590,17 +602,20 @@ class LampstandLoop(irc.IRCClient):
 
         if nickname[1:] in self.population[channel]:
             self.population[channel].remove(nickname[1:])
-            self.logger.info("[LEAVE] Removed %s from %s user list" % (nickname, channel))
+            self.logger.info(
+                "[LEAVE] Removed %s from %s user list" % (nickname, channel))
 
         if nickname in self.population[channel]:
             self.population[channel].remove(nickname)
-            self.logger.info("[LEAVE] Removed %s from %s user list" % (nickname, channel))
+            self.logger.info(
+                "[LEAVE] Removed %s from %s user list" % (nickname, channel))
 
         found = False
         for channel, people in self.population.items():
             if nickname in people:
                 found = True
-                self.logger.info("[LEAVE] Found %s in %s user list, keeping in dictionary" % (nickname, channel))
+                self.logger.info(
+                    "[LEAVE] Found %s in %s user list, keeping in dictionary" % (nickname, channel))
                 return
         if not found:
             self.logger.info("[LEAVE] Lost %s entirely" % nickname)

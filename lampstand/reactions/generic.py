@@ -5,6 +5,7 @@ import lampstand.reactions.base
 
 import logging
 
+
 def __init__():
     pass
 

@@ -10,6 +10,7 @@ import sys
 
 import logging
 
+
 def __init__():
     pass
 
@@ -26,22 +27,22 @@ class Reaction(lampstand.reactions.base.Reaction):
     schedule_count = 0
 
     feeds = {
-        'odyssey' : {
-            'url' : "https://www.facebook.com/feeds/page.php?format=rss20&id=319644741567",
+        'odyssey': {
+            'url': "https://www.facebook.com/feeds/page.php?format=rss20&id=319644741567",
             'plural': "Odyssey Updates",
             'singular': "Odyssey update",
             'channels': ['#odcfroth', ],
             'last_seen': False
         },
-        'empire' : {
-            'url' : "https://www.facebook.com/feeds/page.php?format=rss20&id=136575943105061",
+        'empire': {
+            'url': "https://www.facebook.com/feeds/page.php?format=rss20&id=136575943105061",
             'plural': "Empire Updates",
             'singular': "Empire update",
             'channels': ['#empirefroth', ],
             'last_seen': False
         },
-        'larphacks' : {
-            'url' : "http://larphacks.tumblr.com/rss",
+        'larphacks': {
+            'url': "http://larphacks.tumblr.com/rss",
             'plural': "Larp Hacks",
             'singular': "Larp Hack",
             'channels': ['#maelfroth', ],
@@ -52,7 +53,8 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def __init__(self, connection):
         self.logger = logging.getLogger(self.__name)
-        self.channelMatch = re.compile('^%s. Feed Check' % connection.nickname, re.IGNORECASE)
+        self.channelMatch = re.compile(
+            '^%s. Feed Check' % connection.nickname, re.IGNORECASE)
         # self.privateMatch = re.compile('^%s. ???' % connection.nickname,
         # re.IGNORECASE))
 
@@ -93,17 +95,19 @@ class Reaction(lampstand.reactions.base.Reaction):
 
     def checkFeed(self, feedname, connection):
         feed_settings = self.feeds[feedname]
-    
+
         self.logger.info('[FeedWatch] Fetching feed ' + feed_settings['url'])
         feed = feedparser.parse(feed_settings['url'])
         last_entry = feed['entries'][0]
 
         if self.feeds[feedname]['last_seen'] == last_entry['id']:
-            self.logger.info('[FeedWatch] Same as last ID: %s' % last_entry['title'])
+            self.logger.info('[FeedWatch] Same as last ID: %s' %
+                             last_entry['title'])
             return
 
         if not self.feeds[feedname]['last_seen']:
-            self.logger.info('[FeedWatch] No previous ID, setting, leaving: %s' % last_entry['title'])
+            self.logger.info(
+                '[FeedWatch] No previous ID, setting, leaving: %s' % last_entry['title'])
             self.feeds[feedname]['last_seen'] = last_entry['id']
             return
 
@@ -113,6 +117,5 @@ class Reaction(lampstand.reactions.base.Reaction):
             self.feeds[feedname]['singular'], last_entry['title'], last_entry['link'])
         self.logger.info('[FeedWatch] Announcing %s' % text)
         for channel in self.feeds[feedname]['channels']:
-	    self.logger.info("[FeedWatch] (%s) %s" % (channel, text))
+            self.logger.info("[FeedWatch] (%s) %s" % (channel, text))
             connection.message(channel, text)
-

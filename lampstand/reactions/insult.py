@@ -4,6 +4,7 @@ from lampstand import shakeinsult
 
 import logging
 
+
 def __init__():
     pass
 
@@ -44,7 +45,8 @@ class Reaction(lampstand.reactions.base.Reaction):
         self.logger.info("[INSULT] Insulting %s" % insultee)
 
         if insultee.lower() == 'glados':
-            self.logger.info("Kicking %s for taking the name of my lady in vain" % user)
+            self.logger.info(
+                "Kicking %s for taking the name of my lady in vain" % user)
             connection.kick(channel, user, 'No')
             return
 

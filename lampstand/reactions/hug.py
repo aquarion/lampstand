@@ -6,6 +6,7 @@ import lampstand.reactions.base
 
 import logging
 
+
 def __init__():
     pass
 
@@ -94,7 +95,8 @@ class Reaction(lampstand.reactions.base.Reaction):
         result = cursor.fetchone()
 
         if result is not None:
-            self.logger.info("I have a replacement for %s: %s" % (username, result[1]))
+            self.logger.info("I have a replacement for %s: %s" %
+                             (username, result[1]))
             return "gives %s %s " % (username, result[1])
 
         else:

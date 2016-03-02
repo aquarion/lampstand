@@ -252,7 +252,8 @@ class Reaction(lampstand.reactions.base.Reaction):
         row = cursor.fetchone()
 
         if(row[3] > 1):
-            self.logger.info("%s has %s definitions, randomizing..." % (row[0], row[3]))
+            self.logger.info(
+                "%s has %s definitions, randomizing..." % (row[0], row[3]))
             query = "Select word,definition,author from define where word = %s order by rand() limit 1"
             cursor.execute(query, (row[0],))
             row = cursor.fetchone()

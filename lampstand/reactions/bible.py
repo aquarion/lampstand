@@ -7,6 +7,7 @@ import sys
 import lampstand.reactions.base
 import logging
 
+
 def __init__():
     pass
 
@@ -25,10 +26,10 @@ class Reaction(lampstand.reactions.base.Reaction):
             connection.nickname,
             re.IGNORECASE)
         self.privateMatch = re.compile('(?!choose)(\w*) (\d+\:\S+)')
-        #The {?!choose) is a negative lookahead to make sure that
-        #this does not match strings starting with choose so that
-        #we do not gobble choose action requests (Issue #7)
-        
+        # The {?!choose) is a negative lookahead to make sure that
+        # this does not match strings starting with choose so that
+        # we do not gobble choose action requests (Issue #7)
+
     def channelAction(self, connection, user, channel, message):
         matches = self.channelMatch.findall(message)
 

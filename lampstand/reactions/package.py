@@ -8,6 +8,7 @@ import sys
 
 import logging
 
+
 def __init__():
     pass
 
@@ -140,7 +141,8 @@ class Reaction(lampstand.reactions.base.Reaction):
             if self.message_number < len(self.messages):
                 self.logger.info("Send message")
 
-                self.logger.info(self.message_number, self.messages[self.message_number])
+                self.logger.info(self.message_number, self.messages[
+                                 self.message_number])
 
                 if self.messages[self.message_number]:
                     message = self.messages[

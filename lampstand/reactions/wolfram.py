@@ -9,6 +9,7 @@ from lxml import etree
 
 import logging
 
+
 def __init__():
     pass
 

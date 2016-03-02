@@ -10,9 +10,9 @@ import logging
 
 from lampstand.titlefetcher import *
 
+
 def __init__():
     pass
-
 
 
 class Reaction(lampstand.reactions.base.Reaction):
@@ -54,13 +54,13 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         reload(sys.modules['lampstand.titlefetcher'])
 
-
     def channelAction(self, connection, user, channel, message, matchindex):
 
         self.logger.info("[WEBLINK] Activated, matchindex is %d" % matchindex)
 
         if matchindex == 3:  # Weblink
-            self.logger.info("[WEBLINK] That looks like a weblink : %s" % message)
+            self.logger.info(
+                "[WEBLINK] That looks like a weblink : %s" % message)
 
             links = self.grabUrls(message)
 
@@ -129,7 +129,8 @@ class Reaction(lampstand.reactions.base.Reaction):
                     connection.message(channel, output.encode("utf-8"))
 
         elif matchindex == 2:  # Shorten this URL
-            self.logger.info("[WEBLINK] Shortening requested URL : %s" % message)
+            self.logger.info(
+                "[WEBLINK] Shortening requested URL : %s" % message)
             links = self.grabUrls(message)
 
             if len(links) == 0:
@@ -186,8 +187,8 @@ class Reaction(lampstand.reactions.base.Reaction):
         	    )
             )
             """ % {'urls' : urls,
-             'any': any,
-             'punc': punc}
+                   'any': any,
+                   'punc': punc}
 
         url_re = re.compile(url, re.VERBOSE | re.MULTILINE)
 

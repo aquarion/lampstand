@@ -10,6 +10,7 @@ import lampstand.reactions.base
 import logging
 import traceback
 
+
 def __init__():
     pass
 
@@ -148,7 +149,8 @@ class Reaction(lampstand.reactions.base.Reaction):
             oldtotal = total
             modifier = ''.join(item[0][2].split(' '))
             self.logger.info("Modifier is %s" % modifier)
-            self.logger.info("Modifier is %s -- %s" % (modifier[0], modifier[1:]))
+            self.logger.info("Modifier is %s -- %s" %
+                             (modifier[0], modifier[1:]))
 
             if modifier[0] == "+":
                 total = total + string.atof(modifier[1:])

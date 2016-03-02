@@ -9,6 +9,7 @@ from lampstand import tools
 
 import logging
 
+
 def __init__():
     pass
 
@@ -48,7 +49,8 @@ class Reaction(lampstand.reactions.base.Reaction):
             for line in lines[:]:
                 if not line['user'].lower() == user.lower():
                     lines.remove(line)
-                    self.logger.info("Dropping %s: %s" % (line['user'], line['message']))
+                    self.logger.info("Dropping %s: %s" %
+                                     (line['user'], line['message']))
 
         if filter:
             filter = filter.lower()
@@ -56,7 +58,8 @@ class Reaction(lampstand.reactions.base.Reaction):
             for line in lines[:]:
                 if line['message'].lower().find(filter) == -1:
                     lines.remove(line)
-                    self.logger.info("Dropping %s: %s" % (line['user'], line['message']))
+                    self.logger.info("Dropping %s: %s" %
+                                     (line['user'], line['message']))
 
         for line in lines:
             self.logger.info("Kept %s: %s" % (line['user'], line['message']))

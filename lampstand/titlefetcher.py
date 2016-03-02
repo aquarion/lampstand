@@ -22,6 +22,7 @@ import StringIO
 
 
 class TitleFetcher():
+
     def __init__(self, connection):
         self.logger = logging.getLogger(__name__)
         self.connection = connection
@@ -53,32 +54,34 @@ class TitleFetcher():
             if req.headers['content-type'].find("image/") == 0:
                 image_file = StringIO.StringIO(req.content)
 
-		api_url = "http://api.imagga.com/v1/tagging"
+                api_url = "http://api.imagga.com/v1/tagging"
 
-		querystring = {"url": url,"version":"2"}
+                querystring = {"url": url, "version": "2"}
 
-		auth_key = connection.config.get("imagga", "auth_key")
+                auth_key = connection.config.get("imagga", "auth_key")
 
-		headers = {
-		    'accept': "application/json",
-		    'authorization': "Basic %s==" % auth_key
-    		}
+                headers = {
+                    'accept': "application/json",
+                    'authorization': "Basic %s==" % auth_key
+                }
 
-		response = requests.request("GET", api_url, headers=headers, params=querystring)
+                response = requests.request(
+                    "GET", api_url, headers=headers, params=querystring)
 
-		prefix = "An %s - %dx%d (%dk)"
+                prefix = "An %s - %dx%d (%dk)"
 
-		print response.text
+                print response.text
 
-		if "results" in response.json():
-			tags = response.json()['results'][0]['tags']
-			first_tag = tags[0]
-			if first_tag['confidence'] > 60:
-				prefix = "An %%s of a %s %%dx%%d (%%dk)" % first_tag['tag'] 
+                if "results" in response.json():
+                    tags = response.json()['results'][0]['tags']
+                    first_tag = tags[0]
+                    if first_tag['confidence'] > 60:
+                        prefix = "An %%s of a %s %%dx%%d (%%dk)" % first_tag[
+                            'tag']
 
                 #color = most_colour.most_colour(image_file)
 
-		print prefix
+                print prefix
 
                 image_file.seek(0)
                 im = Image.open(image_file)
@@ -102,20 +105,21 @@ class YoutubeTitleFetcher(TitleFetcher):
     def localinit(self):
         GOOGLE_KEY = self.connection.config.get("google", "api_key")
         self.logger.info("Creating new youtube object")
-        self.youtube = build('youtube', 'v3', developerKey = GOOGLE_KEY)
+        self.youtube = build('youtube', 'v3', developerKey=GOOGLE_KEY)
 
     def fetch_title(self, url):
-        parsedurl =  urlparse.urlparse(url)
+        parsedurl = urlparse.urlparse(url)
         [yt_type, yt_id] = self.url_to_ID(parsedurl)
 
         if yt_type == 'video':
 
-            item = self.youtube.videos().list(part="snippet,contentDetails",id=yt_id).execute()
+            item = self.youtube.videos().list(part="snippet,contentDetails", id=yt_id).execute()
             self.logger.info(item)
 
             video = item['items'][0]
 
-            duration = isodate.parse_duration(video['contentDetails']['duration'])
+            duration = isodate.parse_duration(
+                video['contentDetails']['duration'])
             title = video['snippet']['title']
             description = video['snippet']['description']
 
@@ -130,14 +134,18 @@ class YoutubeTitleFetcher(TitleFetcher):
     def url_to_ID(self, parsedurl):
         query = urlparse.parse_qs(parsedurl.query)
         if "v" in query.keys():
-            self.logger.info("That's a Youtube Link with a v! %s " % query['v'][0])
+            self.logger.info(
+                "That's a Youtube Link with a v! %s " % query['v'][0])
             return ['video', query['v'][0]]
 
+
 class TwitterTitleFetcher(TitleFetcher):
+
     def localinit(self):
         OAUTH_FILENAME = self.connection.config.get("twitter", "oauth_cache")
         CONSUMER_KEY = self.connection.config.get("twitter", "consumer_key")
-        CONSUMER_SECRET = self.connection.config.get("twitter", "consumer_secret")
+        CONSUMER_SECRET = self.connection.config.get(
+            "twitter", "consumer_secret")
 
         try:
             if not os.path.exists(OAUTH_FILENAME):
@@ -160,17 +168,16 @@ class TwitterTitleFetcher(TitleFetcher):
             pass
 
     def fetch_title(self, url):
-        parsedurl =  urlparse.urlparse(url)
+        parsedurl = urlparse.urlparse(url)
         path = parsedurl.path.split("/")
         id = path[-1]
         tweet = self.twitter.statuses.show(id=id)
         self.logger.info(tweet)
-        
 
         if 'entities' in tweet and 'media' in tweet['entities']:
             photo_url = tweet['entities']['media'][0]['media_url']
             return "@%s (%s): %s - %s" % (
-            tweet['user']['name'], tweet['user']['screen_name'], tweet['text'], photo_url)
+                tweet['user']['name'], tweet['user']['screen_name'], tweet['text'], photo_url)
         else:
             return "@%s (%s): %s" % (
-            tweet['user']['name'], tweet['user']['screen_name'], tweet['text'])
+                tweet['user']['name'], tweet['user']['screen_name'], tweet['text'])

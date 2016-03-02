@@ -8,6 +8,7 @@ import datetime
 
 import logging
 
+
 def __init__():
     pass
 
@@ -136,9 +137,11 @@ class Reaction(lampstand.reactions.base.Reaction):
             cursor.execute(q)
             result = cursor.fetchone()
             self.last_quote_seen = result[0]
-            self.logger.info("[QUOTE] Defaulting last seen: %s" % self.last_quote_seen)
+            self.logger.info("[QUOTE] Defaulting last seen: %s" %
+                             self.last_quote_seen)
 
-        self.logger.info("[QUOTE] Looking for quotes submitted > %s" % self.last_quote_seen)
+        self.logger.info(
+            "[QUOTE] Looking for quotes submitted > %s" % self.last_quote_seen)
 
         q = "select submitted from chirpy.mf_quotes where submitted > %s and approved = 1 order by submitted desc"
         cursor = self.dbconnection.cursor()
@@ -159,6 +162,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             connection.message(channel, message)
             quote = quotes[0]
             self.last_quote_seen = quote[0]
-            self.logger.info("[QUOTE] Found %s since %s " % (countquotes, self.last_quote_seen))
+            self.logger.info("[QUOTE] Found %s since %s " %
+                             (countquotes, self.last_quote_seen))
 
         return "Found %s since %s " % (countquotes, self.last_quote_seen)

@@ -11,6 +11,7 @@ import os.path
 
 import logging
 
+
 def __init__():
     pass
 
@@ -254,14 +255,16 @@ class Reaction(lampstand.reactions.base.Reaction):
 
             person = self.channelMatch[2].findall(message)[0][1]
 
-            self.logger.info("Searching %s for <<%s>>" % (connection.people, person))
+            self.logger.info("Searching %s for <<%s>>" %
+                             (connection.people, person))
             self.logger.info("for %s" % person)
 
             if person.lower() == 'me':
                 person = user
 
             if person.lower() == 'glados':
-                self.logger.info("Kicking %s for taking the name of my lady in vain" % user)
+                self.logger.info(
+                    "Kicking %s for taking the name of my lady in vain" % user)
                 connection.kick(
                     channel,
                     user,
@@ -594,7 +597,8 @@ class Reaction(lampstand.reactions.base.Reaction):
         elif (matchIndex == 11):  # Lost and Found
             self.logger.info("[Item] detected lost & found")
             if (channel == "#lampstand" and not user.lower() in self.admin):
-                self.logger.info("Not allowing %s on %s to do that" % (user, channel))
+                self.logger.info(
+                    "Not allowing %s on %s to do that" % (user, channel))
                 connection.message(channel, "%s: Not here. " % user)
                 return
 
