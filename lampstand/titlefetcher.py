@@ -58,7 +58,7 @@ class TitleFetcher():
 
                 querystring = {"url": url, "version": "2"}
 
-                auth_key = connection.config.get("imagga", "auth_key")
+                auth_key = self.connection.config.get("imagga", "auth_key")
 
                 headers = {
                     'accept': "application/json",
