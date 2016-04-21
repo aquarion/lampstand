@@ -99,7 +99,15 @@ Lampstand: How long until 2010-07-12?
 
 (You can say "12th July" or "07/12/10". Note that it uses american style slash-syntax, so avoid that)
 
-This also works in /query, you don't need to prefix it with Lampstand: though. You can find a list of events Lampstand knows about at "Maelfroth.org/events.php":http://www.maelfroth.org/events.php, which includes a iCal export for your favourite calendar system. New events should be submitted to aquarion at maelfroth dot org
+Or look for events in the database:
+
+@Lampstand: Show me empire events@
+[Lampstand] Aquarion: Empire: Spring Equinox 380YE is in 5 weeks, 29 hours, 49 minutes; Empire: Summer Solstice 380YE is in 14 weeks, 29 hours, 49 minutes & Empire: Autumn Equinox 380YE is in 20 weeks, 29 hours, 49 minutes
+
+@Lampstand: Show me past falling down events@
+[Lampstand] Aquarion: Falling Down: The Beginning was 11 days, 9 hours, 47 minutes ago; Falling Down: The Pillars was 1 year, 20 weeks, 69 hours, 47 minutes ago; Falling Down: The Fates was 20 weeks, 105 hours, 47 minutes ago & Falling Down: The Dancers was 51 weeks, 105 hours, 47 minutes ago
+
+This also works in /query, you don't need to prefix it with Lampstand: though. You can find a list of events Lampstand knows about at "larp.me/events":https://larp.me/events, which includes a iCal export for your favourite calendar system. New events should be added to larp.me
 
 h2. Hugs
 

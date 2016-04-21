@@ -40,12 +40,17 @@ class Reaction(lampstand.reactions.base.Reaction):
             re.compile(
                 '^%s. what\'s next\?$' %
                 connection.nickname,
+                re.IGNORECASE),
+            re.compile(
+                '^%s. show me (past|)\s?(.*?) events\.?$' %
+                connection.nickname,
                 re.IGNORECASE))
 
         self.privateMatch = (
             re.compile('^when (is|was) (.*?)\?', re.IGNORECASE),
             re.compile('^how long (until|since) (.*?)\?', re.IGNORECASE),
-            re.compile('^what\'s next\?$', re.IGNORECASE)
+            re.compile('^what\'s next\?$', re.IGNORECASE),
+            re.compile('^show me (past|)\s?(.*?) events\.?$', re.IGNORECASE)
         )
         # self.privateMatch = re.compile('^%s. ???' % connection.nickname,
         # re.IGNORECASE))
@@ -56,7 +61,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         matches = self.privateMatch[matchIndex].findall(message)[0]
 
-        if matchIndex == 0:
+        message = False
+
+        if matchIndex == 0: # When is
             desc = matches[1]
             output = "absolute"
             if matches[0].lower() == "is":
@@ -64,7 +71,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             else:
                 direction = "past"
 
-        elif matchIndex == 1:
+        elif matchIndex == 1: # How long since
             desc = matches[1]
             output = "relative"
             if matches[0].lower() == "until":
@@ -77,7 +84,17 @@ class Reaction(lampstand.reactions.base.Reaction):
             output = "relative"
             direction = "future"
 
-        message = self.howlong(desc, output, direction)
+        elif matchIndex == 3:  # show me
+            desc = matches[1]
+            if matches[0] == "past":
+                direction = "past"
+            else:
+                direction = "future"
+            output = "relative"
+            message = self.findEvents(desc, output, direction)
+
+        if not message:
+            message = self.howLong(desc, output, direction)
 
         connection.message(user, message)
 
@@ -109,11 +126,95 @@ class Reaction(lampstand.reactions.base.Reaction):
             output = "relative"
             direction = "future"
 
-        message = self.howlong(desc, output, direction)
+        elif matchIndex == 3:  # show me
+            desc = matches[1]
+            if matches[0] == "past":
+                direction = "past"
+            else:
+                direction = "future"
+            output = "relative"
+            message = self.findEvents(desc, output, direction)
+
+        if not message:
+            message = self.howLong(desc, output, direction)
 
         connection.message(channel, "%s: %s" % (user, message))
 
-    def howlong(self, desc, output, direction):
+
+    def findEvents(self, desc, output, direction):
+        request = requests.get(
+            'http://api.larp.me/events/all?direction=%s&q=%s' % (direction, desc))
+        response = request.json()
+
+        self.logger.info('http://api.larp.me/events/all?direction=%s&q=%s' % (direction, desc))
+        if not len(response['events']):
+            return "I can't see any events tagged '%s' in the %s. Full list of events at http://larp.me/events" % (desc, direction)
+
+        now = datetime.now()
+
+        response_events = response['events'];
+
+        events = []
+
+        len_events = len(response_events)
+
+        if len_events > 5:
+            response_events = {}
+            key = 0
+
+            key_list = response['events'].keys()
+            key_list = [int(x) for x in key_list]
+            key_list.sort()
+            key_list = [unicode(x) for x in key_list]
+
+            if direction == "past":
+                key_list.reverse()
+
+            while len(response_events) < 5:
+                ident = key_list[key]
+                response_events[ident] = response['events'][ident]
+                key = key + 1
+
+            suffix = " (1-5 of {}. More at http://larp.me/events/all?direction={}&q={}".format(len_events, direction, desc)
+        else:
+            suffix = ""
+
+        key_list = response_events.keys()
+        key_list.reverse()
+
+        for ident in key_list:
+            event = response_events[ident]
+
+            event_start = dateutil.parser.parse(event['starts'])
+            event_desc = event['name']
+            event_class = event['system']['name']
+            event_end = dateutil.parser.parse(event['ends'])
+            event_url = event['website']
+
+            if direction == "past" and event_end:
+                deltapoint = event_end
+            else:
+                deltapoint = event_start
+
+            if direction == "past":
+                delta = now - deltapoint
+            else:
+                delta = deltapoint - now
+
+            deltastring = tools.nicedelta(delta)
+
+            if direction == "past":
+                events.append("%s: %s was %s ago" % (event_class, event_desc, deltastring))
+            else:
+                events.append("%s: %s is in %s" % (event_class, event_desc, deltastring))
+
+        if len_events == 1:
+            return events[0]
+        else:
+            return "{} & {}{}".format("; ".join(events[0:-1]), events[-1], suffix)
+
+
+    def howLong(self, desc, output, direction):
 
         request = requests.get(
             'http://api.larp.me/events/all?direction=%s&q=%s&count=1' %
@@ -133,7 +234,7 @@ class Reaction(lampstand.reactions.base.Reaction):
                         'name': 'Date'},
                     'website': None}
                 self.logger.info(result)
-            except TypeError:
+            except ValueError:
                 return "I can't see any events tagged '%s' in the %s, and it doesn't look like a date. Full list of events at http://larp.me/events" % (
                     desc, direction)
         else:
