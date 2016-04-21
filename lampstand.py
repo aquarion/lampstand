@@ -226,7 +226,7 @@ class LampstandLoop(irc.IRCClient):
             charset='utf8')
 
     def setupLogging(self):
-        LOG_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
+        LOG_DIR = os.path.dirname(os.path.abspath(sys.argv[0]."/log"))
         logfile = self.config.get("logging", "logfile")
         print "logging to %s/lampstand.log" % LOG_DIR
 
