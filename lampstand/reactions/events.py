@@ -61,7 +61,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         matches = self.privateMatch[matchIndex].findall(message)[0]
 
-        message = False
+        reply = False
 
         if matchIndex == 0: # When is
             desc = matches[1]
@@ -91,12 +91,12 @@ class Reaction(lampstand.reactions.base.Reaction):
             else:
                 direction = "future"
             output = "relative"
-            message = self.findEvents(desc, output, direction)
+            reply = self.findEvents(desc, output, direction)
 
-        if not message:
-            message = self.howLong(desc, output, direction)
+        if not reply:
+            reply = self.howLong(desc, output, direction)
 
-        connection.message(user, message)
+        connection.message(user, reply)
 
     def channelAction(self, connection, user, channel, message, matchIndex):
         if self.overUsed():
@@ -104,6 +104,8 @@ class Reaction(lampstand.reactions.base.Reaction):
             return True
 
         matches = self.channelMatch[matchIndex].findall(message)[0]
+
+	reply = False
 
         if matchIndex == 0:
             desc = matches[1]
@@ -133,12 +135,12 @@ class Reaction(lampstand.reactions.base.Reaction):
             else:
                 direction = "future"
             output = "relative"
-            message = self.findEvents(desc, output, direction)
+            reply = self.findEvents(desc, output, direction)
 
-        if not message:
-            message = self.howLong(desc, output, direction)
+        if not reply:
+            reply = self.howLong(desc, output, direction)
 
-        connection.message(channel, "%s: %s" % (user, message))
+        connection.message(channel, "%s: %s" % (user, reply))
 
 
     def findEvents(self, desc, output, direction):
