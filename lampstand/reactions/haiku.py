@@ -40,6 +40,7 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         self.channels = {}
         self.haikus = {}
+        self.lasthaiku = {}
         self.load()
 
     def channelAction(self, connection, user, channel, message, matchindex):
