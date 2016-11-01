@@ -168,6 +168,9 @@ class Reaction(lampstand.reactions.base.Reaction):
             self.logger.info("[Item] Detected gift")
             item = self.channelMatch[matchIndex].findall(message)[0][1]
 
+            if item.isdigit():
+		item = self.items[channel][int(item)]
+
             if item.lower() == "a hug":
                 hug = lampstand.reactions.hug.Reaction(connection)
                 connection.describe(channel, hug.hug(user))
@@ -426,6 +429,9 @@ class Reaction(lampstand.reactions.base.Reaction):
             mesg = self.channelMatch[4].findall(message)[0][0]
             item = self.channelMatch[4].findall(message)[0][1]
 
+            if item.isdigit():
+		item = self.items[channel][int(item)]
+
             if item.lower() == "everything":
                 if user.lower() in self.admin:
                     connection.describe(
@@ -551,6 +557,9 @@ class Reaction(lampstand.reactions.base.Reaction):
             cursor = self.dbconnection.cursor()
             item = self.channelMatch[9].findall(message)[0]
 
+            if item.isdigit():
+		item = self.items[channel][int(item)]
+
             if item.lower() == user.lower():
                 connection.message(
                     channel,
@@ -591,7 +600,6 @@ class Reaction(lampstand.reactions.base.Reaction):
                     channel,
                     '%s: look at them yourself, meatsack' %
                     user)
-
             else:
                 connection.message(channel, '%s: I don\'t have one.' % user)
         elif (matchIndex == 11):  # Lost and Found
