@@ -120,7 +120,9 @@ class Reaction(lampstand.reactions.base.Reaction):
 
         self.schedule_count = self.schedule_count + 1
 
-        if self.schedule_count == 20:
+	# Triggers every 5 seconds. 20 * 5 = 100 seconds.
+	# 1800 seconds is half an hour, 360 loops
+        if self.schedule_count == 360:
             self.schedule_count = 0
 
         if not self.schedule_count == 0:
