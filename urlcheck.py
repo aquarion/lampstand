@@ -42,20 +42,20 @@ class urlCheck():
                                             'punc': punc}
 
         url = r"""
-		    \b                            # start at word boundary
-			%(urls)s    :             # need resource and a colon
-			[%(any)s]  +?             # followed by one or more
-						  #  of any valid character, but
-						  #  be conservative and take only
-						  #  what you need to....
-		    (?=                           # look-ahead non-consumptive assertion
-			    [%(punc)s]*           # either 0 or more punctuation
-			    (?:   [^%(any)s]      #  followed by a non-url char
-				|                 #   or end of the string
-				  $
-			    )
-		    )
-		    """ % {'urls' : urls,
+            \b                            # start at word boundary
+            %(urls)s    :             # need resource and a colon
+            [%(any)s]  +?             # followed by one or more
+                          #  of any valid character, but
+                          #  be conservative and take only
+                          #  what you need to....
+            (?=                           # look-ahead non-consumptive assertion
+                [%(punc)s]*           # either 0 or more punctuation
+                (?:   [^%(any)s]      #  followed by a non-url char
+                |                 #   or end of the string
+                  $
+                )
+            )
+            """ % {'urls' : urls,
              'any': any,
              'punc': punc}
 
@@ -63,8 +63,22 @@ class urlCheck():
 
         return url_re.findall(text)
 
+
+    def colour(self, text, level):
+        colours = {
+            'HEADER': '\033[95m',
+            'OKBLUE': '\033[94m',
+            'OK': '\033[92m',
+            'WARNING': '\033[93m',
+            'FAIL': '\033[91m',
+            'ENDC': '\033[0m',
+        }
+        return "%s%s%s" % (colours[level], text, colours['ENDC']);
+
+
+
     def checkBatch(self):
-        query = 'SELECT id, message, checked_status, checked_repeat, `time` FROM urllist WHERE datediff(NOW(), `checked_date`) > 90 or `checked_date` = 0 '
+        query = 'SELECT id, message, checked_status, checked_repeat, `time` FROM urllist WHERE datediff(NOW(), `checked_date`) > 365 or `checked_date` = 0 '
 
         update_query = "UPDATE `urllist` SET checked_date = NOW(), checked_status = %s, checked_repeat = %s where id = %s"
 
@@ -72,7 +86,8 @@ class urlCheck():
         cursor.execute(query)
         links = cursor.fetchall()
         n = 0
-        print "URL LIst"
+        print self.colour("URL List", "HEADER")
+
         for link in links:
             urls = self.grabUrls(link[1])
             # print link
@@ -92,24 +107,33 @@ class urlCheck():
                 repeat_code = link[3] + 1
             else:
                 repeat_code = 1
+
+            if status_code <= 200:
+                pretty_code = self.colour(status_code, "OK")
+            elif status_code < 500:
+                pretty_code = self.colour(status_code, "WARNING")
+            else:
+                pretty_code = self.colour(status_code, "FAIL")
+
             params = (status_code, repeat_code, link[0])
             dt = datetime.datetime.utcfromtimestamp(seconds_since_epoch)
             iso_format = dt.isoformat() + 'Z'
 
-            print "[%s] %s %s" % (status_code, iso_format, url),
+
+            print "[%s] %s %s" % (pretty_code, iso_format, url),
             cursor.execute(update_query, params)
             print " -"
             n = n + 1
             if n == 20:
                 n = 0
-                print "Commitment!!\n-"
+                print self.colour("Commitment!!\n-", "OKBLUE")
                 self.dbconnection.commit()
 
         self.dbconnection.commit()
 
     def get_url(self, url):
         try:
-            print url
+            #print url
             r = requests.get(url, timeout=10)
             return r.status_code
         except requests.exceptions.Timeout:
