@@ -168,6 +168,10 @@ class Reaction(lampstand.reactions.base.Reaction):
             self.logger.info("[Item] Detected gift")
             item = self.channelMatch[matchIndex].findall(message)[0][1]
 
+            if item.lower() == connection.nickname.lower():
+		connection.message(channel, "I have as many me as I need, thanks")
+		return
+
             if item.isdigit():
 		item = self.items[channel][int(item)]
 
@@ -196,7 +200,7 @@ class Reaction(lampstand.reactions.base.Reaction):
             if item in connection.people:
                 connection.message(
                     channel,
-                    "Choo choo! I'm a train!... no, wait, the other thing. No.")
+                    "I do not wish to contain that meatsack")
                 return
 
             if item in self.items[channel]:
