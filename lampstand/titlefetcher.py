@@ -35,23 +35,29 @@ class TitleFetcher():
         headers = {
             'User-agent': 'Lampstand IRC Bot (contact aquarion@maelfroth.org)'}
         try:
-            req = requests.get(url, headers=headers, timeout=30)
+            req = requests.head(url, headers=headers, timeout=5)
         except requests.exceptions.Timeout:
             return "That link timed out"
         except requests.exceptions.SSLError as e:
             return "Something's up with the security on %s. Tread carefully. (%s)" % (
                 urlp.netloc, e)
 
-        k = len(req.content) / 1024
         if req.status_code != 200:
             title = "That link returned an error %s" % (req.status_code)
         elif req.headers['content-type'].find("text/html") != -1 or req.headers['content-type'].find("application/xhtml+xml") != -1:
+            req = requests.get(url, headers=headers, timeout=5)
             soup = BeautifulSoup.BeautifulSoup(
                 req.text,
                 convertEntities=BeautifulSoup.BeautifulSoup.HTML_ENTITIES)
             title = soup.title.string
         else:
             if req.headers['content-type'].find("image/") == 0:
+                req = requests.head(url, headers=headers, timeout=5)
+                if "content-length" in req.headers:
+                    k = int(req.headers["content-length"]) / 1024
+                else:
+                    k = len(req.content) / 1024
+
                 image_file = StringIO.StringIO(req.content)
 
                 api_url = "http://api.imagga.com/v1/tagging"
@@ -93,6 +99,11 @@ class TitleFetcher():
                     title = prefix % (
                         "image", im.size[0], im.size[1], k)
             else:
+                if "content-length" in req.headers:
+                    k = int(req.headers["content-length"]) / 1024
+                else:
+                    k = len(req.content) / 1024
+
                 title = "A %s file (%dk)" % (
                     req.headers['content-type'], k)
 
