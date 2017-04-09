@@ -24,6 +24,7 @@ import os
 import string
 import exceptions
 import os.path
+import socket
 
 import random
 
@@ -42,7 +43,14 @@ from BeautifulSoup import UnicodeDammit
 from lampstand import sms
 import logging
 from logging.handlers import TimedRotatingFileHandler
+from logging.handlers import SysLogHandler
 
+class ContextFilter(logging.Filter):
+  hostname = socket.gethostname()
+
+  def filter(self, record):
+    record.hostname = ContextFilter.hostname
+    return True
 
 class ChannelActions:
     peopleToIgnore = ('ChanServ')
@@ -127,7 +135,7 @@ class ChannelActions:
             self.connection.register(self.connection.original_nickname)
 
         if old_nick in self.peopleToIgnore or new_nick in self.peopleToIgnore:
-            self.logger.info("(Ignoring)")
+            self.logger.info("(Ignoring %s)" % new_nick)
         else:
             matched = 0
             for nickChangeModule in self.connection.nickChangeModules:
@@ -234,6 +242,9 @@ class LampstandLoop(irc.IRCClient):
         logging.getLogger('').setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s [%(name)s] %(message)s')
 
+        f = ContextFilter()
+        self.logger.addFilter(f)
+
         #console = logging.StreamHandler()
         console = logging.getLogger('').handlers[0]
         console.setLevel(logging.DEBUG)
@@ -246,6 +257,15 @@ class LampstandLoop(irc.IRCClient):
         logfile.setLevel(logging.DEBUG)
         logfile.setFormatter(formatter)
         logging.getLogger('').addHandler(logfile)
+
+        if self.config.has_section("papertrail"):
+            pt_host = self.config.get("papertrail", "host")
+            pt_port = int(self.config.get("papertrail", "port"))
+
+            papertrail = SysLogHandler(address=(pt_host, pt_port))
+            formatter = logging.Formatter('%(asctime)s %(hostname)s Lampstand: %(message)s', datefmt='%b %d %H:%M:%S')
+            papertrail.setFormatter(formatter)
+            self.logger.addHandler(papertrail)
 
         self.logger.debug("Hello Debug")
         self.logger.info("Hello Info")
