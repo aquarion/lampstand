@@ -35,7 +35,7 @@ class TitleFetcher():
         headers = {
             'User-agent': 'Lampstand IRC Bot (contact aquarion@maelfroth.org)'}
         try:
-            req = requests.head(url, headers=headers, timeout=5)
+            req = requests.head(url, headers=headers, timeout=5, allow_redirects=True)
         except requests.exceptions.Timeout:
             return "That link timed out"
         except requests.exceptions.SSLError as e:
