@@ -42,6 +42,9 @@ class TitleFetcher():
             return "Something's up with the security on %s. Tread carefully. (%s)" % (
                 urlp.netloc, e)
 
+	if req.status_code == 405:
+		req = requests.get(url, headers=headers, timeout=5, allow_redirects=True)
+
         if req.status_code != 200:
             title = "That link returned an error %s" % (req.status_code)
         elif req.headers['content-type'].find("text/html") != -1 or req.headers['content-type'].find("application/xhtml+xml") != -1:
