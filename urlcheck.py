@@ -86,7 +86,6 @@ class urlCheck():
         cursor.execute(query)
         links = cursor.fetchall()
         n = 0
-        print self.colour("URL List", "HEADER")
 
         for link in links:
             urls = self.grabUrls(link[1])
