@@ -263,7 +263,7 @@ class LampstandLoop(irc.IRCClient):
             pt_port = int(self.config.get("papertrail", "port"))
 
             papertrail = SysLogHandler(address=(pt_host, pt_port))
-            formatter = logging.Formatter('%(asctime)s %(hostname)s Lampstand: %(message)s', datefmt='%b %d %H:%M:%S')
+            formatter = logging.Formatter('%(asctime)s Lampstand %(levelname)s: %(message)s', datefmt='%b %d %H:%M:%S')
             papertrail.setFormatter(formatter)
             self.logger.addHandler(papertrail)
 
