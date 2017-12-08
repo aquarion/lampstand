@@ -1,7 +1,5 @@
 #!/usr/bin/python
 
-#
-
 
 """
 I am Lampstand. Beware.
@@ -10,8 +8,9 @@ I am Lampstand. Beware.
 
 # twisted imports
 from twisted.words.protocols import irc
-from twisted.internet import reactor, protocol, threads, defer
+from twisted.internet import reactor, protocol, threads, defer, endpoints
 from twisted.python import log
+from twisted.web import server, resource
 
 from datetime import datetime
 from twisted.internet.task import LoopingCall
@@ -222,17 +221,6 @@ class LampstandLoop(irc.IRCClient):
             except:
                 pass
 
-    def setupMysql(self):
-        user = self.config.get("database", "user")
-        passwd = self.config.get("database", "password")
-        db = self.config.get("database", "database")
-
-        self.dbconnection = cymysql.connect(
-            user=user,
-            passwd=passwd,
-            db=db,
-            charset='utf8')
-
     def setupLogging(self):
         LOG_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))+"/log"
         logfile = self.config.get("logging", "logfile")
@@ -277,8 +265,8 @@ class LampstandLoop(irc.IRCClient):
         self.date_started = datetime.now()
 
         self.config = self.factory.config
+        self.dbconnection = self.factory.dbconnection
 
-        self.setupMysql()
         self.setupLogging()
 
         # threads.deferToThread(self.scheduledTasks)
@@ -653,6 +641,24 @@ class LampstandLoop(irc.IRCClient):
 
         self.config = config
 
+class HypertextFactory(resource.Resource):
+    isLeaf = True
+
+    def __init__(self, config, dbconnection):
+        self.config = config
+        self.dbconnection = dbconnection
+
+    def render_GET(self, request):
+        request.setHeader(b"content-type", b"text/plain")
+
+        cursor = self.dbconnection.cursor()
+
+        cursor.execute('select count(*) as `total` from `define`')
+        total = cursor.fetchone()
+
+        content = u"I am Lampstand. I know about {total} things".format(total=total)
+
+        return content.encode("ascii")
 
 class LampstandFactory(protocol.ClientFactory):
 
@@ -664,8 +670,9 @@ class LampstandFactory(protocol.ClientFactory):
     # the class of the protocol to build when new connection is made
     protocol = LampstandLoop
 
-    def __init__(self, config):
+    def __init__(self, config, dbconnection):
         self.config = config
+        self.dbconnection = dbconnection
 
     def clientConnectionLost(self, connector, reason):
         """If we get disconnected, reconnect to server."""
@@ -692,17 +699,28 @@ if __name__ == '__main__':
         config_files.append(basedir + '/config.ini')
     config.read(config_files)
 
-    server = config.get("connection", "server")
-    port = config.getint("connection", "port")
 
-    logging.info("Connecting to %s:%s" % (server, port))
+    user = config.get("database", "user")
+    passwd = config.get("database", "password")
+    db = config.get("database", "database")
 
-    # create factory protocol and application
-    f = LampstandFactory(config)
+    dbconnection = cymysql.connect(
+        user=user,
+        passwd=passwd,
+        db=db,
+        charset='utf8')
 
-    # connect factory to this host and port
-    reactor.connectTCP(server, port, f)
+    irc_host = config.get("connection", "server")
+    irc_port = config.getint("connection", "port")
+    www_port = config.getint("webserver", "port")
 
-    # run bot
+    # IRC Bot
+    logging.info("Connecting to %s:%s" % (irc_host, irc_port))
+    f = LampstandFactory(config, dbconnection)
+    reactor.connectTCP(irc_host, irc_port, f)
 
+    # Webserver 
+    endpoints.serverFromString(reactor, "tcp:{port}".format(port=www_port)).listen(server.Site(HypertextFactory(config, dbconnection)))
+   
+    # run bot, run
     reactor.run()
