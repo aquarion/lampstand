@@ -3,7 +3,7 @@ import urllib
 
 class ESVSession:
 
-    def __init__(self, key='IP'):
+    def __init__(self, key='TEST'):
         options = ['include-short-copyright=0',
                    'output-format=plain-text',
                    'include-passage-horizontal-lines=0',
