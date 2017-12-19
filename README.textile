@@ -20,6 +20,11 @@ h2. Boxes
 
 (The boxes come from the "Warehouse basement":http://warehousebasement.com/)
 
+h2. Calendar Facts
+
+As supplied from "XKCD 1930":https://xkcd.com/1930/ , some nifty facts about our calendar.
+
+@Lampstand: Give me a calendar fact@
 
 h2. Choose
 
