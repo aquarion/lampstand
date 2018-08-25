@@ -14,7 +14,7 @@ from twitter.oauth_dance import oauth_dance
 import requests
 import BeautifulSoup
 
-import Image
+from PIL import Image
 
 import logging
 import urlparse

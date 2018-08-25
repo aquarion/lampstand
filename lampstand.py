@@ -315,6 +315,7 @@ class LampstandLoop(irc.IRCClient):
         self.logger.info("Installing %s" % moduleName)
 
         if (module in sys.modules):
+            success = True
             self.removeModuleActions(moduleName)
             self.logger.info('Reloading %s' % module)
             reload(sys.modules[module])
@@ -324,12 +325,18 @@ class LampstandLoop(irc.IRCClient):
             try:
                 rtn = 'Loaded %s' % module
                 __import__(module)
-            except exceptions.ImportError:
-                rtn = 'Epic Fail loading %s, Not found' % module
-            except:
+                success = True
+            except exceptions.ImportError as e:
+                rtn = 'Epic Fail loading %s: %s' % (module, e.message)
+                success = False
+            except Exception as e:
                 rtn = 'Epic Fail loading %s, Threw an exception' % module
+                success = False
 
-        self.addModuleActions(moduleName)
+        self.logger.info(rtn)
+        if success:
+            self.addModuleActions(moduleName)
+
         return rtn
 
     def removeModuleActions(self, module):

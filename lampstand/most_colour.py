@@ -2,7 +2,7 @@
 from . import ColorDB
 
 import struct
-import Image
+from PIL import Image
 import scipy
 import scipy.misc
 import scipy.cluster
