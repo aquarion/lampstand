@@ -7,14 +7,30 @@ import sys
 import re
 import socket
 import datetime
+import logging
+
+class ContextFilter(logging.Filter):
+  hostname = socket.gethostname()
+
+  def filter(self, record):
+    record.hostname = ContextFilter.hostname
+    return True
 
 
 class urlCheck():
     config = {}
+    logger = False
 
     def __init__(self):
         self.loadConfig()
         self.connectToDB()
+        self.logger = logging.getLogger('urlcheck')
+        logging.getLogger('').setLevel(logging.ERROR)
+        formatter = logging.Formatter('%(asctime)s [%(name)s] %(message)s')
+
+        f = ContextFilter()
+        self.logger.addFilter(f)
+
 
     def loadConfig(self):
         basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -89,8 +105,6 @@ class urlCheck():
 
         for link in links:
             urls = self.grabUrls(link[1])
-            # print link
-            # print urls
             if len(urls) == 0:
                 params = (400, 1, link[0])
                 cursor.execute(update_query, params)
@@ -119,13 +133,14 @@ class urlCheck():
             iso_format = dt.isoformat() + 'Z'
 
 
-            print "[%s] %s %s" % (pretty_code, iso_format, url),
+            l = "[%s] %s %s" % (pretty_code, iso_format, url)
+            self.logger.info(l)
             cursor.execute(update_query, params)
-            print " -"
             n = n + 1
             if n == 20:
                 n = 0
-                print self.colour("Commitment!!\n-", "OKBLUE")
+                self.logger.info("Commited")
+                #print self.colour("Commitment!!\n-", "OKBLUE")
                 self.dbconnection.commit()
 
         self.dbconnection.commit()
