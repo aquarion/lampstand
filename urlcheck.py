@@ -123,6 +123,8 @@ class urlCheck():
 
             if status_code <= 200:
                 pretty_code = self.colour(status_code, "OK")
+            elif status_code == 429:
+                pretty_code = self.colour(status_code, "OK")
             elif status_code < 500:
                 pretty_code = self.colour(status_code, "WARNING")
             else:
@@ -135,6 +137,7 @@ class urlCheck():
 
             l = "[%s] %s %s" % (pretty_code, iso_format, url)
             self.logger.info(l)
+            # print l
             cursor.execute(update_query, params)
             n = n + 1
             if n == 20:
@@ -147,7 +150,6 @@ class urlCheck():
 
     def get_url(self, url):
         try:
-            #print url
             r = requests.get(url, timeout=10)
             return r.status_code
         except requests.exceptions.Timeout:
